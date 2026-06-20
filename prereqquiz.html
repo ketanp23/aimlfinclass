@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TM2065 — Pre-requisite Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1A202C;
+    --ink-soft: #2D3748;
+    --muted: #4A5568;
+    --muted-soft: #718096;
+    --paper: #FAF8F3;
+    --paper-warm: #F5F1E8;
+    --card: #FFFFFF;
+    --border: #E5E0D5;
+    --border-strong: #C9C2B0;
+    --navy: #1A365D;
+    --navy-soft: #2C5282;
+    --gold: #B7791F;
+    --gold-soft: #D69E2E;
+    --success: #2F855A;
+    --success-bg: #F0FFF4;
+    --error: #C53030;
+    --error-bg: #FFF5F5;
+    --radius: 6px;
+    --shadow: 0 1px 3px rgba(26, 54, 93, 0.06), 0 1px 2px rgba(26, 54, 93, 0.04);
+    --shadow-lg: 0 10px 30px -10px rgba(26, 54, 93, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ========== TOP STICKY BAR ========== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+    padding: 12px 0;
+    backdrop-filter: blur(8px);
+    background: rgba(250, 248, 243, 0.92);
+  }
+  .topbar-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+  }
+  .course-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .course-tag b { color: var(--navy); font-weight: 700; }
+  .timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-label {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted-soft);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+  }
+  .timer.warning { color: var(--gold); }
+  .timer.danger { color: var(--error); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: 0.6; } }
+  .progress-info {
+    text-align: right;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .progress-info b { color: var(--ink); font-weight: 700; }
+  .progress-bar {
+    height: 2px;
+    background: var(--border);
+    margin-top: 10px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--navy);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  /* ========== MAIN LAYOUT ========== */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ========== COVER PAGE ========== */
+  .cover {
+    text-align: center;
+    padding: 24px 0 40px;
+  }
+  .cover-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .cover-eyebrow::before, .cover-eyebrow::after {
+    content: '—';
+    margin: 0 12px;
+    color: var(--border-strong);
+  }
+  .cover-uni {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    letter-spacing: 0.01em;
+    margin-bottom: 4px;
+  }
+  .cover-faculty {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+  .cover-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 44px;
+    line-height: 1.1;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .cover-title em { font-style: italic; font-weight: 400; }
+  .cover-subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 48px;
+  }
+  .cover-subtitle b { color: var(--ink); font-weight: 600; }
+
+  /* Quick stats strip */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 48px;
+  }
+  .stat {
+    background: var(--card);
+    padding: 18px 12px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  @media (max-width: 520px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .cover-title { font-size: 32px; }
+  }
+
+  /* Instructions */
+  .instructions {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--navy);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 36px;
+  }
+  .instructions h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+  .instructions ul {
+    list-style: none;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .instructions li {
+    padding: 6px 0 6px 28px;
+    position: relative;
+  }
+  .instructions li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 16px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* Candidate details form */
+  .details-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+  .details-card h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .details-card p.note {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 22px;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .form-grid .full { grid-column: span 2; }
+  @media (max-width: 520px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full { grid-column: span 1; }
+  }
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-strong);
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    border-radius: 4px;
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+    text-decoration: none;
+  }
+  .btn:hover { background: #143052; }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled {
+    background: var(--border-strong);
+    cursor: not-allowed;
+    color: var(--muted);
+  }
+  .btn-large { padding: 16px 36px; font-size: 15px; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--paper-warm); }
+  .btn-danger { background: var(--error); }
+  .btn-danger:hover { background: #9B2C2C; }
+
+  .start-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+  }
+
+  /* ========== QUIZ AREA ========== */
+  #quiz-area { display: none; }
+  #quiz-area.active { display: block; }
+  #cover.hidden { display: none; }
+
+  .section-header {
+    margin: 64px 0 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .section-header:first-of-type { margin-top: 8px; }
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .section-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+  .section-meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* Question cards */
+  .qcard {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  .qcard.answered { border-left: 3px solid var(--success); }
+  .qhead {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .qnum {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+    min-width: 36px;
+  }
+  .qtext {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .qtext code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--paper-warm);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--ink-soft);
+  }
+  .opts { list-style: none; padding-left: 48px; }
+  .opt {
+    margin-bottom: 6px;
+  }
+  .opt label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .opt label:hover { background: var(--paper-warm); }
+  .opt input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .opt-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+  .opt input:checked ~ .opt-letter {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: white;
+  }
+  .opt input:checked ~ .opt-text { color: var(--ink); font-weight: 500; }
+  .opt input:focus-visible ~ .opt-letter {
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+  }
+  .opt-text { flex: 1; }
+  .opt-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: var(--paper-warm);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* Submit panel */
+  .submit-panel {
+    margin-top: 64px;
+    padding: 32px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .submit-panel h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .submit-panel p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .submit-panel .summary {
+    display: inline-flex;
+    gap: 24px;
+    padding: 14px 20px;
+    background: var(--paper);
+    border-radius: var(--radius);
+    margin-bottom: 24px;
+    font-size: 13px;
+  }
+  .summary-item { color: var(--muted); }
+  .summary-item b { color: var(--ink); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* Confirm modal */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 32, 44, 0.5);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 32px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .modal p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+
+  /* ========== RESULTS PAGE ========== */
+  #results-area { display: none; }
+  #results-area.active { display: block; }
+
+  .result-hero {
+    text-align: center;
+    padding: 32px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .result-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .result-score-display {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: 'Fraunces', Georgia, serif;
+    margin-bottom: 16px;
+  }
+  .result-score {
+    font-size: 96px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .result-total {
+    font-size: 36px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .result-band {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+  .band-strong { background: #C6F6D5; color: #22543D; }
+  .band-adequate { background: #FEFCBF; color: #744210; }
+  .band-weak { background: #FED7D7; color: #822727; }
+  .band-foundational { background: #FEB2B2; color: #63171B; }
+  .result-name {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .result-name b { color: var(--ink); }
+
+  /* Section breakdown */
+  .breakdown {
+    margin-bottom: 48px;
+  }
+  .breakdown h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+  .breakdown-grid {
+    display: grid;
+    gap: 12px;
+  }
+  .breakdown-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .breakdown-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .breakdown-label span {
+    display: block;
+    font-size: 11px;
+    color: var(--muted-soft);
+    font-weight: 400;
+    margin-top: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .breakdown-bar {
+    width: 140px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .breakdown-bar-fill {
+    height: 100%;
+    background: var(--navy);
+    border-radius: 3px;
+  }
+  .breakdown-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 50px;
+    text-align: right;
+  }
+  @media (max-width: 520px) {
+    .breakdown-bar { width: 80px; }
+  }
+
+  /* Review section */
+  .review-section h3 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .review-intro {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .review-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border-strong);
+    background: var(--card);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .filter-btn:hover { color: var(--navy); border-color: var(--navy); }
+  .filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+  .review-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 12px;
+    border-left: 3px solid var(--border);
+  }
+  .review-card.correct { border-left-color: var(--success); }
+  .review-card.incorrect { border-left-color: var(--error); }
+  .review-card.unanswered { border-left-color: var(--gold); }
+  .review-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .review-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    min-width: 40px;
+  }
+  .review-status {
+    margin-left: auto;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .status-correct { background: var(--success-bg); color: var(--success); }
+  .status-incorrect { background: var(--error-bg); color: var(--error); }
+  .status-unanswered { background: #FEFCBF; color: #744210; }
+  .review-q {
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 14px;
+    line-height: 1.55;
+  }
+  .review-q code, .review-ans code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-warm);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .review-answers {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .review-ans {
+    font-size: 13px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .review-ans-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 80px;
+    color: var(--muted-soft);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .review-ans.your { background: var(--error-bg); color: var(--ink-soft); }
+  .review-ans.your .review-ans-label { color: var(--error); }
+  .review-ans.your.correct-pick { background: var(--success-bg); }
+  .review-ans.your.correct-pick .review-ans-label { color: var(--success); }
+  .review-ans.right-ans { background: var(--success-bg); color: var(--ink); }
+  .review-ans.right-ans .review-ans-label { color: var(--success); }
+  .review-explanation {
+    font-size: 13px;
+    color: var(--muted);
+    padding: 10px 14px;
+    background: var(--paper-warm);
+    border-radius: 4px;
+    line-height: 1.6;
+  }
+  .review-explanation b { color: var(--ink-soft); font-weight: 600; }
+
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 48px 0 24px;
+    flex-wrap: wrap;
+  }
+
+  .instructor-note {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: var(--paper-warm);
+    border-radius: var(--radius);
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .instructor-note b { color: var(--ink); }
+
+  /* Restore notice */
+  .restore-banner {
+    display: none;
+    background: #FFFAEB;
+    border: 1px solid #F6E05E;
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #744210;
+    align-items: center;
+    gap: 12px;
+  }
+  .restore-banner.show { display: flex; }
+  .restore-banner button {
+    background: transparent;
+    border: 1px solid #D69E2E;
+    color: #744210;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .restore-banner button:hover { background: rgba(214, 158, 46, 0.15); }
+
+  /* ========== PRINT STYLES ========== */
+  @media print {
+    .topbar, .results-actions, .review-filters, .restore-banner, .submit-panel { display: none !important; }
+    body { background: white; }
+    .qcard, .review-card, .breakdown-row, .details-card, .instructions { box-shadow: none; border: 1px solid #999; page-break-inside: avoid; }
+    main { padding: 20px; max-width: 100%; }
+    .section-header { page-break-before: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== STICKY TOP BAR ========== -->
+<header class="topbar" id="topbar" style="display:none;">
+  <div class="topbar-inner">
+    <div class="course-tag"><b>TM2065</b> · Pre-requisite Quiz</div>
+    <div>
+      <span class="timer-label">Time Remaining</span>
+      <div class="timer" id="timer">120:00</div>
+    </div>
+    <div class="progress-info"><b id="prog-answered">0</b> / 100 answered</div>
+  </div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="prog-bar"></div></div>
+</header>
+
+<main>
+
+  <!-- ========== COVER / WELCOME ========== -->
+  <section id="cover">
+    <div class="cover">
+      <div class="cover-eyebrow">Symbiosis International (Deemed University)</div>
+      <div class="cover-uni" style="display:none;">Symbiosis International (Deemed University)</div>
+      <div class="cover-faculty">Faculty of Management · Banking and Finance</div>
+
+      <h1 class="cover-title">Pre-requisite<br><em>Quiz</em></h1>
+      <p class="cover-subtitle">
+        A short, untimed reading before you begin: this quiz is designed to help your instructor
+        understand your <b>current knowledge level</b> in Python, statistics, mathematics and finance
+        before <b>TM2065 — Application of ML and AI in Finance</b> commences. Your score will <b>not</b> affect your grade.
+      </p>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-value">100</div><div class="stat-label">Questions</div></div>
+        <div class="stat"><div class="stat-value">120</div><div class="stat-label">Minutes</div></div>
+        <div class="stat"><div class="stat-value">4</div><div class="stat-label">Sections</div></div>
+        <div class="stat"><div class="stat-value">1×</div><div class="stat-label">Mark Each</div></div>
+      </div>
+    </div>
+
+    <div class="restore-banner" id="restore-banner">
+      <span>🕒 We found an unsubmitted attempt saved in your browser. Restore it?</span>
+      <button onclick="restoreSession()">Restore</button>
+      <button onclick="discardSession()" style="border:none; background:none; color:#744210;">Discard</button>
+    </div>
+
+    <div class="instructions">
+      <h3>Before you begin</h3>
+      <ul>
+        <li>Read each question carefully — every question has exactly <b>one</b> correct answer.</li>
+        <li>You have <b>120 minutes</b> from the moment you click <b>Start quiz</b>. The timer is at the top.</li>
+        <li>Your progress is auto-saved in this browser — you may safely close and re-open the tab.</li>
+        <li>No negative marking. Attempt every question, even if uncertain.</li>
+        <li>Calculators, notes, mobile phones and AI assistants are <b>not</b> permitted.</li>
+        <li>You may submit early. The quiz auto-submits when the timer reaches zero.</li>
+      </ul>
+    </div>
+
+    <div class="details-card">
+      <h3>Your details</h3>
+      <p class="note">Please fill these in before starting. They appear on your result summary, which you'll share with the instructor.</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="s-name">Full Name</label>
+          <input id="s-name" type="text" placeholder="e.g. Ananya Sharma" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="s-roll">Roll Number</label>
+          <input id="s-roll" type="text" placeholder="e.g. MBA-BF-24-021" />
+        </div>
+        <div class="field">
+          <label for="s-prog">Programme & Batch</label>
+          <input id="s-prog" type="text" placeholder="e.g. MBA (B&F) 2024-26" />
+        </div>
+      </div>
+      <div class="start-row" style="margin-top:24px;">
+        <button class="btn btn-large" id="start-btn" onclick="startQuiz()">Start quiz →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== QUIZ ========== -->
+  <section id="quiz-area"></section>
+
+  <!-- ========== RESULTS ========== -->
+  <section id="results-area"></section>
+
+</main>
+
+<!-- ========== CONFIRMATION MODAL ========== -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal">
+    <h3>Submit your quiz?</h3>
+    <p id="confirm-text">You have answered <b>0</b> of 100 questions. Once submitted, you cannot change your answers. Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Keep working</button>
+      <button class="btn btn-danger" onclick="submitQuiz()">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =================================================================
+// QUIZ DATA — 100 questions across 4 sections
+// =================================================================
+const QUIZ = {
+  sections: [
+    {
+      id: 'A',
+      title: 'Python Programming',
+      subtitle: 'Syntax, data structures, pandas & NumPy basics',
+      questions: [
+        { q: "Which symbol is used to write a single-line comment in Python?", opts: ["<code>//</code>", "<code>#</code>", "<code>/* */</code>", "<code>--</code>"], correct: 1, explanation: "The hash symbol <code>#</code> starts a single-line comment in Python." },
+        { q: "What is the output of: <code>print(len(\"Machine Learning\"))</code> ?", opts: ["15", "16", "17", "Error"], correct: 1, explanation: "The string \"Machine Learning\" contains 16 characters including the space." },
+        { q: "Which of the following Python data types is mutable (can be changed after creation)?", opts: ["tuple", "string", "list", "frozenset"], correct: 2, explanation: "Lists are mutable; tuples, strings and frozensets are immutable." },
+        { q: "What does the following expression return: <code>list(range(2, 10, 2))</code> ?", opts: ["<code>[2, 4, 6, 8]</code>", "<code>[2, 4, 6, 8, 10]</code>", "<code>[0, 2, 4, 6, 8]</code>", "<code>[2, 4, 6, 8, 10, 12]</code>"], correct: 0, explanation: "<code>range(start, stop, step)</code> is exclusive of stop, so the values are 2, 4, 6, 8." },
+        { q: "Which Python library is most widely used for tabular data manipulation in finance?", opts: ["NumPy", "Pandas", "Matplotlib", "TensorFlow"], correct: 1, explanation: "Pandas provides DataFrame structures ideal for tabular financial data." },
+        { q: "What is the output of: <code>print(2 ** 5)</code> ?", opts: ["10", "25", "32", "7"], correct: 2, explanation: "<code>2 ** 5</code> = 2×2×2×2×2 = 32 (** is the exponent operator)." },
+        { q: "Which command is used to install a Python package from PyPI?", opts: ["<code>python install pandas</code>", "<code>pip install pandas</code>", "<code>py get pandas</code>", "<code>install pandas pip</code>"], correct: 1, explanation: "<code>pip</code> is Python's standard package installer." },
+        { q: "What does the following code return: <code>type([1, 2, 3])</code> ?", opts: ["<code>&lt;class 'list'&gt;</code>", "<code>&lt;class 'tuple'&gt;</code>", "<code>&lt;class 'array'&gt;</code>", "<code>&lt;class 'dict'&gt;</code>"], correct: 0, explanation: "<code>type()</code> of a list literal returns the list class." },
+        { q: "Which keyword is used to define a function in Python?", opts: ["<code>function</code>", "<code>def</code>", "<code>func</code>", "<code>define</code>"], correct: 1, explanation: "The <code>def</code> keyword defines a function in Python." },
+        { q: "NumPy is primarily used for:", opts: ["Web development", "Numerical and array computations", "Database management", "Image editing"], correct: 1, explanation: "NumPy = Numerical Python; the basis for scientific computing in Python." },
+        { q: "If <code>x = [10, 20, 30, 40, 50]</code>, what is the value of <code>x[-2]</code> ?", opts: ["50", "40", "30", "20"], correct: 1, explanation: "Negative indices count from the end: <code>x[-1]</code> = 50, <code>x[-2]</code> = 40." },
+        { q: "What does the line <code>df = pd.read_csv(\"data.csv\")</code> do?", opts: ["Writes a new CSV file", "Reads a CSV file into a pandas DataFrame", "Deletes the CSV file", "Encrypts the CSV file"], correct: 1, explanation: "<code>pd.read_csv()</code> is the standard CSV-loading function." },
+        { q: "Which pandas method displays the first 5 rows of a DataFrame by default?", opts: ["<code>df.first()</code>", "<code>df.head()</code>", "<code>df.top()</code>", "<code>df.show(5)</code>"], correct: 1, explanation: "<code>df.head()</code> returns the first 5 rows by default." },
+        { q: "What is the output of: <code>print(\"3\" + \"4\")</code> ?", opts: ["7", "34", "\"7\"", "Error"], correct: 1, explanation: "The <code>+</code> operator concatenates strings — \"3\" + \"4\" = \"34\"." },
+        { q: "A bank wants to apply the same tax-calculation logic to 10,000 customer records stored in a DataFrame. Which is the most efficient approach in pandas?", opts: ["Use a for-loop over each row", "Use a vectorised operation on the column", "Write the data to Excel and apply formulas", "Recompute manually for each row"], correct: 1, explanation: "Vectorised pandas/NumPy operations are far faster than Python row-loops — a core reasoning point for finance analytics." },
+        { q: "What is the output of: <code>print(10 % 3)</code> ?", opts: ["3", "1", "0.33", "3.33"], correct: 1, explanation: "<code>%</code> is the modulo (remainder) operator; 10 ÷ 3 = 3 remainder 1." },
+        { q: "Which list method adds an element at the end of a list?", opts: ["<code>add()</code>", "<code>append()</code>", "<code>insert()</code>", "<code>push()</code>"], correct: 1, explanation: "<code>list.append(x)</code> adds <code>x</code> to the end of the list." },
+        { q: "What is the output of: <code>bool(0)</code> ?", opts: ["True", "False", "0", "None"], correct: 1, explanation: "In Python, <code>0</code> is treated as <code>False</code>; any non-zero number is <code>True</code>." },
+        { q: "To import only the <code>sqrt</code> function from the <code>math</code> module, the correct syntax is:", opts: ["<code>import sqrt from math</code>", "<code>from math import sqrt</code>", "<code>using math.sqrt</code>", "<code>include math.sqrt</code>"], correct: 1, explanation: "Standard syntax: <code>from &lt;module&gt; import &lt;name&gt;</code>." },
+        { q: "Which of the following is NOT a built-in Python data type?", opts: ["<code>int</code>", "<code>str</code>", "<code>char</code>", "<code>float</code>"], correct: 2, explanation: "Python has no separate <code>char</code> type; single characters are simply strings of length 1." },
+        { q: "What is the output of: <code>print({\"a\": 1, \"b\": 2}[\"b\"])</code> ?", opts: ["1", "2", "\"b\"", "Error"], correct: 1, explanation: "Dictionary access by key <code>d[\"b\"]</code> returns its associated value — here, 2." },
+        { q: "What does the list comprehension <code>[x**2 for x in range(4)]</code> produce?", opts: ["<code>[1, 4, 9, 16]</code>", "<code>[0, 1, 4, 9]</code>", "<code>[0, 2, 4, 6]</code>", "<code>[1, 2, 4, 8]</code>"], correct: 1, explanation: "<code>range(4)</code> → 0, 1, 2, 3; squaring each gives 0, 1, 4, 9." },
+        { q: "If <code>s = \"FINANCE\"</code>, what is the value of <code>s[2:5]</code> ?", opts: ["<code>\"NAN\"</code>", "<code>\"NANC\"</code>", "<code>\"INA\"</code>", "<code>\"IFI\"</code>"], correct: 0, explanation: "Indices: F=0, I=1, N=2, A=3, N=4, C=5, E=6. <code>s[2:5]</code> takes indices 2, 3, 4 → \"NAN\"." },
+        { q: "Which Python construct is used to handle runtime errors gracefully?", opts: ["<code>if-else</code>", "<code>for</code>-loop", "<code>try-except</code>", "<code>switch-case</code>"], correct: 2, explanation: "<code>try-except</code> blocks catch and handle runtime exceptions in Python." },
+        { q: "In NumPy, the operation <code>np.array([1, 2, 3]) * 2</code> returns:", opts: ["<code>[2, 2, 2]</code>", "<code>[1, 2, 3, 1, 2, 3]</code>", "<code>[2, 4, 6]</code>", "Error"], correct: 2, explanation: "NumPy broadcasts the scalar across the array element-wise: each element is doubled." }
+      ]
+    },
+    {
+      id: 'B',
+      title: 'Statistics and Probability',
+      subtitle: 'Descriptive statistics, distributions, hypothesis testing',
+      questions: [
+        { q: "The arithmetic mean of the numbers 2, 4, 6, 8, 10 is:", opts: ["5", "6", "7", "8"], correct: 1, explanation: "(2+4+6+8+10) / 5 = 30 / 5 = 6." },
+        { q: "The median of the data set 5, 9, 3, 7, 1 is:", opts: ["3", "5", "7", "9"], correct: 1, explanation: "Sorted: 1, 3, 5, 7, 9. The middle value is 5." },
+        { q: "Standard deviation is a measure of:", opts: ["Central tendency", "Dispersion (spread)", "Probability", "Frequency"], correct: 1, explanation: "Standard deviation quantifies how far values typically lie from the mean." },
+        { q: "A correlation coefficient of −1 between two variables indicates:", opts: ["No relationship", "Perfect positive linear relationship", "Perfect negative linear relationship", "Random scatter"], correct: 2, explanation: "r = −1 means one variable increases perfectly linearly as the other decreases." },
+        { q: "The correlation coefficient (Pearson's r) always lies in the range:", opts: ["0 to 1", "−1 to +1", "−∞ to +∞", "0 to 100"], correct: 1, explanation: "Pearson correlation is mathematically bounded between −1 and +1." },
+        { q: "Among Mean, Median and Mode, which measure of central tendency is most affected by extreme outliers?", opts: ["Median", "Mode", "Mean", "All are equally affected"], correct: 2, explanation: "The mean uses every value, so an extreme outlier shifts it noticeably; median and mode are far more robust." },
+        { q: "In a normal distribution, approximately what percentage of the values fall within one standard deviation of the mean?", opts: ["50%", "68%", "95%", "99.7%"], correct: 1, explanation: "Empirical rule: ~68% within 1 SD, ~95% within 2 SD, ~99.7% within 3 SD." },
+        { q: "The probability of an impossible event is:", opts: ["0", "1", "0.5", "Undefined"], correct: 0, explanation: "An impossible event has probability 0; a certain event has probability 1." },
+        { q: "If a fair six-sided die is rolled once, the probability of obtaining an even number is:", opts: ["1/6", "1/3", "1/2", "2/3"], correct: 2, explanation: "Even outcomes: 2, 4, 6 → 3 favourable out of 6 → 1/2." },
+        { q: "In hypothesis testing, the null hypothesis (H₀) typically states that:", opts: ["There is a significant effect", "There is no effect or no difference", "The alternative hypothesis is true", "The sample is biased"], correct: 1, explanation: "The null hypothesis is the default 'no effect' position." },
+        { q: "A researcher obtains a p-value of 0.03 at a significance level α = 0.05. The correct decision is to:", opts: ["Accept H₀", "Reject H₀", "The test is inconclusive", "Collect more data before deciding"], correct: 1, explanation: "When p-value (0.03) &lt; α (0.05), we reject the null hypothesis." },
+        { q: "The variance of a data set is mathematically:", opts: ["Square root of the mean", "The square of the standard deviation", "The difference between mean and median", "The sum of all values"], correct: 1, explanation: "By definition, variance = (standard deviation)²." },
+        { q: "In the simple linear regression equation <code>y = mx + c</code>, the coefficient <code>m</code> represents the:", opts: ["Intercept", "Slope", "Error term", "Mean of y"], correct: 1, explanation: "In <code>y = mx + c</code>, <code>m</code> is the slope and <code>c</code> is the intercept." },
+        { q: "A distribution with a longer tail on the right side is called:", opts: ["Negatively skewed", "Positively skewed (right-skewed)", "Symmetric", "Uniform"], correct: 1, explanation: "A long right tail means positive skew (mean &gt; median)." },
+        { q: "The mode of the data set <code>[3, 5, 3, 7, 5, 3, 9, 5, 3]</code> is:", opts: ["3", "5", "7", "9"], correct: 0, explanation: "3 appears 4 times — more frequently than any other value." },
+        { q: "Which sampling method gives every member of the population an equal chance of being selected?", opts: ["Stratified sampling", "Convenience sampling", "Simple random sampling", "Snowball sampling"], correct: 2, explanation: "By definition, every member has an equal probability of selection." },
+        { q: "A Type I error in hypothesis testing occurs when we:", opts: ["Reject the null hypothesis when it is actually true", "Accept the null hypothesis when it is actually false", "Use too small a sample", "Use a biased estimator"], correct: 0, explanation: "Type I = false positive. Type II = failing to reject a false null." },
+        { q: "In a regression model, R-squared (R²) represents:", opts: ["The total error in the model", "The proportion of variance in the dependent variable explained by the model", "The slope of the regression line", "The sum of residuals"], correct: 1, explanation: "R² ∈ [0, 1] measures goodness of fit." },
+        { q: "Which of the following is NOT a measure of dispersion?", opts: ["Variance", "Standard deviation", "Median", "Range"], correct: 2, explanation: "Median is a measure of central tendency; variance, SD and range measure dispersion." },
+        { q: "If two events A and B are statistically independent, then <code>P(A and B)</code> equals:", opts: ["<code>P(A) + P(B)</code>", "<code>P(A) × P(B)</code>", "<code>P(A) − P(B)</code>", "<code>P(A) / P(B)</code>"], correct: 1, explanation: "Multiplication rule for INDEPENDENT events." },
+        { q: "The Interquartile Range (IQR) is defined as:", opts: ["<code>Q3 − Q1</code>", "<code>Q2 − Q1</code>", "<code>Max − Min</code>", "<code>Mean − Median</code>"], correct: 0, explanation: "The IQR is the difference between the third and first quartiles — spread of the middle 50% of the data." },
+        { q: "A 95% confidence interval for a population mean is best interpreted as:", opts: ["95% of data points lie inside this interval", "We are 95% confident the interval contains the true population mean", "The sample mean is 95% accurate", "95% of samples will produce the same mean"], correct: 1, explanation: "Standard textbook interpretation; confidence refers to the long-run behaviour of intervals, not the proportion of data inside." },
+        { q: "The Central Limit Theorem states that, for large enough samples, the sampling distribution of the sample mean approaches a:", opts: ["Uniform distribution", "Binomial distribution", "Normal distribution", "Exponential distribution"], correct: 2, explanation: "The CLT holds regardless of the underlying distribution, provided the sample is large enough." },
+        { q: "To report the 'typical' income in a country where a few billionaires drastically pull up the average, the most appropriate measure of central tendency is the:", opts: ["Mean", "Median", "Mode", "Range"], correct: 1, explanation: "The median is robust to extreme outliers (the billionaires) while the mean is heavily distorted by them." },
+        { q: "If <code>P(A) = 0.4</code> and <code>P(B | A) = 0.5</code>, then <code>P(A and B)</code> equals:", opts: ["0.1", "0.2", "0.5", "0.9"], correct: 1, explanation: "Multiplication rule with conditional probability: <code>P(A∩B) = P(A) × P(B|A) = 0.4 × 0.5 = 0.20</code>." }
+      ]
+    },
+    {
+      id: 'C',
+      title: 'Mathematics and Data Concepts',
+      subtitle: 'Returns, log/derivative, matrices, data types & scaling',
+      questions: [
+        { q: "A stock's price rises from ₹100 to ₹110 in one day. The simple percentage return for that day is:", opts: ["1%", "10%", "11%", "100%"], correct: 1, explanation: "Return = (110 − 100) / 100 × 100 = 10%." },
+        { q: "The value of <code>log(1)</code> (any base) is:", opts: ["0", "1", "e", "Undefined"], correct: 0, explanation: "<code>log(1) = 0</code> in any base, because <code>b⁰ = 1</code> for any positive base <code>b</code>." },
+        { q: "Which of the following is a categorical variable?", opts: ["Age in years", "Height in cm", "Customer occupation type", "Annual income"], correct: 2, explanation: "Occupation takes a fixed set of unordered categories; the others are numeric/continuous." },
+        { q: "Time-series data is best described as:", opts: ["Data with no inherent order", "Observations collected sequentially over time", "Randomly shuffled records", "Cross-sectional data at a single point in time"], correct: 1, explanation: "Examples: daily stock prices, monthly inflation — order matters." },
+        { q: "Which of the following is an example of structured data?", opts: ["Tweets on social media", "Free text in PDF reports", "Customer records in an Excel table", "Voice recordings of call centres"], correct: 2, explanation: "Structured data fits a fixed row/column schema; tweets, free text and audio are unstructured." },
+        { q: "The derivative of the function <code>f(x) = x²</code> with respect to <code>x</code> is:", opts: ["<code>x</code>", "<code>2x</code>", "<code>x³ / 3</code>", "<code>2</code>"], correct: 1, explanation: "Power rule: <code>d/dx(xⁿ) = n·xⁿ⁻¹</code> → for <code>x²</code>, we get <code>2x</code>." },
+        { q: "The product of a 2×3 matrix and a 3×4 matrix results in a matrix of size:", opts: ["2×4", "3×3", "2×3", "Cannot be multiplied"], correct: 0, explanation: "When multiplying an m×n by an n×p matrix, the result is m×p. Here 2×3 × 3×4 = 2×4." },
+        { q: "A stock has an average daily return of 0.5% over 5 trading days. The approximate total simple return is:", opts: ["0.5%", "2.0%", "2.5%", "5.0%"], correct: 2, explanation: "Simple sum: 0.5% × 5 days = 2.5% (ignoring compounding)." },
+        { q: "A portfolio has an expected return of 12%, the risk-free rate is 4%, and the portfolio standard deviation is 10%. The Sharpe ratio is:", opts: ["0.4", "0.8", "1.2", "1.6"], correct: 1, explanation: "Sharpe = (Rp − Rf) / σp = (12 − 4) / 10 = 0.8." },
+        { q: "In mathematics, the natural logarithm is denoted by:", opts: ["<code>log</code>", "<code>ln</code>", "<code>lg</code>", "<code>log₁₀</code>"], correct: 1, explanation: "The natural logarithm (base <code>e</code>) is denoted <code>ln</code>." },
+        { q: "₹1,000 is invested at 10% compound interest per annum. The amount after 2 years is:", opts: ["₹1,100", "₹1,200", "₹1,210", "₹1,221"], correct: 2, explanation: "Compound interest: 1000 × (1.10)² = 1000 × 1.21 = ₹1,210." },
+        { q: "The future value of ₹100 invested for 1 year at 5% simple interest is:", opts: ["₹95", "₹100", "₹105", "₹110"], correct: 2, explanation: "FV = P + (P × r × t) = 100 + (100 × 0.05 × 1) = ₹105." },
+        { q: "A stock's daily returns have a mean of 8% and a standard deviation of 4%, approximately normally distributed. Approximately 95% of returns fall in the range:", opts: ["4% to 12%", "0% to 16%", "8% to 16%", "−4% to 20%"], correct: 1, explanation: "95% within ±2 SD: 8% ± (2 × 4%) = 0% to 16%." },
+        { q: "The z-score of a data point measures:", opts: ["Its raw numeric value", "Its rank in the dataset", "Its distance from the mean in units of standard deviations", "Its probability of occurrence"], correct: 2, explanation: "<code>z = (x − μ) / σ</code>." },
+        { q: "If a student's marks are at the 80th percentile, this means:", opts: ["The student scored 80 marks", "80% of students scored at or below this student", "80% of students scored above this student", "The class average is 80"], correct: 1, explanation: "Percentile definition — 80th percentile means 80% are at or below that point." },
+        { q: "Min-max normalisation typically rescales numeric values to the range:", opts: ["−1 to +1", "0 to 1", "0 to 100", "−∞ to +∞"], correct: 1, explanation: "Min-max formula: <code>(x − min) / (max − min) ∈ [0, 1]</code>." },
+        { q: "In predictive modelling, the most common way to handle missing values in a numeric column is to:", opts: ["Discard the entire dataset", "Replace them with zero always", "Impute them (e.g. with the mean or median)", "Replace them with random numbers"], correct: 2, explanation: "Imputation preserves the dataset while filling gaps with reasonable estimates." },
+        { q: "An outlier in a dataset is best described as:", opts: ["The most frequent value", "The average value", "A value that significantly differs from other observations", "A missing value"], correct: 2, explanation: "Outliers lie far from the bulk of the data and can distort models." },
+        { q: "Why is feature scaling important before applying many ML algorithms (e.g. k-NN, k-Means)?", opts: ["It reduces disk space", "It ensures all features contribute proportionally during distance / loss calculations", "It removes outliers automatically", "It increases the number of rows in the dataset"], correct: 1, explanation: "Distance-based and gradient-based algorithms are sensitive to feature scales — a feature in lakhs would dominate one in percentages." },
+        { q: "Which of the following is an example of ordinal data?", opts: ["Customer's eye colour", "Customer's credit rating (AAA, AA, A, BBB)", "Customer's phone number", "Customer's PAN number"], correct: 1, explanation: "Credit ratings have a natural order; eye colour is nominal, phone and PAN are identifiers." },
+        { q: "A commonly used train-test split ratio in machine-learning practice is:", opts: ["50% train / 50% test", "80% train / 20% test", "100% train / 0% test", "20% train / 80% test"], correct: 1, explanation: "The 80/20 split is the most common default in ML practice." },
+        { q: "The dot product of the vectors <code>[1, 2, 3]</code> and <code>[4, 5, 6]</code> is:", opts: ["14", "21", "32", "35"], correct: 2, explanation: "Dot product = 1·4 + 2·5 + 3·6 = 4 + 10 + 18 = 32." },
+        { q: "A histogram is best used to visualise:", opts: ["Relationship between two numeric variables", "The distribution of a single numeric variable", "Geographic location of data", "Sequential trends over time"], correct: 1, explanation: "Histograms show frequency distributions; scatter plots show relationships; line charts show time trends." },
+        { q: "Converting the categorical variable 'City' (Mumbai, Delhi, Pune) into three separate 0/1 columns is called:", opts: ["Standardisation", "Imputation", "One-hot encoding", "Normalisation"], correct: 2, explanation: "One-hot encoding creates a binary indicator column per category — standard for nominal variables." },
+        { q: "In finance, 'log returns' are often preferred over simple returns because they are:", opts: ["Easier to compute by hand", "Time-additive across periods", "Always positive", "Bounded between 0 and 1"], correct: 1, explanation: "Log returns add cleanly across periods, simplifying multi-period and statistical analysis." }
+      ]
+    },
+    {
+      id: 'D',
+      title: 'Finance and Machine Learning Awareness',
+      subtitle: 'Financial concepts, ML categories, model evaluation',
+      questions: [
+        { q: "The simple interest earned on ₹10,000 at 10% per annum for 1 year is:", opts: ["₹100", "₹1,000", "₹10,000", "₹11,000"], correct: 1, explanation: "Simple Interest = (P × R × T) / 100 = (10,000 × 10 × 1) / 100 = ₹1,000." },
+        { q: "Which of the following is NOT a primary financial statement of a company?", opts: ["Balance Sheet", "Income Statement (P&amp;L)", "Cash Flow Statement", "Marketing Plan"], correct: 3, explanation: "The three primary financial statements are the Balance Sheet, Income Statement and Cash Flow Statement." },
+        { q: "In finance, the abbreviation NPV stands for:", opts: ["Net Present Value", "Net Profit Variance", "New Portfolio Value", "Nominal Period Value"], correct: 0, explanation: "NPV discounts future cash flows to today's value for investment decisions." },
+        { q: "Machine Learning is best described as:", opts: ["Hand-coding explicit if-then rules", "Algorithms that learn patterns from data to make predictions", "Storing data in cloud databases", "Random number generation"], correct: 1, explanation: "Core definition of ML — learning from data rather than hand-coding rules." },
+        { q: "Which of the following is a classification problem in finance?", opts: ["Predicting tomorrow's stock price (a numeric value)", "Predicting whether a loan applicant will default (yes / no)", "Estimating next quarter's revenue", "Forecasting the inflation rate"], correct: 1, explanation: "A discrete label (yes/no) → classification. Continuous predictions → regression." },
+        { q: "Which of the following is an example of unsupervised learning?", opts: ["Linear regression", "Logistic regression", "K-Means clustering of customers", "Decision tree classification"], correct: 2, explanation: "K-Means groups data without using labels → unsupervised." },
+        { q: "Which of the following is a supervised learning algorithm?", opts: ["K-Means clustering", "Linear regression", "Principal Component Analysis (PCA)", "Apriori algorithm"], correct: 1, explanation: "Linear regression uses labelled (X, y) data → supervised. K-Means, PCA and Apriori are unsupervised." },
+        { q: "Logistic regression is typically used for:", opts: ["Predicting continuous numeric values", "Binary or multi-class classification", "Clustering similar items", "Reducing the number of features"], correct: 1, explanation: "Despite its name, logistic regression is a classification algorithm (predicting class probabilities)." },
+        { q: "Overfitting in a machine learning model refers to a situation where the model:", opts: ["Is too simple to capture the underlying pattern", "Performs well on training data but poorly on new unseen data", "Has too little training data", "Uses the wrong programming language"], correct: 1, explanation: "Overfitting = the model has memorised noise; underfitting = the model is too simple." },
+        { q: "In a typical ML workflow, the training dataset is used to:", opts: ["Evaluate the final model performance", "Build (fit) the model parameters", "Visualise the data", "Deploy the model in production"], correct: 1, explanation: "The training set fits the model; the test set evaluates it on unseen data." },
+        { q: "The bias-variance trade-off in machine learning refers to balancing:", opts: ["Training time vs. test time", "Model simplicity vs. model complexity", "Number of features vs. number of rows", "Hardware cost vs. software cost"], correct: 1, explanation: "Simple models tend to have high bias (under-fit); complex models tend to have high variance (over-fit)." },
+        { q: "In a binary classification problem, accuracy is defined as:", opts: ["(Correct predictions) ÷ (Total predictions)", "(True positives) ÷ (All actual positives)", "(True positives) ÷ (All predicted positives)", "(False positives) ÷ (Total predictions)"], correct: 0, explanation: "Accuracy = (TP + TN) / (TP + TN + FP + FN). Note: it can be misleading on imbalanced datasets like fraud." },
+        { q: "A confusion matrix is used to evaluate which type of ML problem?", opts: ["Regression", "Classification", "Clustering", "Dimensionality reduction"], correct: 1, explanation: "A confusion matrix cross-tabulates predicted vs. actual classes for classification problems." },
+        { q: "A decision tree algorithm splits the data at each node by choosing the feature that:", opts: ["Has the lowest mean value", "Best separates the target classes (e.g. by maximising information gain)", "Appears first alphabetically", "Appears first in the dataset"], correct: 1, explanation: "Decision trees use measures like Gini impurity or information gain to pick splits." },
+        { q: "The Price-to-Earnings (P/E) ratio of a stock is calculated as:", opts: ["Market Price per Share ÷ Earnings per Share", "Total Revenue ÷ Total Expenses", "Net Profit ÷ Sales", "Total Debt ÷ Equity"], correct: 0, explanation: "Standard P/E formula — used widely for relative valuation." },
+        { q: "The Beta (β) of a stock measures:", opts: ["Its dividend yield", "Its sensitivity to overall market movements", "The company's total assets", "Its book value"], correct: 1, explanation: "Beta &gt; 1 means the stock is more volatile than the market; β &lt; 1 means less volatile." },
+        { q: "Diversification across many uncorrelated assets in a portfolio primarily reduces:", opts: ["Systematic (market) risk", "Unsystematic (company-specific) risk", "Inflation risk", "Liquidity risk"], correct: 1, explanation: "Diversification removes idiosyncratic risk; systematic (market) risk cannot be diversified away." },
+        { q: "In a credit-card fraud detection model, the cost of a false negative (missing an actual fraud) is typically:", opts: ["Lower than a false positive", "Higher than a false positive", "Equal to a false positive", "Always zero"], correct: 1, explanation: "Missing actual fraud usually costs the bank (and customer) far more than the inconvenience of a false alarm." },
+        { q: "k-Fold cross-validation is primarily used to:", opts: ["Train the model faster", "Obtain a more reliable estimate of model performance", "Reduce the dataset size", "Visualise the data"], correct: 1, explanation: "k-fold CV averages results across folds, giving a more stable performance estimate, especially with limited data." },
+        { q: "The test set in an ML workflow is used to:", opts: ["Train the model parameters", "Tune the hyperparameters", "Evaluate the final model on unseen data", "Clean and preprocess data"], correct: 2, explanation: "The test set should be held back from training/tuning to give an honest performance estimate." },
+        { q: "ARIMA, LSTM and Prophet are all commonly used for:", opts: ["Image classification", "Time-series forecasting", "Speech recognition", "Web scraping"], correct: 1, explanation: "ARIMA (classical statistics), LSTM (deep learning) and Prophet (Facebook's library) are all time-series methods." },
+        { q: "A consistently high Debt-to-Equity ratio for a company generally indicates:", opts: ["Low financial risk", "High financial leverage and higher risk", "High liquidity", "High profitability"], correct: 1, explanation: "More debt relative to equity raises both potential return and risk of default." },
+        { q: "'Feature engineering' in machine learning refers to:", opts: ["Designing software user-interfaces", "Constructing new informative input variables from raw data", "Choosing the optimal hardware", "Compressing data files"], correct: 1, explanation: "Examples: deriving 'days since last transaction', moving averages of stock price, ratios — often more impactful than the algorithm chosen." },
+        { q: "Which technique is often used to detect anomalous (potentially fraudulent) transactions when very few labelled fraud examples are available?", opts: ["Linear regression", "Anomaly / outlier detection (unsupervised)", "Manual rule-based scripting only", "Linear discriminant analysis"], correct: 1, explanation: "When labelled fraud is scarce, unsupervised anomaly detection flags transactions that deviate from normal patterns." },
+        { q: "A wealth-management firm wants to predict the exact continuous closing price of a stock tomorrow. This is fundamentally a:", opts: ["Classification problem", "Regression problem", "Clustering problem", "Association-rule problem"], correct: 1, explanation: "Predicting a continuous numeric value is regression; predicting a category (e.g. 'price will go up / down') would be classification." }
+      ]
+    }
+  ]
+};
+
+// =================================================================
+// STATE
+// =================================================================
+const TOTAL_QUESTIONS = 100;
+const TOTAL_SECONDS = 120 * 60;
+const STORAGE_KEY = 'tm2065-quiz-attempt-v1';
+
+let state = {
+  started: false,
+  startedAt: null,
+  answers: {}, // { "A-3": 2, "B-15": 0, ... }
+  candidate: { name: '', roll: '', programme: '' },
+  submitted: false,
+};
+let timerInterval = null;
+
+// =================================================================
+// PERSISTENCE
+// =================================================================
+function saveState() {
+  if (state.submitted) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+function clearSaved() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+// =================================================================
+// FLOW: START
+// =================================================================
+function startQuiz(restored = false) {
+  const name = document.getElementById('s-name').value.trim();
+  const roll = document.getElementById('s-roll').value.trim();
+  const prog = document.getElementById('s-prog').value.trim();
+  if (!restored) {
+    if (!name) { alert('Please enter your name before starting.'); return; }
+    state.candidate = { name, roll, programme: prog };
+    state.started = true;
+    state.startedAt = Date.now();
+    state.answers = {};
+  }
+  saveState();
+
+  document.getElementById('cover').classList.add('hidden');
+  document.getElementById('quiz-area').classList.add('active');
+  document.getElementById('topbar').style.display = 'block';
+
+  renderQuiz();
+  startTimer();
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+// =================================================================
+// RENDER
+// =================================================================
+function renderQuiz() {
+  const area = document.getElementById('quiz-area');
+  let html = '';
+  let absIdx = 0;
+
+  QUIZ.sections.forEach((sec) => {
+    html += `<div class="section-header" id="sec-${sec.id}">
+      <div class="section-tag">Section ${sec.id} · ${sec.questions.length} questions</div>
+      <h2 class="section-title">${sec.title}</h2>
+      <div class="section-meta">${sec.subtitle}</div>
+    </div>`;
+
+    sec.questions.forEach((qObj, i) => {
+      absIdx++;
+      const key = `${sec.id}-${i}`;
+      const selected = state.answers[key];
+      const answered = selected !== undefined;
+      html += `<div class="qcard ${answered ? 'answered' : ''}" id="qcard-${key}">
+        <div class="qhead">
+          <div class="qnum">Q${absIdx}.</div>
+          <div class="qtext">${qObj.q}</div>
+        </div>
+        <ul class="opts">`;
+      qObj.opts.forEach((opt, j) => {
+        const checked = selected === j ? 'checked' : '';
+        html += `<li class="opt"><label>
+          <input type="radio" name="${key}" value="${j}" ${checked} onchange="onAnswer('${key}', ${j})" />
+          <span class="opt-letter">${String.fromCharCode(97 + j)}</span>
+          <span class="opt-text">${opt}</span>
+        </label></li>`;
+      });
+      html += `</ul></div>`;
+    });
+  });
+
+  html += `<div class="submit-panel">
+    <h3>Finished?</h3>
+    <p>Review your answers above before submitting. Once submitted, your responses are final.</p>
+    <div class="summary">
+      <div class="summary-item">Answered: <b id="sp-answered">0</b> / 100</div>
+      <div class="summary-item">Time used: <b id="sp-time">0 min</b></div>
+    </div>
+    <div><button class="btn btn-large" onclick="openSubmitModal()">Submit quiz</button></div>
+  </div>`;
+
+  area.innerHTML = html;
+}
+
+function onAnswer(key, value) {
+  state.answers[key] = value;
+  saveState();
+  const card = document.getElementById(`qcard-${key}`);
+  if (card) card.classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(state.answers).length;
+  const pct = (count / TOTAL_QUESTIONS) * 100;
+  const a = document.getElementById('prog-answered');
+  const b = document.getElementById('prog-bar');
+  if (a) a.textContent = count;
+  if (b) b.style.width = pct + '%';
+  const spa = document.getElementById('sp-answered');
+  if (spa) spa.textContent = count;
+  updateTimeUsed();
+}
+
+function updateTimeUsed() {
+  if (!state.startedAt) return;
+  const used = Math.floor((Date.now() - state.startedAt) / 1000);
+  const mins = Math.floor(used / 60);
+  const el = document.getElementById('sp-time');
+  if (el) el.textContent = mins + ' min';
+}
+
+// =================================================================
+// TIMER
+// =================================================================
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(tick, 1000);
+  tick();
+}
+function tick() {
+  if (!state.startedAt || state.submitted) return;
+  const used = Math.floor((Date.now() - state.startedAt) / 1000);
+  const left = TOTAL_SECONDS - used;
+  const tEl = document.getElementById('timer');
+  if (left <= 0) {
+    tEl.textContent = '00:00';
+    submitQuiz(true);
+    return;
+  }
+  const mm = String(Math.floor(left / 60)).padStart(2, '0');
+  const ss = String(left % 60).padStart(2, '0');
+  tEl.textContent = `${mm}:${ss}`;
+  tEl.classList.toggle('warning', left <= 15 * 60 && left > 5 * 60);
+  tEl.classList.toggle('danger', left <= 5 * 60);
+  updateTimeUsed();
+}
+
+// =================================================================
+// MODAL + SUBMIT
+// =================================================================
+function openSubmitModal() {
+  const count = Object.keys(state.answers).length;
+  document.getElementById('confirm-text').innerHTML =
+    `You have answered <b>${count}</b> of ${TOTAL_QUESTIONS} questions. ` +
+    (count < TOTAL_QUESTIONS ? `<br><br>Unanswered questions will be marked as 0. ` : '') +
+    `Once submitted, you cannot change your answers. Are you sure?`;
+  document.getElementById('confirm-modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('confirm-modal').classList.remove('show');
+}
+function submitQuiz(timeout = false) {
+  state.submitted = true;
+  closeModal();
+  if (timerInterval) clearInterval(timerInterval);
+  clearSaved();
+  renderResults(timeout);
+  document.getElementById('quiz-area').classList.remove('active');
+  document.getElementById('results-area').classList.add('active');
+  document.getElementById('topbar').style.display = 'none';
+  window.scrollTo(0, 0);
+}
+
+// =================================================================
+// RESULTS
+// =================================================================
+function renderResults(timeout) {
+  const area = document.getElementById('results-area');
+  let total = 0;
+  const sectionScores = {};
+
+  QUIZ.sections.forEach((sec) => {
+    let correct = 0;
+    sec.questions.forEach((qObj, i) => {
+      const key = `${sec.id}-${i}`;
+      if (state.answers[key] === qObj.correct) correct++;
+    });
+    sectionScores[sec.id] = { score: correct, total: sec.questions.length };
+    total += correct;
+  });
+
+  const pct = (total / TOTAL_QUESTIONS) * 100;
+  let band, bandClass, bandAdvice;
+  if (pct >= 80) { band = 'Strong'; bandClass = 'band-strong'; bandAdvice = "You're well prepared. Bring your curiosity to the case studies."; }
+  else if (pct >= 60) { band = 'Adequate'; bandClass = 'band-adequate'; bandAdvice = "Solid foundation. Brush up your weaker section before Module 1."; }
+  else if (pct >= 40) { band = 'Developing'; bandClass = 'band-weak'; bandAdvice = "Some gaps to close. Use the suggested resources before Module 1."; }
+  else { band = 'Foundational'; bandClass = 'band-foundational'; bandAdvice = "Plan a brief pre-course refresher in Python and statistics."; }
+
+  const candidate = state.candidate;
+  const finishedAt = new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+
+  let html = `
+    <div class="result-hero">
+      <div class="result-eyebrow">${timeout ? 'Time elapsed · auto-submitted' : 'Quiz submitted'} · ${finishedAt}</div>
+      <div class="result-score-display">
+        <span class="result-score">${total}</span><span class="result-total">/100</span>
+      </div>
+      <div><span class="result-band ${bandClass}">${band}</span></div>
+      <div class="result-name">
+        <b>${escapeHtml(candidate.name) || '—'}</b>${candidate.roll ? ' · ' + escapeHtml(candidate.roll) : ''}${candidate.programme ? ' · ' + escapeHtml(candidate.programme) : ''}
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <h3>Section-wise performance</h3>
+      <div class="breakdown-grid">`;
+
+  QUIZ.sections.forEach((sec) => {
+    const s = sectionScores[sec.id];
+    const sp = (s.score / s.total) * 100;
+    html += `<div class="breakdown-row">
+      <div class="breakdown-label">${sec.title}<span>Section ${sec.id} · ${sec.questions.length} questions</span></div>
+      <div class="breakdown-bar"><div class="breakdown-bar-fill" style="width:${sp}%"></div></div>
+      <div class="breakdown-score">${s.score} / ${s.total}</div>
+    </div>`;
+  });
+
+  html += `</div></div>
+
+    <div class="instructor-note">
+      <b>${bandAdvice}</b><br>
+      Please <b>print this page</b> or take a screenshot of your score summary and share it with your course instructor.
+    </div>
+
+    <div class="results-actions">
+      <button class="btn" onclick="window.print()">Print / save as PDF</button>
+      <button class="btn btn-ghost" onclick="scrollToReview()">Review answers</button>
+    </div>
+
+    <div class="review-section" id="review-section">
+      <h3>Review your answers</h3>
+      <p class="review-intro">Every question, your response, the correct answer, and a brief explanation.</p>
+      <div class="review-filters">
+        <button class="filter-btn active" data-filter="all" onclick="filterReview('all', this)">All (100)</button>
+        <button class="filter-btn" data-filter="incorrect" onclick="filterReview('incorrect', this)">Incorrect only</button>
+        <button class="filter-btn" data-filter="unanswered" onclick="filterReview('unanswered', this)">Unanswered</button>
+        <button class="filter-btn" data-filter="correct" onclick="filterReview('correct', this)">Correct only</button>
+      </div>
+      <div id="review-list">`;
+
+  let absIdx = 0;
+  QUIZ.sections.forEach((sec) => {
+    sec.questions.forEach((qObj, i) => {
+      absIdx++;
+      const key = `${sec.id}-${i}`;
+      const yourPick = state.answers[key];
+      let status, statusClass, statusLabel;
+      if (yourPick === undefined) { status = 'unanswered'; statusClass = 'status-unanswered'; statusLabel = 'Not answered'; }
+      else if (yourPick === qObj.correct) { status = 'correct'; statusClass = 'status-correct'; statusLabel = 'Correct'; }
+      else { status = 'incorrect'; statusClass = 'status-incorrect'; statusLabel = 'Incorrect'; }
+
+      const yourText = yourPick !== undefined
+        ? `(${String.fromCharCode(97 + yourPick)}) ${qObj.opts[yourPick]}`
+        : '— No answer selected —';
+      const correctText = `(${String.fromCharCode(97 + qObj.correct)}) ${qObj.opts[qObj.correct]}`;
+
+      html += `<div class="review-card ${status}" data-status="${status}">
+        <div class="review-header">
+          <span class="review-num">Q${absIdx}</span>
+          <span style="font-size:11px; color:var(--muted-soft); font-family:'JetBrains Mono',monospace; letter-spacing:0.08em;">SEC ${sec.id}</span>
+          <span class="review-status ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="review-q">${qObj.q}</div>
+        <div class="review-answers">`;
+
+      if (status === 'correct') {
+        html += `<div class="review-ans your correct-pick"><span class="review-ans-label">Your answer</span><span>${yourText}</span></div>`;
+      } else if (status === 'incorrect') {
+        html += `<div class="review-ans your"><span class="review-ans-label">Your answer</span><span>${yourText}</span></div>`;
+        html += `<div class="review-ans right-ans"><span class="review-ans-label">Correct</span><span>${correctText}</span></div>`;
+      } else {
+        html += `<div class="review-ans right-ans"><span class="review-ans-label">Correct</span><span>${correctText}</span></div>`;
+      }
+
+      html += `</div>
+        <div class="review-explanation"><b>Why:</b> ${qObj.explanation}</div>
+      </div>`;
+    });
+  });
+
+  html += `</div></div>`;
+
+  area.innerHTML = html;
+}
+
+function scrollToReview() {
+  document.getElementById('review-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function filterReview(filter, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.review-card').forEach(card => {
+    if (filter === 'all') card.style.display = '';
+    else card.style.display = card.dataset.status === filter ? '' : 'none';
+  });
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// =================================================================
+// SESSION RESTORE
+// =================================================================
+function checkRestore() {
+  const saved = loadSaved();
+  if (!saved || !saved.started || saved.submitted) return;
+  const elapsed = Math.floor((Date.now() - saved.startedAt) / 1000);
+  if (elapsed >= TOTAL_SECONDS) {
+    clearSaved();
+    return;
+  }
+  // pre-fill candidate fields and show restore banner
+  document.getElementById('s-name').value = saved.candidate.name || '';
+  document.getElementById('s-roll').value = saved.candidate.roll || '';
+  document.getElementById('s-prog').value = saved.candidate.programme || '';
+  document.getElementById('restore-banner').classList.add('show');
+  window._savedAttempt = saved;
+}
+function restoreSession() {
+  state = window._savedAttempt;
+  startQuiz(true);
+  document.getElementById('restore-banner').classList.remove('show');
+}
+function discardSession() {
+  clearSaved();
+  document.getElementById('restore-banner').classList.remove('show');
+}
+
+// Enable start button when name has content
+document.addEventListener('DOMContentLoaded', () => {
+  checkRestore();
+});
+
+// Warn before unload during quiz
+window.addEventListener('beforeunload', (e) => {
+  if (state.started && !state.submitted) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+</script>
+</body>
+</html>
