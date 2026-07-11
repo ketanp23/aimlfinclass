@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervised Learning · Finance Playground</title>
+<style>
+  :root{
+    --bg:#0E1C2A; --panel:#16283A; --panel2:#1C3247; --card:#13273A;
+    --teal:#33C7B4; --teald:#1F8F80; --copper:#E0924E; --red:#E36464;
+    --gold:#E7C15A; --violet:#9A8CDB; --ink:#EAF1F6; --mute:#8DA2B5; --line:#27405F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Segoe UI',Calibri,system-ui,sans-serif;
+    line-height:1.45; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1320px; margin:0 auto; padding:22px 20px 60px;}
+  header.top{border-bottom:1px solid var(--line); padding-bottom:16px; margin-bottom:20px;}
+  .kicker{color:var(--teal); font-weight:700; letter-spacing:2px; font-size:12px;}
+  h1{font-family:Cambria,Georgia,serif; font-size:30px; font-weight:700; margin:4px 0 6px; letter-spacing:.3px;}
+  .sub{color:var(--mute); font-size:14px; max-width:820px;}
+  .layout{display:grid; grid-template-columns:280px 1fr 320px; gap:18px; align-items:start;}
+  @media(max-width:1100px){.layout{grid-template-columns:1fr;}}
+  .box{background:var(--panel); border:1px solid #223850; border-radius:12px; padding:16px;}
+  .box h2{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--mute);
+    margin-bottom:12px; font-weight:700;}
+  .seg{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;}
+  .chip{background:var(--card); border:1px solid #26405a; color:var(--mute); border-radius:8px;
+    padding:7px 10px; font-size:12.5px; cursor:pointer; transition:.15s; flex:1 1 auto; text-align:center;}
+  .chip:hover{border-color:var(--teal); color:var(--ink);}
+  .chip.on{background:var(--teald); border-color:var(--teal); color:#fff; font-weight:600;}
+  .algo .chip{flex:1 1 45%;}
+  .desc{font-size:12px; color:var(--mute); margin:8px 0 4px; min-height:34px;}
+  .ctrl{margin:14px 0 4px;}
+  .ctrl label{display:flex; justify-content:space-between; font-size:12.5px; color:var(--ink); margin-bottom:5px;}
+  .ctrl label b{color:var(--teal); font-variant-numeric:tabular-nums;}
+  input[type=range]{width:100%; height:4px; -webkit-appearance:none; border-radius:3px;
+    background:#2a445d; outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    background:var(--teal); cursor:pointer; border:2px solid var(--bg);}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--teal);cursor:pointer;border:2px solid var(--bg);}
+  .hint{font-size:11px; color:var(--mute); margin-top:3px;}
+  .btnrow{display:flex; gap:8px; margin-top:14px;}
+  .btn{flex:1; background:var(--card); border:1px solid #2a445d; color:var(--ink); border-radius:8px;
+    padding:9px; font-size:12.5px; cursor:pointer; transition:.15s;}
+  .btn:hover{border-color:var(--teal);}
+  .btn.pri{background:var(--teal); color:#08131d; border-color:var(--teal); font-weight:700;}
+  .btn.on{background:var(--copper); border-color:var(--copper); color:#1a1206; font-weight:700;}
+  /* canvas */
+  .stage{position:relative;}
+  canvas#plot{width:100%; aspect-ratio:1/1; background:var(--card); border:1px solid #223850;
+    border-radius:12px; display:block; cursor:crosshair;}
+  .axis{position:absolute; color:var(--mute); font-size:11.5px; pointer-events:none;}
+  .axis.x{bottom:8px; left:50%; transform:translateX(-50%);}
+  .axis.y{top:50%; left:8px; transform:translateY(-50%) rotate(-90deg); transform-origin:left;}
+  .legend{display:flex; gap:16px; margin-top:10px; font-size:12.5px; color:var(--mute); flex-wrap:wrap; align-items:center;}
+  .dot{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle;}
+  /* metrics */
+  .cm{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:6px 0 10px;}
+  .cm .cell{background:var(--card); border-radius:8px; padding:10px 8px; text-align:center;}
+  .cm .cell .n{font-size:22px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .cm .cell .t{font-size:10.5px; color:var(--mute); letter-spacing:.5px;}
+  .cell.tp{border:1px solid var(--teal);} .cell.tn{border:1px solid #2a445d;}
+  .cell.fp{border:1px solid var(--copper);} .cell.fn{border:1px solid var(--red);}
+  .stats{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;}
+  .stat{background:var(--card); border-radius:8px; padding:9px 10px;}
+  .stat .v{font-size:20px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .stat .l{font-size:10.5px; color:var(--mute); letter-spacing:.5px; text-transform:uppercase;}
+  .roc{margin-top:12px;}
+  canvas#roc{width:100%; aspect-ratio:1.15/1; background:var(--card); border-radius:8px; display:block;}
+  .explain{background:var(--panel2); border-radius:10px; padding:12px 13px; margin-top:14px; font-size:12.5px;
+    color:var(--ink); border-left:3px solid var(--teal);}
+  .explain b{color:var(--teal);}
+  .cmwrap{position:relative;}
+  .cmhdr{font-size:11px; color:var(--mute); margin-bottom:4px;}
+  footer{margin-top:26px; border-top:1px solid var(--line); padding-top:14px; color:var(--mute); font-size:11.5px; font-style:italic;}
+  .pill{display:inline-block; background:var(--card); border:1px solid #2a445d; border-radius:20px;
+    padding:3px 10px; font-size:11px; color:var(--mute); margin-right:6px;}
+  .tabnote{font-size:11px;color:var(--mute);margin-top:8px}
+  /* deep-detail band */
+  .deep{display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-top:22px;}
+  @media(max-width:1100px){.deep{grid-template-columns:1fr;}}
+  .dcard{background:var(--panel); border:1px solid #223850; border-radius:12px; padding:16px 17px;}
+  .dhdr{font-family:Cambria,Georgia,serif; font-size:16px; font-weight:700; margin-bottom:12px;
+    display:flex; align-items:center; gap:9px;}
+  .dnum{display:inline-flex; width:24px; height:24px; border-radius:6px; background:var(--teald); color:#fff;
+    font-size:12px; font-weight:700; align-items:center; justify-content:center; font-family:'Segoe UI',sans-serif;}
+  .dcard h4{font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--teal);
+    margin:14px 0 5px; font-weight:700;}
+  .dcard h4:first-child{margin-top:0;}
+  .dcard p{font-size:12.7px; color:#cdd9e3; margin-bottom:8px;}
+  .dcard b{color:var(--ink);} .dcard .em{color:var(--teal); font-weight:600;}
+  .frow{display:flex; gap:10px; margin:4px 0; font-size:12.2px; color:#cdd9e3;}
+  .frow .k{color:var(--teal); min-width:104px; font-weight:600;}
+  .badge{display:inline-block; padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:700;
+    letter-spacing:.4px; vertical-align:middle;}
+  .badge.good{background:rgba(51,199,180,.15); color:var(--teal); border:1px solid var(--teal);}
+  .badge.partial{background:rgba(231,193,90,.14); color:var(--gold); border:1px solid var(--gold);}
+  .badge.poor{background:rgba(227,100,100,.14); color:var(--red); border:1px solid var(--red);}
+  .costgrid{display:grid; grid-template-columns:1fr; gap:8px; margin:4px 0;}
+  .costbox{background:var(--card); border-radius:8px; padding:9px 11px; border-left:3px solid var(--line);}
+  .costbox.fn{border-left-color:var(--red);} .costbox.fp{border-left-color:var(--copper);}
+  .costbox .ct{font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:var(--mute); margin-bottom:3px;}
+  .costbox .cd{font-size:12px; color:#cdd9e3;}
+  .metricflag{background:var(--card); border-radius:8px; padding:10px 12px; border-left:3px solid var(--teal); margin:2px 0 6px;}
+  .metricflag .mt{font-size:12.5px; color:#e5edf3;} .metricflag .mt b{color:var(--teal);}
+  .stat.watch{outline:2px solid var(--teal); outline-offset:1px; position:relative;}
+  .stat.watch::after{content:'WATCH'; position:absolute; top:-8px; right:6px; background:var(--teal); color:#08131d;
+    font-size:8px; font-weight:800; letter-spacing:.5px; padding:1px 5px; border-radius:6px;}
+  .caveat{background:rgba(227,100,100,.09); border:1px solid rgba(227,100,100,.35); border-radius:8px;
+    padding:8px 10px; font-size:11.8px; color:#e9c3c3; margin-top:8px;}
+  /* tabs */
+  .tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin:2px 0 22px; flex-wrap:wrap;}
+  .tab{background:none; border:none; color:var(--mute); font:inherit; font-size:13.5px; font-weight:600;
+    letter-spacing:.3px; padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+    transition:.15s;}
+  .tab:hover{color:var(--ink);}
+  .tab.on{color:var(--teal); border-bottom-color:var(--teal);}
+  .pane{display:none;} .pane.on{display:block;}
+  /* finance domains */
+  .domintro{color:var(--mute); font-size:14px; max-width:860px; margin-bottom:22px;}
+  .domgroup{margin-bottom:26px;}
+  .domgroup > .gh{display:flex; align-items:baseline; gap:12px; margin-bottom:4px;}
+  .domgroup .gnum{color:var(--teal); font-weight:700; font-size:12px; letter-spacing:2px;}
+  .domgroup h3{font-family:Cambria,Georgia,serif; font-size:21px; font-weight:700;}
+  .domgroup .gsub{color:var(--mute); font-size:12.5px; margin:2px 0 14px;}
+  .domcards{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  @media(max-width:1000px){.domcards{grid-template-columns:1fr;}}
+  .domcard{background:var(--panel); border:1px solid #223850; border-radius:12px; padding:15px 16px;}
+  .domcard h4{font-size:14.5px; font-weight:700; color:var(--ink); margin-bottom:5px; text-transform:none; letter-spacing:0;}
+  .domcard p{font-size:12.5px; color:#cbd7e1; margin-bottom:11px;}
+  .jumps{display:flex; flex-wrap:wrap; gap:6px;}
+  .jump{background:var(--card); border:1px solid var(--teald); color:var(--teal); border-radius:20px;
+    padding:4px 11px; font-size:11.5px; font-weight:600; cursor:pointer; transition:.15s;}
+  .jump:hover{background:var(--teald); color:#fff;}
+  .jump.reg{border-color:#3a5570; color:var(--mute); cursor:default;}
+  .jump.reg:hover{background:var(--card); color:var(--mute);}
+  /* reading material */
+  .reading{max-width:900px;}
+  .reading .lead{color:var(--mute); font-size:14px; margin-bottom:20px;}
+  .reading h3{font-family:Cambria,Georgia,serif; font-size:22px; font-weight:700; margin:28px 0 4px;
+    padding-top:20px; border-top:1px solid var(--line);}
+  .reading h3:first-of-type{border-top:none; padding-top:0; margin-top:8px;}
+  .reading .tagline{color:var(--teal); font-size:12.5px; font-weight:600; margin-bottom:12px;}
+  .reading h5{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--mute);
+    margin:14px 0 5px; font-weight:700;}
+  .reading p{font-size:13.5px; color:#d3dee7; margin-bottom:10px; line-height:1.62;}
+  .reading b{color:var(--ink);} .reading .em{color:var(--teal); font-weight:600;}
+  .reading ul{margin:0 0 10px 2px; list-style:none;}
+  .reading li{font-size:13px; color:#cbd7e1; padding:3px 0 3px 16px; position:relative;}
+  .reading li::before{content:'\u2013'; position:absolute; left:0; color:var(--teal);}
+  .reading .fin{background:var(--panel2); border-left:3px solid var(--copper); border-radius:8px;
+    padding:10px 13px; font-size:12.8px; color:#e7dccb; margin:6px 0 12px;}
+  .reading .fin b{color:var(--gold);}
+  .kv{display:grid; grid-template-columns:130px 1fr; gap:2px 12px; margin:6px 0 12px; font-size:13px;}
+  .kv .kk{color:var(--teal); font-weight:600;} .kv .vv{color:#cbd7e1;}
+  .metrictbl{width:100%; border-collapse:collapse; margin:6px 0 14px; font-size:12.8px;}
+  .metrictbl th{text-align:left; color:var(--mute); font-weight:600; font-size:11px; letter-spacing:.5px;
+    text-transform:uppercase; padding:6px 10px; border-bottom:1px solid var(--line);}
+  .metrictbl td{padding:8px 10px; border-bottom:1px solid #1b3047; color:#d3dee7; vertical-align:top;}
+  .metrictbl td b{color:var(--teal);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="kicker">TM2065 · SUPERVISED LEARNING · INTERACTIVE PLAYGROUND</div>
+    <h1>Train a classifier on a finance problem — watch the metrics respond</h1>
+    <p class="sub">Pick a finance scenario and an algorithm, tune its hyper-parameters, and see the decision boundary and evaluation metrics update live. Click on the plot to add a new applicant or transaction and retrain instantly. Everything runs in your browser — no data leaves the page.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="domains">Finance Domains</button>
+    <button class="tab" data-tab="reading">Reading Material</button>
+    <button class="tab" data-tab="playground">Playground</button>
+  </nav>
+
+  <section class="pane" id="tab-playground">
+  <div class="layout">
+    <!-- LEFT: controls -->
+    <div class="box">
+      <h2>1 · Finance scenario</h2>
+      <div class="seg" id="scenarios"></div>
+      <div class="desc" id="scenDesc"></div>
+
+      <h2 style="margin-top:16px">2 · Algorithm</h2>
+      <div class="seg algo" id="algos"></div>
+      <div class="desc" id="algoDesc"></div>
+
+      <h2 style="margin-top:14px">3 · Hyper-parameters</h2>
+      <div id="params"></div>
+
+      <div class="ctrl" style="margin-top:16px">
+        <label>Decision threshold <b id="thVal">0.50</b></label>
+        <input type="range" id="th" min="0.05" max="0.95" step="0.01" value="0.5">
+        <div class="hint">Slide right to flag fewer positives (↑precision, ↓recall).</div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn" id="regen">↻ New data</button>
+        <button class="btn" id="addmode">+ Add points</button>
+      </div>
+      <div class="tabnote" id="addnote"></div>
+    </div>
+
+    <!-- CENTER: plot -->
+    <div>
+      <div class="stage">
+        <canvas id="plot" width="640" height="640"></canvas>
+        <div class="axis x" id="axx">Feature X</div>
+        <div class="axis y" id="axy">Feature Y</div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <!-- RIGHT: metrics -->
+    <div class="box">
+      <h2>Evaluation · test set</h2>
+      <div class="cmhdr">Confusion matrix &nbsp;·&nbsp; <span id="posName">positive</span> = the event we want to catch</div>
+      <div class="cm">
+        <div class="cell tn"><div class="n" id="cTN">0</div><div class="t">TRUE NEG</div></div>
+        <div class="cell fp"><div class="n" id="cFP">0</div><div class="t">FALSE ALARM</div></div>
+        <div class="cell fn"><div class="n" id="cFN">0</div><div class="t">MISS (FN)</div></div>
+        <div class="cell tp"><div class="n" id="cTP">0</div><div class="t">TRUE POS</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v" id="mAcc">–</div><div class="l">Accuracy</div></div>
+        <div class="stat"><div class="v" id="mPrec">–</div><div class="l">Precision</div></div>
+        <div class="stat"><div class="v" id="mRec">–</div><div class="l">Recall</div></div>
+        <div class="stat"><div class="v" id="mF1">–</div><div class="l">F1 score</div></div>
+      </div>
+      <div class="roc">
+        <div class="cmhdr">ROC curve &nbsp;·&nbsp; AUC = <b id="aucVal" style="color:var(--teal)">–</b></div>
+        <canvas id="roc" width="300" height="260"></canvas>
+      </div>
+      <div class="explain" id="explain"></div>
+    </div>
+  </div>
+
+  <!-- DEEP DETAIL BAND -->
+  <div class="deep">
+    <div class="dcard">
+      <div class="dhdr"><span class="dnum">A</span> The scenario in depth</div>
+      <div id="deepScen"></div>
+    </div>
+    <div class="dcard">
+      <div class="dhdr"><span class="dnum">B</span> How <span id="deepAlgoName">this model</span> works here</div>
+      <div id="deepAlgo"></div>
+    </div>
+    <div class="dcard">
+      <div class="dhdr"><span class="dnum">C</span> Reading the metrics for this decision</div>
+      <div id="deepMetric"></div>
+    </div>
+  </div>
+
+  </section>
+
+  <!-- ===================== FINANCE DOMAINS ===================== -->
+  <section class="pane on" id="tab-domains">
+    <p class="domintro">Finance is not one job — it is a dozen distinct disciplines, each with its own data, its own decision, and its own definition of a good model. Here is the map. Where a discipline poses a <b style="color:var(--ink)">classification</b> decision, a live playground scenario demonstrates it — follow the <span class="jump" style="cursor:default">▷ tags</span> to jump straight to it. Disciplines whose core task is predicting a <b style="color:var(--ink)">number</b> are regression problems, noted but not simulated in this classifier.</p>
+
+    <div class="domgroup">
+      <div class="gh"><span class="gnum">01</span><h3>Corporate Finance</h3></div>
+      <div class="gsub">Internal financial management, reporting, and process execution.</div>
+      <div class="domcards">
+        <div class="domcard"><h4>Financial Planning &amp; Analysis</h4><p>Budgets, forecasting, and MIS reporting — projecting next quarter's revenue for the board pack.</p><div class="jumps"><span class="jump reg">Regression · revenue</span></div></div>
+        <div class="domcard"><h4>Core Accounting &amp; Operations</h4><p>Transactional processes — Order-to-Cash and Procure-to-Pay — where invoices must be routed, matched, and paid correctly.</p><div class="jumps"><span class="jump" data-goto="p2p">▷ P2P invoice exception</span></div></div>
+        <div class="domcard"><h4>Treasury &amp; Cash Management</h4><p>Liquidity, cash-flow forecasting, and banking relationships — deciding whether to borrow overnight or sweep a surplus.</p><div class="jumps"><span class="jump reg">Regression · cash</span></div></div>
+      </div>
+    </div>
+
+    <div class="domgroup">
+      <div class="gh"><span class="gnum">02</span><h3>Investment &amp; Capital Markets</h3></div>
+      <div class="gsub">Wealth creation, asset valuation, and financial trading.</div>
+      <div class="domcards">
+        <div class="domcard"><h4>Asset Management</h4><p>Running investment portfolios for institutions and individuals — forecasting fund and stock returns.</p><div class="jumps"><span class="jump reg">Regression · returns</span></div></div>
+        <div class="domcard"><h4>Equity Research</h4><p>Valuing companies and issuing buy / sell / hold calls — estimating a justified P/E multiple.</p><div class="jumps"><span class="jump reg">Regression · fair P/E</span></div></div>
+        <div class="domcard"><h4>Investment Banking</h4><p>Advising on mergers, acquisitions, and capital raising — judging whether an announced deal will actually close.</p><div class="jumps"><span class="jump" data-goto="mna">▷ M&amp;A deal break</span></div></div>
+      </div>
+    </div>
+
+    <div class="domgroup">
+      <div class="gh"><span class="gnum">03</span><h3>Financial Services &amp; Banking</h3></div>
+      <div class="gsub">Institutions that intermediate financial flows and offer products to the public.</div>
+      <div class="domcards">
+        <div class="domcard"><h4>Retail &amp; Commercial Banking</h4><p>Loans, accounts, KYC, and AML — deciding who to lend to, on what terms, and which activity to report.</p><div class="jumps"><span class="jump" data-goto="credit">▷ Credit default</span><span class="jump" data-goto="rating">▷ Loan approval</span><span class="jump" data-goto="aml">▷ AML alert</span></div></div>
+        <div class="domcard"><h4>Insurance &amp; Wealth Management</h4><p>Protecting against financial risk and planning long-term wealth — spotting policyholders about to lapse.</p><div class="jumps"><span class="jump" data-goto="lapse">▷ Policy lapse</span><span class="jump reg">Regression · claim severity</span></div></div>
+        <div class="domcard"><h4>Fintech &amp; Blockchain</h4><p>The intersection of finance and technology — digital payments, on-chain screening, and algorithmic trading.</p><div class="jumps"><span class="jump" data-goto="fraud">▷ Transaction fraud</span><span class="jump" data-goto="anomaly">▷ Transaction anomaly</span></div></div>
+      </div>
+    </div>
+
+    <div class="domgroup">
+      <div class="gh"><span class="gnum">04</span><h3>Specialized Financial Domains</h3></div>
+      <div class="gsub">Cross-cutting, technical disciplines that every other domain relies on.</div>
+      <div class="domcards">
+        <div class="domcard"><h4>Taxation</h4><p>Direct and indirect taxes — triaging GST returns to choose which to audit under a capacity constraint.</p><div class="jumps"><span class="jump" data-goto="gst">▷ GST audit flag</span></div></div>
+        <div class="domcard"><h4>Risk Management</h4><p>Assessing and mitigating market, credit, and operational risk — flagging issuers likely to be downgraded.</p><div class="jumps"><span class="jump" data-goto="downgrade">▷ Credit downgrade</span></div></div>
+        <div class="domcard"><h4>Quantitative Finance</h4><p>Advanced mathematical models to price derivatives — fitting a fast surrogate to an option-price surface.</p><div class="jumps"><span class="jump reg">Regression · option price</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== READING MATERIAL ===================== -->
+  <section class="pane" id="tab-reading">
+    <div class="reading">
+      <p class="lead">Working notes on the seven algorithms in this playground — what each one does, the boundary it draws, the knob that controls it, where it earns its keep in finance, and how to read its evaluation. Every algorithm here is <b>supervised</b>: it learns from labelled examples (borrowers who did or didn't default, transactions that were or weren't fraud) to score new cases.</p>
+
+      <h5>The shared workflow</h5>
+      <p>Whatever the model, the pipeline is the same: <b>frame</b> the problem (is the answer a category or a number?), <b>gather and clean</b> point-in-time-correct data, <b>split</b> into train and test, <b>fit</b> on the training fold, <b>evaluate</b> on data the model has never seen, and <b>monitor</b> for drift once live. This playground fixes the first four steps and lets you play with the last two — every metric you see is computed on a held-out 30% test split, never the training data.</p>
+
+      <h3>Linear SVM</h3>
+      <div class="tagline">A straight decision boundary with the widest possible margin.</div>
+      <p>A Support Vector Machine looks for the boundary that separates the two classes with the largest <b>margin</b> — the widest empty corridor between them. In its linear form that boundary is a straight line (a hyperplane in higher dimensions). Only the points nearest the boundary, the <em>support vectors</em>, actually determine where it sits; the rest could move freely without changing the model.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">a single straight line / hyperplane</span><span class="kk">Key knob</span><span class="vv">C — tolerance for margin violations (low = wide & forgiving, high = fits every point)</span><span class="kk">Strengths</span><span class="vv">fast, stable, and each feature weight is a readable risk coefficient</span><span class="kk">Weakness</span><span class="vv">cannot represent a curved or corner boundary — underfits non-linear problems</span></div>
+      <div class="fin"><b>In finance:</b> credit scorecards and any decision a regulator must be able to read as "so much risk per unit of each feature." The first model to reach for, and the benchmark every fancier model must beat.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Watch it collapse on the Fraud ring and AML scenarios — a straight line can't enclose a ring, so recall falls off a cliff. When it does fit (credit, downgrade, M&amp;A) its AUC is competitive and its weights are the bonus.</p>
+
+      <h3>SVM with an RBF kernel</h3>
+      <div class="tagline">The same margin idea, bent into a curve by the kernel trick.</div>
+      <p>The <em>kernel trick</em> projects the data into a higher-dimensional space where a straight boundary becomes possible, then maps it back — the visible effect is a smooth, curved boundary. The Radial Basis Function (Gaussian) kernel measures similarity by distance, so the model can wrap closed curves around clusters that no line could separate.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">smooth curves, closed loops around clusters</span><span class="kk">Key knob</span><span class="vv">γ — how local the influence of each point is (high = tight, wiggly islands; low = broad, smooth)</span><span class="kk">Strengths</span><span class="vv">captures curved and ring-shaped patterns a line cannot</span><span class="kk">Weakness</span><span class="vv">no simple per-feature explanation; high γ overfits</span></div>
+      <div class="fin"><b>In finance:</b> fraud rings and AML scatter, curved approval frontiers, compound-risk corners — anywhere the true boundary bends. The price is interpretability.</div>
+      <h5>Reading its evaluation</h5>
+      <p>The star on Fraud, AML and Loan approval, where its AUC jumps well above the linear model. If γ is too high, training accuracy soars while test accuracy sags — the classic overfitting signature.</p>
+
+      <h3>Decision Tree</h3>
+      <div class="tagline">A flowchart of yes/no splits — every prediction is a readable rule.</div>
+      <p>A tree repeatedly splits the data on one feature at a time, each split chosen to make the resulting groups as pure (single-class) as possible — measured by <em>Gini impurity</em> or entropy. Following a path from root to leaf reads as a plain rule: "if match-variance &gt; t and price-variance &gt; s, route to review." The boundary it draws is always a set of axis-aligned rectangles.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">axis-aligned rectangles (a staircase)</span><span class="kk">Key knob</span><span class="vv">max depth — how many stacked questions (deeper = finer but overfits)</span><span class="kk">Strengths</span><span class="vv">the most interpretable model here; handles hinges and corners exactly</span><span class="kk">Weakness</span><span class="vv">a single tree is unstable — small data changes redraw it; deep trees overfit</span></div>
+      <div class="fin"><b>In finance:</b> the natural fit for policy-style rules — P2P invoice routing, GST audit hinges, transparent risk segmentation — where the decision must be documented and defended verbatim.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Best where the true boundary is axis-aligned (P2P, GST). Push max depth up and watch the boundary turn jagged and test metrics wobble — the definition of overfitting.</p>
+
+      <h3>Random Forest</h3>
+      <div class="tagline">Hundreds of decorrelated trees vote — accurate and stable.</div>
+      <p>A forest trains many trees, each on a random bootstrap sample of the rows and a random subset of features at each split, then averages their votes. Individual trees overfit in different directions, so averaging cancels their errors and produces a smooth, robust boundary — usually the strongest off-the-shelf model for tabular finance data.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">a smoothed average of many staircases</span><span class="kk">Key knob</span><span class="vv">number of trees (more = steadier) and per-tree depth</span><span class="kk">Strengths</span><span class="vv">high accuracy, resistant to overfitting, handles rare classes well</span><span class="kk">Weakness</span><span class="vv">no single readable rule — you recover drivers via feature-importance</span></div>
+      <div class="fin"><b>In finance:</b> the default workhorse for credit scoring, fraud, and churn — reached for whenever raw predictive accuracy on tabular data matters more than a one-line explanation.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Consistently strong AUC across almost every scenario. On imbalanced problems (downgrade, AML) it ranks well but still needs a lowered threshold — accuracy alone will still mislead.</p>
+
+      <h3>K-Nearest Neighbours (KNN)</h3>
+      <div class="tagline">Classify a new case by the majority vote of its closest past cases.</div>
+      <p>KNN does no training at all — the data <em>is</em> the model. To score a new point it finds the K most similar past cases by distance and takes their majority label (or average probability). Because "similar" means distance, features must be on comparable scales or the largest-magnitude one dominates.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">local and naturally curved, follows the data</span><span class="kk">Key knob</span><span class="vv">K — neighbours polled (small = jumpy/local, large = smooth/toward the base rate)</span><span class="kk">Strengths</span><span class="vv">simple, captures curves and corners, shows the actual comparable cases</span><span class="kk">Weakness</span><span class="vv">slow to predict at scale; struggles on rare classes and needs scaling</span></div>
+      <div class="fin"><b>In finance:</b> peer-comparable valuation ("find the five most similar deals; their average multiple is the fair value") and distance-based novelty flags in anomaly detection.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Good on curved and scattered problems (fraud, AML) because neighbours capture local shape; weaker on heavily imbalanced data, where a new case's neighbours are usually the majority class.</p>
+
+      <h3>Naïve Bayes</h3>
+      <div class="tagline">Probabilistic scoring that assumes features are independent.</div>
+      <p>Gaussian Naïve Bayes fits a simple bell curve to each feature within each class, then multiplies those per-feature probabilities together (with the class base rate) to get a score. The "naïve" assumption — that features are independent given the class — is rarely exactly true, yet the model is fast, needs little data, and is a surprisingly strong baseline.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">smooth, essentially elliptical / quadratic</span><span class="kk">Key knob</span><span class="vv">none — it fits directly from the data</span><span class="kk">Strengths</span><span class="vv">extremely fast, works with little data, a solid first baseline</span><span class="kk">Weakness</span><span class="vv">the independence assumption breaks on correlated features and interactions</span></div>
+      <div class="fin"><b>In finance:</b> first-pass fraud triage, document and email classification — anywhere a cheap, instant probability is more valuable than a perfectly calibrated one.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Strong where classes are roughly bell-shaped (credit, downgrade, AML's tight normal cloud); structurally weak on interactions (policy lapse) and "OR" rules (loan approval), where independence fails.</p>
+
+      <h3>One-Class SVM</h3>
+      <div class="tagline">Learns the shape of "normal" from normal data alone; flags the rest.</div>
+      <p>Unlike the others, this is trained on a <b>single class</b> — normal behaviour only — and draws a boundary around it. Anything falling outside is flagged as an anomaly, no anomaly labels required. That is exactly what you want when the "bad" cases are rare, diverse, and unlabelled, and when tomorrow's anomaly may look nothing like yesterday's.</p>
+      <div class="kv"><span class="kk">Boundary</span><span class="vv">a closed region around normal data</span><span class="kk">Key knob</span><span class="vv">γ (boundary tightness) and ν — the fraction of normal data you accept flagging (your alert budget)</span><span class="kk">Strengths</span><span class="vv">needs no anomaly labels; generalises to unseen anomaly types</span><span class="kk">Weakness</span><span class="vv">only as good as the definition of "normal"; ν must be tuned to review capacity</span></div>
+      <div class="fin"><b>In finance:</b> AML transaction monitoring and novelty / first-party-fraud detection — the natural tool whenever you can describe normal but not enumerate every abnormal.</div>
+      <h5>Reading its evaluation</h5>
+      <p>Judge it on recall against alert volume, not accuracy. ν is the direct lever: raise it to catch more and alert more, lower it to protect analyst time.</p>
+
+      <h3>Reading the metrics</h3>
+      <div class="tagline">Every classification metric is a ratio of four counts.</div>
+      <p>Once a threshold turns each probability into a yes/no call, every prediction on the test set falls into one of four boxes — the <b>confusion matrix</b>. True positives and true negatives are correct; false positives are false alarms; false negatives are misses. Which of the two error types hurts more is a <em>business</em> question, and it decides which metric you optimise.</p>
+      <table class="metrictbl">
+        <tr><th>Metric</th><th>What it answers</th><th>Lean on it when</th></tr>
+        <tr><td><b>Accuracy</b></td><td>What share of all calls were right?</td><td>the classes are roughly balanced — <em>misleading when they aren't</em></td></tr>
+        <tr><td><b>Precision</b></td><td>Of the cases I flagged, how many were real?</td><td>a false alarm is costly (blocking a good customer, wasting an auditor)</td></tr>
+        <tr><td><b>Recall</b></td><td>Of the real positives, how many did I catch?</td><td>a miss is costly (missed fraud, downgrade, or SAR filing)</td></tr>
+        <tr><td><b>F1</b></td><td>The harmonic mean of precision and recall.</td><td>you need one number and both errors matter</td></tr>
+        <tr><td><b>AUC-ROC</b></td><td>How well does the model rank positives above negatives?</td><td>no threshold is fixed yet, or it varies by policy — threshold-free ranking quality</td></tr>
+      </table>
+      <h5>The accuracy trap</h5>
+      <p>If only 5% of cases are positive, a model that predicts "negative" for everyone is 95% accurate and catches nothing. On every imbalanced scenario here (fraud, AML, downgrade, M&amp;A breaks) accuracy flatters a useless model — which is why the panel highlights recall, F1, or AUC instead, and marks the metric to watch.</p>
+      <h5>The threshold is a policy, not a model output</h5>
+      <p>A classifier outputs a probability; <em>you</em> choose the cut-off that turns it into an action. Slide it down to catch more positives (higher recall, more false alarms); slide it up to act only on the surest cases (higher precision, more misses). The model doesn't change — the business's appetite for each error does. That is the slider you're moving in the playground.</p>
+    </div>
+  </section>
+
+  <footer>
+    Educational playground for TM2065 · Application of Machine Learning and Artificial Intelligence in Finance. Algorithms are lightweight in-browser implementations for intuition, not production libraries. Metrics are computed on a held-out 30% test split.
+  </footer>
+</div>
+<script>
+/* ===== Supervised Learning · Finance Playground engine ===== */
+const C = {bg:'#0E1C2A',card:'#13273A',teal:'#33C7B4',teald:'#1F8F80',copper:'#E0924E',
+  red:'#E36464',gold:'#E7C15A',violet:'#9A8CDB',ink:'#EAF1F6',mute:'#8DA2B5',line:'#27405F'};
+const R = () => Math.random();
+function randn(){let u=0,v=0;while(!u)u=R();while(!v)v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* ---------- scenarios (feature space in [-3,3]) ---------- */
+const SCEN = {
+  credit:{
+    name:'Credit default', axx:'Debt-to-income →', axy:'Credit utilisation →',
+    pos:'default', neg:'repaid', posName:'default',
+    desc:'Two overlapping groups of borrowers. Mostly linearly separable — a good first test for any classifier.',
+    gen(n=220){const P=[];for(let i=0;i<n;i++){const d=R()<0.5;
+      const x=(d? 0.9:-0.9)+randn()*0.95, y=(d?0.8:-0.7)+randn()*0.95;
+      P.push({x:clamp(x),y:clamp(y),label:d?1:0});}return P;}
+  },
+  fraud:{
+    name:'Fraud ring', axx:'Transaction feature 1 →', axy:'Transaction feature 2 →',
+    pos:'fraud', neg:'legit', posName:'fraud',
+    desc:'Legitimate behaviour forms a central cloud; fraud sits in a ring around it. A straight line cannot separate them — kernels and trees can.',
+    gen(n=240){const P=[];for(let i=0;i<n;i++){if(R()<0.62){const r=R()*0.9,a=R()*6.28;
+      P.push({x:clamp(r*Math.cos(a)),y:clamp(r*Math.sin(a)),label:0});}
+      else{const r=1.7+R()*0.7,a=R()*6.28;P.push({x:clamp(r*Math.cos(a)+randn()*0.12),y:clamp(r*Math.sin(a)+randn()*0.12),label:1});}}
+      return P;}
+  },
+  rating:{
+    name:'Loan approval', axx:'Income →', axy:'Collateral →',
+    pos:'approve', neg:'decline', posName:'approval',
+    desc:'A curved approval frontier — high income OR high collateral gets you approved. Tests how well a model captures a non-linear "OR".',
+    gen(n=230){const P=[];for(let i=0;i<n;i++){const x=(R()*6-3),y=(R()*6-3);
+      const ap=(x+y> -0.4) && (x*0.6+y*0.6+Math.sin(x*1.1)*0.8 > -0.6);
+      const flip=R()<0.07;P.push({x:clamp(x),y:clamp(y),label:(ap!==flip)?1:0});}return P;}
+  },
+  anomaly:{
+    name:'Transaction anomaly', axx:'Amount (scaled) →', axy:'Time-of-day (scaled) →',
+    pos:'anomaly', neg:'normal', posName:'anomaly', oneClass:true,
+    desc:'Almost all transactions are normal; a handful are anomalies. Trains a One-Class model on normal behaviour only — anything unusual is flagged.',
+    gen(n=230){const P=[];for(let i=0;i<n*0.9;i++){P.push({x:clamp(randn()*0.7),y:clamp(randn()*0.7),label:0});}
+      for(let i=0;i<n*0.1;i++){P.push({x:clamp(R()*5-2.5),y:clamp(R()*5-2.5),label:1});}return P;}
+  },
+  downgrade:{
+    name:'Credit downgrade', axx:'Leverage →', axy:'Coverage weakness →',
+    pos:'downgrade', neg:'stable', posName:'downgrade',
+    desc:'Most issuers stay stable; a small minority are downgraded. A rare-positive problem where accuracy flatters a do-nothing model.',
+    gen(n=260){const P=[];for(let i=0;i<n;i++){const bad=R()<0.14;
+      const x=(bad?1.2:-0.4)+randn()*(bad?0.7:0.95), y=(bad?1.3:-0.3)+randn()*(bad?0.7:0.95);
+      P.push({x:clamp(x),y:clamp(y),label:bad?1:0});}return P;}
+  },
+  aml:{
+    name:'AML alert', axx:'Structuring score →', axy:'Cross-border share →',
+    pos:'suspicious', neg:'normal', posName:'suspicious',
+    desc:'Almost all account-months are normal and cluster centrally; a rare few are suspicious and scatter to the edges. Extreme imbalance — recall is the whole job.',
+    gen(n=280){const P=[];for(let i=0;i<n;i++){if(R()<0.90){P.push({x:clamp(randn()*0.7),y:clamp(randn()*0.7),label:0});}
+      else{const a=R()*6.28,r=1.7+R()*1.1;P.push({x:clamp(r*Math.cos(a)),y:clamp(r*Math.sin(a)),label:1});}}return P;}
+  },
+  p2p:{
+    name:'P2P invoice exception', axx:'PO / match variance →', axy:'Price-quantity variance →',
+    pos:'exception', neg:'clean', posName:'exception',
+    desc:'Invoices with a missing or mismatched PO almost always need manual review. A dominant single-feature rule — the boundary is essentially one vertical split.',
+    gen(n=260){const P=[];for(let i=0;i<n;i++){const x=randn()*1.25-0.3,y=randn()*1.1;
+      let lab=(x>1.0)?1:0; if(y>1.7)lab=1; if(R()<0.06)lab=1-lab;
+      P.push({x:clamp(x),y:clamp(y),label:lab});}return P;}
+  },
+  mna:{
+    name:'M&A deal break', axx:'Regulatory overlap →', axy:'Hostile / low-cash →',
+    pos:'break', neg:'completes', posName:'break',
+    desc:'Most announced deals complete; a minority break. The majority is the easy class — the model exists to catch the rare break, so accuracy misleads.',
+    gen(n=260){const P=[];for(let i=0;i<n;i++){const x=R()*6-3,y=R()*6-3;
+      const risk=0.7*x+0.6*y; let lab=(risk>1.3)?1:0; if(R()<0.06)lab=1-lab;
+      P.push({x:clamp(x),y:clamp(y),label:lab});}return P;}
+  },
+  lapse:{
+    name:'Policy lapse', axx:'Premium-to-income →', axy:'Missed payments →',
+    pos:'lapse', neg:'retained', posName:'lapse',
+    desc:'Lapse risk is compound: a heavy premium burden bites mainly when missed payments are also high. The risky region is a corner — an interaction a straight line can\u2019t draw.',
+    gen(n=260){const P=[];for(let i=0;i<n;i++){const x=R()*6-3,y=R()*6-3;
+      const comp=(x+2.2)*(y+2.2)/12; let lab=(comp>1.25)?1:0; if(R()<0.06)lab=1-lab;
+      P.push({x:clamp(x),y:clamp(y),label:lab});}return P;}
+  },
+  gst:{
+    name:'GST audit flag', axx:'Input-tax-credit ratio →', axy:'Vendor mismatch →',
+    pos:'audit', neg:'clean', posName:'audit',
+    desc:'Audit-worthy returns sit in a right-angled corner — high ITC ratio AND high vendor mismatch. A crisp hinge two tree splits capture exactly, but a single straight line cannot.',
+    gen(n=260){const P=[];for(let i=0;i<n;i++){const x=R()*6-3,y=R()*6-3;
+      let lab=(x>0.6&&y>-0.2)?1:0; if(R()<0.06)lab=1-lab;
+      P.push({x:clamp(x),y:clamp(y),label:lab});}return P;}
+  }
+};
+function clamp(v){return Math.max(-3,Math.min(3,v));}
+
+/* ---------- algorithms ---------- */
+// each returns a model with score(pt) in [0,1] (prob of positive)
+function logistic(z){return 1/(1+Math.exp(-z));}
+function dist2(a,b){const dx=a.x-b.x,dy=a.y-b.y;return dx*dx+dy*dy;}
+
+function trainLinearSVM(D,{C:Cp=1}){
+  // hinge-loss subgradient descent, labels in {-1,+1}
+  let w1=0,w2=0,b=0; const lr=0.02, n=D.length;
+  for(let ep=0;ep<400;ep++){for(const p of D){const y=p.label?1:-1;
+    const m=y*(w1*p.x+w2*p.y+b);
+    if(m<1){w1+=lr*(Cp*y*p.x-w1/n);w2+=lr*(Cp*y*p.y-w2/n);b+=lr*Cp*y;}
+    else{w1-=lr*w1/n;w2-=lr*w2/n;}}}
+  const k=1.4;
+  return {score:p=>logistic(k*(w1*p.x+w2*p.y+b)),lin:{w1,w2,b}};
+}
+function trainKernel(D,{gamma=1}){
+  // Gaussian-kernel density-difference classifier (RBF)
+  const pos=D.filter(p=>p.label),neg=D.filter(p=>!p.label);
+  const kern=(a,b)=>Math.exp(-gamma*dist2(a,b));
+  return {score:p=>{let sp=0,sn=0;for(const q of pos)sp+=kern(p,q);for(const q of neg)sn+=kern(p,q);
+    sp/=Math.max(1,pos.length);sn/=Math.max(1,neg.length);
+    return logistic(6*(sp-sn)/(sp+sn+1e-9));}};
+}
+function trainKNN(D,{k=7}){
+  return {score:p=>{const ds=D.map(q=>({d:dist2(p,q),l:q.label})).sort((a,b)=>a.d-b.d);
+    let s=0;for(let i=0;i<k&&i<ds.length;i++)s+=ds[i].l;return s/Math.min(k,ds.length);}};
+}
+function trainNB(D){
+  const cls=[0,1].map(c=>{const g=D.filter(p=>p.label===c);const n=g.length||1;
+    const mx=g.reduce((s,p)=>s+p.x,0)/n, my=g.reduce((s,p)=>s+p.y,0)/n;
+    const vx=g.reduce((s,p)=>s+(p.x-mx)**2,0)/n+.15, vy=g.reduce((s,p)=>s+(p.y-my)**2,0)/n+.15;
+    return {mx,my,vx,vy,prior:n/D.length};});
+  const g=(x,m,v)=>Math.exp(-((x-m)**2)/(2*v))/Math.sqrt(2*Math.PI*v);
+  return {score:p=>{const l1=cls[1].prior*g(p.x,cls[1].mx,cls[1].vx)*g(p.y,cls[1].my,cls[1].vy);
+    const l0=cls[0].prior*g(p.x,cls[0].mx,cls[0].vx)*g(p.y,cls[0].my,cls[0].vy);
+    return l1/(l1+l0+1e-12);}};
+}
+// CART tree
+function gini(D){if(!D.length)return 0;const p=D.filter(d=>d.label).length/D.length;return 1-p*p-(1-p)*(1-p);}
+function buildTree(D,depth,maxDepth,minLeaf,randFeat){
+  const p1=D.length?D.filter(d=>d.label).length/D.length:0.5;
+  if(depth>=maxDepth||D.length<minLeaf*2||p1===0||p1===1)return {leaf:true,p:p1};
+  let best=null,bestG=gini(D);
+  const feats=randFeat?(R()<0.5?['x']:['y']):['x','y'];
+  for(const f of feats){const vals=[...new Set(D.map(d=>d[f]))].sort((a,b)=>a-b);
+    for(let i=0;i<vals.length-1;i++){const t=(vals[i]+vals[i+1])/2;
+      const L=D.filter(d=>d[f]<=t),Rr=D.filter(d=>d[f]>t);
+      if(L.length<minLeaf||Rr.length<minLeaf)continue;
+      const g=(L.length*gini(L)+Rr.length*gini(Rr))/D.length;
+      if(g<bestG-1e-6){bestG=g;best={f,t,L,Rr};}}}
+  if(!best)return {leaf:true,p:p1};
+  return {leaf:false,f:best.f,t:best.t,
+    L:buildTree(best.L,depth+1,maxDepth,minLeaf,randFeat),
+    R:buildTree(best.Rr,depth+1,maxDepth,minLeaf,randFeat)};
+}
+function treePred(node,p){while(!node.leaf)node=(p[node.f]<=node.t)?node.L:node.R;return node.p;}
+function trainTree(D,{depth=4}){const t=buildTree(D,0,depth,4,false);return {score:p=>treePred(t,p),tree:t};}
+function trainForest(D,{trees=25,depth=6}){
+  const T=[];for(let i=0;i<trees;i++){const bs=[];for(let j=0;j<D.length;j++)bs.push(D[(R()*D.length)|0]);
+    T.push(buildTree(bs,0,depth,3,true));}
+  return {score:p=>{let s=0;for(const t of T)s+=treePred(t,p);return s/T.length;}};
+}
+function trainOneClass(D,{gamma=1.2,nu=0.1}){
+  const normal=D.filter(p=>!p.label);
+  const kern=(a,b)=>Math.exp(-gamma*dist2(a,b));
+  const dens=p=>{let s=0;for(const q of normal)s+=kern(p,q);return s/Math.max(1,normal.length);};
+  const scores=normal.map(dens).sort((a,b)=>a-b);
+  const thr=scores[Math.floor(nu*scores.length)]||0;
+  // score = prob of ANOMALY (positive). lower density -> higher anomaly
+  return {score:p=>{const d=dens(p);return logistic(9*(thr-d)/(thr+1e-9));},oneClass:true};
+}
+
+/* ---------- registry ---------- */
+const ALGO = {
+  linsvm:{name:'Linear SVM',train:trainLinearSVM,
+    desc:'Finds the widest straight margin between the two classes.',
+    params:[{k:'C',label:'C (regularisation)',min:0.1,max:10,step:0.1,val:1,fmt:v=>v.toFixed(1),
+      hint:'Low C = wider, forgiving margin. High C = fits outliers.'}],
+    explain:'<b>Linear SVM</b> separates borrowers with a straight decision boundary and maximises the margin around it. It is fast and interpretable but fails when the true boundary is curved — try it on the Fraud ring to see it break.'},
+  rbfsvm:{name:'SVM (RBF kernel)',train:trainKernel,
+    desc:'Bends the boundary using a Gaussian kernel — captures curved patterns.',
+    params:[{k:'gamma',label:'γ (kernel reach)',min:0.2,max:6,step:0.1,val:1.4,fmt:v=>v.toFixed(1),
+      hint:'High γ = tight, wiggly islands (overfit). Low γ = smooth.'}],
+    explain:'<b>Kernel SVM</b> projects the data into a higher dimension where a curved boundary becomes possible. It excels on the Fraud ring, but you trade away the simple per-feature interpretation a linear model gives you.'},
+  tree:{name:'Decision Tree',train:trainTree,
+    desc:'Recursive yes/no splits — every prediction is a readable rule.',
+    params:[{k:'depth',label:'Max depth',min:1,max:10,step:1,val:4,fmt:v=>v.toFixed(0),
+      hint:'Deeper = fits training data harder, risks overfitting.'}],
+    explain:'<b>Decision trees</b> carve the feature space into axis-aligned boxes. Every path is a plain rule an auditor can read ("income>X and utilisation<Y → approve"). Increase depth and watch the boundary get jagged — that is overfitting.'},
+  forest:{name:'Random Forest',train:trainForest,
+    desc:'Hundreds of trees vote — accurate and stable.',
+    params:[{k:'trees',label:'Number of trees',min:5,max:60,step:5,val:25,fmt:v=>v.toFixed(0),
+      hint:'More trees = smoother, more stable boundary.'},
+      {k:'depth',label:'Max depth',min:2,max:12,step:1,val:6,fmt:v=>v.toFixed(0),hint:''}],
+    explain:'<b>Random forest</b> averages many decorrelated trees, each trained on a bootstrap sample. The averaging cancels individual errors, giving a smooth, accurate boundary — the default workhorse for tabular credit scoring.'},
+  knn:{name:'K-Nearest',train:trainKNN,
+    desc:'Vote of the K most similar past cases.',
+    params:[{k:'k',label:'K (neighbours)',min:1,max:35,step:2,val:7,fmt:v=>v.toFixed(0),
+      hint:'Small K = jumpy/overfit. Large K = over-smooth.'}],
+    explain:'<b>KNN</b> classifies a new applicant by the majority label of its K nearest neighbours. No training — the data is the model. Simple and effective, but slow to predict on millions of rows.'},
+  nb:{name:'Naïve Bayes',train:trainNB,
+    desc:'Probabilistic scoring assuming features are independent.',
+    params:[],
+    explain:'<b>Gaussian Naïve Bayes</b> models each class as a bell curve and multiplies feature probabilities together. Blazingly fast and a strong baseline for fraud triage and document classification, even though its independence assumption rarely holds.'},
+  oneclass:{name:'One-Class SVM',train:trainOneClass,forceScen:'anomaly',
+    desc:'Learns "normal" from normal data only; flags the rest.',
+    params:[{k:'gamma',label:'γ (boundary tightness)',min:0.4,max:4,step:0.1,val:1.4,fmt:v=>v.toFixed(1),hint:''},
+      {k:'nu',label:'ν (expected anomaly rate)',min:0.02,max:0.4,step:0.01,val:0.12,fmt:v=>(v*100).toFixed(0)+'%',
+      hint:'How much of normal data to leave outside the boundary.'}],
+    explain:'<b>One-Class SVM</b> is trained only on normal transactions and draws a boundary around them. Anything outside is flagged as an anomaly — no fraud labels required. Switch to the Transaction-anomaly scenario to use it.'}
+};
+
+/* ---------- state ---------- */
+let state={scen:'credit',algo:'linsvm',data:[],train:[],test:[],model:null,
+  params:{},threshold:0.5,addMode:false,addLabel:1};
+
+/* ---------- data + split ---------- */
+function regen(){const s=SCEN[state.scen];state.data=s.gen();split();retrain();}
+function split(){const d=[...state.data].sort(()=>R()-0.5);const cut=Math.floor(d.length*0.7);
+  state.train=d.slice(0,cut);state.test=d.slice(cut);}
+function retrain(){const a=ALGO[state.algo];state.model=a.train(state.train,state.params);draw();metrics();}
+
+/* ---------- rendering ---------- */
+const plot=document.getElementById('plot'),px=plot.getContext('2d');
+const W=plot.width,H=plot.height;
+const toPx=p=>({X:(p.x+3)/6*W,Y:(3-p.y)/6*H});
+const toData=(X,Y)=>({x:X/W*6-3,y:3-Y/H*6});
+function draw(){
+  px.clearRect(0,0,W,H);
+  // decision field
+  const step=8,th=state.threshold;
+  for(let X=0;X<W;X+=step)for(let Y=0;Y<H;Y+=step){
+    const s=state.model.score(toData(X+step/2,Y+step/2));
+    const pos=s>=th;
+    px.fillStyle=pos?'rgba(51,199,180,0.16)':'rgba(227,100,100,0.13)';
+    px.fillRect(X,Y,step,step);
+  }
+  // boundary line (contour at threshold): draw contour by marching cells
+  px.strokeStyle='rgba(234,241,246,0.55)';px.lineWidth=1.4;
+  const g=90;
+  for(let i=0;i<g;i++)for(let j=0;j<g;j++){
+    const x0=i/g*W,y0=j/g*H,x1=(i+1)/g*W,y1=(j+1)/g*H;
+    const a=state.model.score(toData(x0,y0))-th, b=state.model.score(toData(x1,y0))-th,
+          c=state.model.score(toData(x0,y1))-th;
+    if(a*b<0){px.beginPath();px.moveTo(x1-(x1-x0)*Math.abs(b)/(Math.abs(a)+Math.abs(b)),y0);
+      px.lineTo(x1-(x1-x0)*Math.abs(b)/(Math.abs(a)+Math.abs(b)),y0+(H/g));px.stroke();}
+    if(a*c<0){const yy=y1-(y1-y0)*Math.abs(c)/(Math.abs(a)+Math.abs(c));
+      px.beginPath();px.moveTo(x0,yy);px.lineTo(x0+(W/g),yy);px.stroke();}
+  }
+  // grid
+  px.strokeStyle='rgba(39,64,95,0.4)';px.lineWidth=1;
+  for(let k=1;k<6;k++){const q=k/6;px.beginPath();px.moveTo(q*W,0);px.lineTo(q*W,H);px.stroke();
+    px.beginPath();px.moveTo(0,q*H);px.lineTo(W,q*H);px.stroke();}
+  // points (test = ring, train = solid)
+  const drawPts=(arr,ring)=>{for(const p of arr){const {X,Y}=toPx(p);
+    px.beginPath();px.arc(X,Y,ring?6:5,0,7);
+    px.fillStyle=p.label?C.teal:C.red;
+    if(ring){px.fillStyle='rgba(0,0,0,0)';px.strokeStyle=p.label?C.teal:C.red;px.lineWidth=2.2;
+      px.arc(X,Y,6,0,7);px.stroke();}else{px.fill();
+      px.strokeStyle=C.bg;px.lineWidth=1;px.stroke();}}};
+  drawPts(state.train,false);drawPts(state.test,true);
+}
+
+/* ---------- metrics ---------- */
+function metrics(){
+  const th=state.threshold;let TP=0,TN=0,FP=0,FN=0;
+  const scored=state.test.map(p=>({y:p.label,s:state.model.score(p)}));
+  for(const {y,s} of scored){const pred=s>=th?1:0;
+    if(pred&&y)TP++;else if(pred&&!y)FP++;else if(!pred&&y)FN++;else TN++;}
+  set('cTP',TP);set('cTN',TN);set('cFP',FP);set('cFN',FN);
+  const acc=(TP+TN)/Math.max(1,scored.length);
+  const prec=TP/Math.max(1,TP+FP), rec=TP/Math.max(1,TP+FN);
+  const f1=2*prec*rec/Math.max(1e-9,prec+rec);
+  setv('mAcc',pct(acc));setv('mPrec',(TP+FP)?pct(prec):'–');
+  setv('mRec',(TP+FN)?pct(rec):'–');setv('mF1',(TP+FP&&TP+FN)?f1.toFixed(2):'–');
+  drawROC(scored);
+}
+function drawROC(scored){
+  const rc=document.getElementById('roc'),ctx=rc.getContext('2d'),w=rc.width,h=rc.height,pad=28;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='rgba(39,64,95,0.6)';ctx.lineWidth=1;
+  ctx.strokeRect(pad,6,w-pad-6,h-pad-6);
+  ctx.setLineDash([4,4]);ctx.strokeStyle=C.mute;ctx.beginPath();
+  ctx.moveTo(pad,h-pad);ctx.lineTo(w-6,6);ctx.stroke();ctx.setLineDash([]);
+  const P=scored.filter(s=>s.y).length,Nn=scored.length-P;
+  if(!P||!Nn){document.getElementById('aucVal').textContent='–';return;}
+  const sorted=[...scored].sort((a,b)=>b.s-a.s);
+  let tp=0,fp=0;const pts=[[0,0]];let auc=0,prevF=0;
+  for(const s of sorted){if(s.y)tp++;else fp++;
+    const tpr=tp/P,fpr=fp/Nn;pts.push([fpr,tpr]);}
+  // AUC via trapezoid
+  for(let i=1;i<pts.length;i++){const [f0,t0]=pts[i-1],[f1,t1]=pts[i];auc+=(f1-f0)*(t0+t1)/2;}
+  const MX=X=>pad+X*(w-pad-6),MY=Y=>(h-pad)-Y*(h-pad-6);
+  ctx.strokeStyle=C.teal;ctx.lineWidth=2.2;ctx.beginPath();
+  pts.forEach(([f,t],i)=>{i?ctx.lineTo(MX(f),MY(t)):ctx.moveTo(MX(f),MY(t));});ctx.stroke();
+  // fill
+  ctx.lineTo(MX(1),MY(0));ctx.closePath();ctx.fillStyle='rgba(51,199,180,0.12)';ctx.fill();
+  ctx.fillStyle=C.mute;ctx.font='10px Segoe UI';
+  ctx.fillText('FPR',w/2-8,h-8);ctx.save();ctx.translate(10,h/2+10);ctx.rotate(-Math.PI/2);ctx.fillText('TPR',0,0);ctx.restore();
+  document.getElementById('aucVal').textContent=auc.toFixed(3);
+}
+const set=(id,v)=>document.getElementById(id).textContent=v;
+const setv=(id,v)=>document.getElementById(id).textContent=v;
+const pct=v=>(v*100).toFixed(1)+'%';
+
+/* ---------- UI build ---------- */
+function buildUI(){
+  const sc=document.getElementById('scenarios');
+  Object.entries(SCEN).forEach(([k,v])=>{const b=document.createElement('div');
+    b.className='chip'+(k===state.scen?' on':'');b.textContent=v.name;b.onclick=()=>{setScen(k);};sc.appendChild(b);});
+  const ac=document.getElementById('algos');
+  Object.entries(ALGO).forEach(([k,v])=>{const b=document.createElement('div');
+    b.className='chip'+(k===state.algo?' on':'');b.textContent=v.name;b.dataset.k=k;b.onclick=()=>setAlgo(k);ac.appendChild(b);});
+  document.getElementById('regen').onclick=regen;
+  const am=document.getElementById('addmode');
+  am.onclick=()=>{state.addMode=!state.addMode;am.classList.toggle('on',state.addMode);
+    document.getElementById('addnote').textContent=state.addMode?
+      'Click plot to add a '+(state.addLabel?SCEN[state.scen].pos:SCEN[state.scen].neg)+' point. Press to toggle class ↓':'';
+    renderAddToggle();};
+  document.getElementById('th').oninput=e=>{state.threshold=+e.target.value;
+    document.getElementById('thVal').textContent=state.threshold.toFixed(2);draw();metrics();};
+  plot.addEventListener('click',e=>{if(!state.addMode)return;const r=plot.getBoundingClientRect();
+    const X=(e.clientX-r.left)/r.width*W,Y=(e.clientY-r.top)/r.height*H;const d=toData(X,Y);
+    state.data.push({x:clamp(d.x),y:clamp(d.y),label:state.addLabel});split();retrain();});
+  refreshScenUI();refreshAlgoUI();buildParams();
+}
+function renderAddToggle(){const note=document.getElementById('addnote');
+  if(!state.addMode)return;note.innerHTML='';
+  const s=SCEN[state.scen];const span=document.createElement('span');
+  span.style.cursor='pointer';span.className='pill';
+  span.textContent='adding: '+(state.addLabel?s.pos:s.neg)+'  (tap to switch)';
+  span.onclick=()=>{state.addLabel=state.addLabel?0:1;renderAddToggle();};
+  note.appendChild(span);}
+function setScen(k){state.scen=k;
+  document.querySelectorAll('#scenarios .chip').forEach((c,i)=>c.classList.toggle('on',Object.keys(SCEN)[i]===k));
+  refreshScenUI();regen();}
+function refreshScenUI(){const s=SCEN[state.scen];
+  document.getElementById('scenDesc').textContent=s.desc;
+  document.getElementById('axx').textContent=s.axx;document.getElementById('axy').textContent=s.axy;
+  document.getElementById('posName').textContent=s.pos;
+  const lg=document.getElementById('legend');
+  lg.innerHTML=`<span><span class="dot" style="background:${C.teal}"></span>${cap(s.pos)}</span>
+    <span><span class="dot" style="background:${C.red}"></span>${cap(s.neg)}</span>
+    <span style="color:${C.mute}">● solid = train · ○ ring = test</span>`;
+}
+function setAlgo(k){const a=ALGO[k];
+  if(a.forceScen&&state.scen!==a.forceScen){setScen(a.forceScen);}
+  state.algo=k;document.querySelectorAll('#algos .chip').forEach(c=>c.classList.toggle('on',c.dataset.k===k));
+  refreshAlgoUI();buildParams();retrain();}
+function refreshAlgoUI(){const a=ALGO[state.algo];
+  document.getElementById('algoDesc').textContent=a.desc;
+  document.getElementById('explain').innerHTML=a.explain;}
+function buildParams(){const a=ALGO[state.algo],box=document.getElementById('params');box.innerHTML='';
+  state.params={};a.params.forEach(pm=>{state.params[pm.k]=pm.val;
+    const d=document.createElement('div');d.className='ctrl';
+    d.innerHTML=`<label>${pm.label} <b id="v_${pm.k}">${pm.fmt(pm.val)}</b></label>
+      <input type="range" min="${pm.min}" max="${pm.max}" step="${pm.step}" value="${pm.val}">
+      ${pm.hint?`<div class="hint">${pm.hint}</div>`:''}`;
+    const inp=d.querySelector('input');
+    inp.oninput=e=>{state.params[pm.k]=+e.target.value;
+      document.getElementById('v_'+pm.k).textContent=pm.fmt(+e.target.value);retrain();};
+    box.appendChild(d);});
+  if(!a.params.length)box.innerHTML='<div class="hint">This algorithm has no tunable parameter here — it fits directly from the data.</div>';
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+buildUI();regen();
+
+</script>
+<script>
+/* ===== Deep-detail layer: scenario briefs, algorithm-fit analysis, metric guidance ===== */
+
+const SCEN_DEEP = {
+  credit:{
+    story:'A retail bank scoring loan applicants at the moment of origination. Every dot is a past borrower whose outcome is now settled — <span class="em">teal = defaulted</span>, <span style="color:var(--red)">red = repaid</span>. The model learns that historical pattern so it can score the <b>next</b> applicant before any money goes out the door.',
+    feats:[['Debt-to-income','monthly debt payments \u00f7 income \u2014 how stretched the borrower already is'],
+           ['Credit utilisation','balance \u00f7 available limit \u2014 how close they run to their limit']],
+    whyHard:'The two clouds <b>overlap heavily</b>: plenty of high-DTI borrowers still repay, and some cautious low-DTI ones default. No boundary separates them cleanly, so every model must accept some errors \u2014 the real question is <span class="em">which</span> errors it makes.',
+    fn:['Miss a default \u2192 approve a bad loan','You lose most of the principal \u2014 often 40\u201360% even after recovery. The single most expensive mistake here.'],
+    fp:['Flag a good borrower \u2192 decline them','Lost interest margin plus a rejected customer who walks to a competitor. Real, but far cheaper than a charge-off.'],
+    real:'Real analogue: FICO-style scorecards and IFRS-9 / CECL loss provisioning.'
+  },
+  fraud:{
+    story:'A card issuer\u2019s real-time transaction monitor. Legitimate spending forms a dense central cloud of <span style="color:var(--red)">normal</span> behaviour; an organised <span class="em">fraud ring</span> operates in a band of unusual feature combinations <b>around</b> it \u2014 teal = fraud.',
+    feats:[['Transaction feature 1','an engineered signal \u2014 e.g. amount-vs-history or velocity'],
+           ['Transaction feature 2','a second signal \u2014 e.g. geo-distance from home location']],
+    whyHard:'Fraud is not \u201cbig on one axis\u201d \u2014 it is a specific <b>combination</b> that forms a hollow ring, a shape <span class="em">no straight line can enclose</span>. On top of that, fraud is a minority of traffic, so the classes are imbalanced.',
+    fn:['Miss fraud \u2192 let it through','Direct chargeback loss, investigation cost and customer harm. Adds up fast across a ring.'],
+    fp:['Block a legit purchase','A card declined at checkout: friction, an angry customer, an abandoned cart. Too many and trust erodes.'],
+    real:'Real analogue: real-time card-fraud scoring (rules + ML hybrids).'
+  },
+  rating:{
+    story:'An automated underwriting policy you are trying to <b>replicate as a model</b>. Approval is granted when income <span class="em">OR</span> collateral is strong enough \u2014 a borrower can offset a weakness on one axis with strength on the other, which bends the approval frontier into a curve. Teal = approve.',
+    feats:[['Income','repayment capacity from earnings'],
+           ['Collateral','asset value securing the loan']],
+    whyHard:'The frontier <b>curves</b> because of the compensating \u201cOR\u201d rule. A model that can only cut straight lines mis-classifies the corners \u2014 exactly the region where the policy is most generous \u2014 so its mistakes are <span class="em">systematic</span>, not random.',
+    fn:['Decline someone the policy would approve','Lost good business, and inconsistent decisions raise fair-lending / model-consistency concerns.'],
+    fp:['Approve someone the policy would decline','Risk leakage: loans go out that the underwriting rule was designed to stop.'],
+    real:'Real analogue: policy-as-model, challenger models, fair-lending consistency testing.'
+  },
+  anomaly:{
+    story:'Monitoring for rare, novel events when you have <b>almost no labelled examples</b> to learn from. You model only what <span style="color:var(--red)">normal</span> looks like; anything far from it is flagged for a human to review. Teal = anomaly.',
+    feats:[['Amount (scaled)','how large the transaction is versus the usual'],
+           ['Time-of-day (scaled)','when it happens \u2014 odd hours are suspicious']],
+    whyHard:'You cannot train a clean two-class model: anomalies are rare, <b>diverse, and mostly unlabelled</b>. Tomorrow\u2019s anomaly may look nothing like yesterday\u2019s, so you must learn the shape of <span class="em">normal</span> and measure distance from it, rather than memorise known bad cases.',
+    fn:['Miss an anomaly','A novel fraud or AML event slips through \u2014 potentially large, with regulatory exposure.'],
+    fp:['Flag a normal transaction','Analyst review time. Too many false alerts and the investigations team drowns \u2014 \u201calert fatigue.\u201d'],
+    real:'Real analogue: AML transaction monitoring and novelty / first-party-fraud detection.'
+  },
+  downgrade:{
+    story:'A fixed-income risk desk scanning corporate issuers for likely rating <span class="em">downgrades</span> over the next few quarters. Teal = downgraded, <span style="color:var(--red)">red = stable</span>. Catch a downgrade early and the desk can trim or hedge before the agency acts and the bond price gaps.',
+    feats:[['Leverage','debt / EBITDA \u2014 how much borrowing the balance sheet carries'],
+           ['Coverage weakness','inverse interest-coverage \u2014 how little headroom earnings leave to service debt']],
+    whyHard:'Only about <b>one issuer in seven</b> is downgraded, so the classes are heavily imbalanced. A model that simply says \u201cstable\u201d for everyone is right ~86% of the time and protects nothing \u2014 the rare positives are the entire point.',
+    fn:['Miss a downgrade \u2192 hold into the cut','The bond gaps down on the rating action; you wear the loss the model existed to avoid.'],
+    fp:['Flag a stable issuer \u2192 trim needlessly','Transaction cost and lost carry from de-risking a name that was fine. Recoverable.'],
+    real:'Real analogue: early-warning credit surveillance and IFRS-9 stage migration.'
+  },
+  aml:{
+    story:'A bank\u2019s financial-crime unit reviewing account-months for <span class="em">suspicious activity</span> that may require a regulatory filing. <span style="color:var(--red)">Normal</span> behaviour clusters tightly; suspicious activity \u2014 structuring, unusual cross-border flow \u2014 scatters to the edges (teal).',
+    feats:[['Structuring score','how much activity looks split to dodge reporting thresholds'],
+           ['Cross-border share','fraction of value moving across borders']],
+    whyHard:'Suspicious cases are ~1 in 10, diverse, and sit away from the normal cluster in <b>no fixed direction</b>. Accuracy is meaningless and a straight line can\u2019t ring-fence a scatter \u2014 and because true labels are scarce, this is often better tackled as a one-class problem (see <b>Transaction anomaly</b>).',
+    fn:['Miss a suspicious case','A filing you were legally required to make never happens \u2014 regulatory breach, fines, reputational damage.'],
+    fp:['Flag a normal account','Analyst time on a dead-end review. Too many and the team can\u2019t keep up.'],
+    real:'Real analogue: AML transaction monitoring and SAR triage.'
+  },
+  p2p:{
+    story:'An accounts-payable team auto-routing supplier invoices: clean ones flow straight through to payment, <span class="em">exceptions</span> go to a human (teal). Whether an invoice needs review is driven mostly by one thing \u2014 a missing or mismatched purchase order.',
+    feats:[['PO / match variance','how far the invoice diverges from its purchase order \u2014 the dominant driver'],
+           ['Price-quantity variance','secondary mismatches in unit price or quantity']],
+    whyHard:'It isn\u2019t hard to separate \u2014 that\u2019s the point. One dominant feature almost decides the label, so the boundary is essentially a <b>single vertical line</b>. The interesting question is which model recovers that rule most cleanly and cheaply.',
+    fn:['Miss an exception \u2192 auto-pay a bad invoice','Cash out the door on a wrong or duplicate invoice \u2014 hard to claw back.'],
+    fp:['Flag a clean invoice','Unnecessary manual review: slower payment and wasted reviewer time.'],
+    real:'Real analogue: Procure-to-Pay straight-through-processing controls.'
+  },
+  mna:{
+    story:'A merger-arbitrage desk estimating whether an announced deal will <span class="em">break</span> before it closes (teal = break, <span style="color:var(--red)">red = completes</span>). Most deals go through; the desk\u2019s whole job is to avoid the minority that collapse and blow up the spread.',
+    feats:[['Regulatory overlap','antitrust / approval risk between the two parties'],
+           ['Hostile / low-cash','deal hostility and how little of the consideration is cash']],
+    whyHard:'About four in five deals complete, so \u201calways completes\u201d scores ~80% accuracy while catching <b>zero breaks</b>. The rare break is exactly what matters, and it sits on one side of a fairly linear risk frontier.',
+    fn:['Miss a break \u2192 hold into a collapse','The spread gaps against you \u2014 the classic merger-arb blow-up.'],
+    fp:['Flag a deal that completes','You pass on or over-hedge a good spread. Opportunity cost, not a realised loss.'],
+    real:'Real analogue: merger-arbitrage risk assessment and deal-completion modelling.'
+  },
+  lapse:{
+    story:'A life insurer\u2019s retention team predicting which policyholders will <span class="em">lapse</span> so they can intervene early (teal = lapse). Risk is compound \u2014 a heavy premium burden bites mainly when payments are already being missed.',
+    feats:[['Premium-to-income','how large the premium is relative to the policyholder\u2019s income'],
+           ['Missed payments','recent payment delinquency']],
+    whyHard:'Neither feature alone predicts lapse well; the danger lives in their <b>interaction</b> \u2014 both high at once. That risky region is a <span class="em">corner</span> of the feature space, a shape a single straight line can\u2019t carve out.',
+    fn:['Miss a lapse \u2192 lose a saveable policy','Lost future premiums plus the cost of re-acquiring a customer you could have kept.'],
+    fp:['Flag a loyal policyholder','Retention budget spent on someone who was never leaving. Wasted incentive.'],
+    real:'Real analogue: insurance persistency / churn modelling.'
+  },
+  gst:{
+    story:'A tax authority triaging GST returns to decide which to <span class="em">audit</span> with limited inspector time (teal = audit-worthy). The suspicious returns sit in a sharp corner: high input-tax-credit ratio <b>and</b> high vendor mismatch together.',
+    feats:[['Input-tax-credit ratio','credit claimed vs tax due \u2014 above ~1 is a red flag'],
+           ['Vendor mismatch','invoices that don\u2019t reconcile with counterparties\u2019 filings']],
+    whyHard:'The audit rule is a <b>right-angled hinge</b> \u2014 both conditions must hold. A single straight line has to cut diagonally across that corner, wrongly clearing some evasion and flagging some clean returns; two axis-aligned splits capture it exactly.',
+    fn:['Miss an evasive return','Tax revenue lost \u2014 and a signal to others that evasion goes uncaught.'],
+    fp:['Audit a clean return','Wasted inspector hours and an unnecessary burden on a compliant taxpayer.'],
+    real:'Real analogue: GST / VAT audit selection and revenue-risk scoring.'
+  }
+};
+
+const ALGO_DEEP = {
+  linsvm:{knob:'<b>C</b> is your appetite for outliers. Low C = a wide, forgiving margin that shrugs off a few odd cases and generalises well; high C = the model insists on classifying every training point and starts chasing noise.',
+    interp:['High','each feature\u2019s weight reads directly as a risk coefficient \u2014 trivial to explain to a regulator.']},
+  rbfsvm:{knob:'<b>\u03b3</b> sets how local the boundary is. Low \u03b3 = one smooth global curve; high \u03b3 = tight bubbles around individual points, i.e. memorising the training set instead of learning the pattern.',
+    interp:['Low','the curved boundary has no simple per-feature story \u2014 you gain flexibility, lose transparency.']},
+  tree:{knob:'<b>Max depth</b> is how many stacked yes/no questions are allowed. Shallow = a few robust rules; deep = fine-grained rules that overfit and turn the boundary jagged.',
+    interp:['Highest','the tree literally <em>is</em> the rulebook \u2014 an auditor can read every path.']},
+  forest:{knob:'<b>Trees</b> and <b>depth</b> control how many voters there are and how detailed each one is. More trees = a steadier averaged vote and a smoother boundary.',
+    interp:['Medium','no single rule, but feature-importance / SHAP recovers the drivers behind the decision.']},
+  knn:{knob:'<b>K</b> is how many past cases get a vote. Small K = jumpy, follows every local wrinkle; large K = smooth but drifts toward the overall base rate.',
+    interp:['Medium','you can show the actual nearest past cases as the justification for a decision.']},
+  nb:{knob:'No knob \u2014 it fits directly by fitting a bell curve to each class and multiplying feature probabilities. That speed is the whole point.',
+    interp:['Medium','per-feature likelihoods are inspectable, but the \u201cfeatures are independent\u201d assumption is a standing caveat.']},
+  oneclass:{knob:'<b>\u03b3</b> tightens or loosens the boundary of normal; <b>\u03bd</b> is your <span class="em">alert budget</span> \u2014 the fraction of normal traffic you accept flagging. Set \u03bd to what your investigations team can actually review.',
+    interp:['Low\u2013Medium','it draws the outline of \u201cnormal\u201d; \u03bd ties the model straight to review capacity.']}
+};
+
+const FIT = {
+  credit:{
+    linsvm:{r:'good',t:'The two borrower clouds are close to linearly separable, so a straight margin is a strong, defensible first choice \u2014 and the per-feature weights are exactly what a model-risk team wants to see. Keep C modest so a hard margin doesn\u2019t chase overlapping outliers.'},
+    rbfsvm:{r:'partial',t:'The kernel can hug the overlap for a sliver more accuracy, but on genuinely overlapping credit data it mostly fits noise and you forfeit the clean per-feature explanation a scorecard needs. Small gain, real interpretability cost.'},
+    tree:{r:'partial',t:'A shallow tree gives auditable \u201cif DTI\u202f>\u202fx and utilisation\u202f>\u202fy\u201d rules underwriters love, but one tree\u2019s boxy boundary is coarse on this diagonal overlap and gets unstable as you deepen it. Great for explaining, mediocre as the final scorer.'},
+    forest:{r:'good',t:'The default workhorse for tabular credit: averaging many trees smooths the diagonal boundary and <b>ranks</b> risk well \u2014 watch the AUC. You give up the single readable rule, then recover explanation with feature-importance.'},
+    knn:{r:'partial',t:'\u201cBorrowers similar to this one defaulted\u201d is intuitive, but with heavy overlap a small K is jumpy and a large K just echoes the base default rate. A fine baseline, awkward to deploy and justify at scale.'},
+    nb:{r:'partial',t:'A fast baseline, but DTI and utilisation are correlated \u2014 which breaks its independence assumption \u2014 so it tends to be over-confident. Use it as a sanity check, not the model you ship.'}
+  },
+  fraud:{
+    linsvm:{r:'poor',t:'The headline failure: no straight line can wrap a ring, so a linear SVM either slices the ring in half or gives up and calls everything legit. Watch recall crater \u2014 this is the case that proves you sometimes genuinely need non-linearity.'},
+    rbfsvm:{r:'good',t:'The Gaussian kernel bends the boundary into a closed curve that traps the fraud band, and precision and recall both jump. Tune \u03b3 carefully: push it too high and you carve tight islands around single transactions \u2014 memorising, not generalising.'},
+    tree:{r:'good',t:'Axis-aligned splits staircase around the ring surprisingly well, and every alert arrives with a readable reason (\u201cfeature\u202f1 in [a,b] and feature\u202f2 in [c,d]\u201d) \u2014 gold for a fraud analyst who has to justify a block.'},
+    forest:{r:'good',t:'Many trees vote away the staircase artefacts and handle the rare class robustly \u2014 a very common production fraud model. Judge it on precision and recall together (F1), never on raw accuracy, because fraud is rare.'},
+    knn:{r:'good',t:'Fraud \u201clooks like known fraud,\u201d so neighbour voting naturally encircles the ring. The catch is latency: scoring every transaction against the whole history is slow at card-network volume.'},
+    nb:{r:'partial',t:'One bell curve per class can\u2019t represent a hollow ring, so it blurs the boundary \u2014 but it is so cheap it still earns a place as a first-pass triage filter ahead of a heavier model.'}
+  },
+  rating:{
+    linsvm:{r:'poor',t:'A straight line can\u2019t follow the \u201chigh income OR high collateral\u201d curve, so its errors pile up in the corners \u2014 precisely where the policy is most generous. Systematic corner errors are a fair-lending consistency red flag, not just lost accuracy.'},
+    rbfsvm:{r:'good',t:'Smoothly traces the curved frontier and reproduces the compensating logic with high fidelity. The trade-off is losing the one-line explanation of who gets approved and why.'},
+    tree:{r:'good',t:'Staircases neatly along the curve and \u2014 the key virtue here \u2014 hands the approval policy back as explicit rules, ideal as a challenger model an auditor can read line by line.'},
+    forest:{r:'good',t:'The highest-fidelity copy of the curved frontier; the ensemble irons out the staircase. Reach for it when accuracy of the policy replica matters more than a single readable rule.'},
+    knn:{r:'good',t:'Local and naturally curved, so it follows the frontier well. Deployment cost and the absence of a global, statable rule are the trade-offs.'},
+    nb:{r:'poor',t:'Independent bell curves force an essentially straight or elliptical split that cannot express an \u201cOR / compensating\u201d rule, so it mis-approves in the corners much like the linear SVM.'}
+  },
+  anomaly:{
+    linsvm:{r:'poor',t:'There is almost nothing to separate \u2014 anomalies are rare, scattered and barely labelled \u2014 so a two-class line latches onto the few anomaly points it sees and won\u2019t generalise to new, unseen anomaly types.'},
+    rbfsvm:{r:'partial',t:'With the handful of labels it can wrap the current anomalies, but it overfits to the specific ones it saw and misses novel behaviour \u2014 the exact failure mode one-class methods exist to avoid.'},
+    tree:{r:'partial',t:'Can fence off the labelled anomalies, but like any supervised learner here it only catches anomaly types already seen. Regenerate the data and watch recall wobble.'},
+    forest:{r:'partial',t:'Steadier than a single tree, yet it shares the same blind spot: it learns \u201cknown anomalies,\u201d not \u201cnot normal.\u201d Fresh anomalies expose the gap.'},
+    knn:{r:'partial',t:'Distance-to-neighbours is actually a sound novelty signal \u2014 far from everything is suspicious \u2014 which is why KNN-distance is a real anomaly heuristic. Using the labels here, though, wastes that unsupervised strength.'},
+    nb:{r:'partial',t:'Can flag points that sit in the low-probability tail of the normal bell curve \u2014 a lightweight anomaly score \u2014 but it assumes a single, simple shape for normal.'},
+    oneclass:{r:'good',t:'The right tool. It learns only the shape of normal spend and flags everything outside it, needing <b>zero</b> anomaly labels, so it generalises to brand-new anomaly types. Set \u03bd to your team\u2019s review capacity \u2014 \u03bd is literally \u201cwhat fraction of normal traffic I\u2019m willing to alert on.\u201d'}
+  },
+  downgrade:{
+    linsvm:{r:'good',t:'The stable and downgrade clusters are largely separable, so a straight boundary ranks issuers well and its weights read as risk drivers a credit committee trusts. The catch is the threshold, not the fit \u2014 at the default cut-off a rare positive is easy to under-flag, so watch recall and slide the threshold down.'},
+    rbfsvm:{r:'partial',t:'Can tighten around the downgrade cluster for marginally better recall, but on near-separable, small-minority data it mostly fits noise and forfeits the clean coefficient story a rating model wants.'},
+    tree:{r:'partial',t:'Gives a readable \u201cleverage\u202f>\u202fx and coverage-weakness\u202f>\u202fy \u2192 downgrade\u201d rule, but a single tree is unstable on a rare class and its accuracy looks deceptively high while it quietly misses downgrades.'},
+    forest:{r:'good',t:'Averaging stabilises the rare-class boundary and ranks issuers cleanly \u2014 watch the AUC. In production, class weighting stops the minority being drowned by stable names.'},
+    knn:{r:'partial',t:'With few downgrades nearby, a small K is noisy and a large K is swamped by the stable majority, so recall on the rare class suffers. A baseline, not the model you ship.'},
+    nb:{r:'good',t:'The two clusters are roughly Gaussian, so it ranks well and costs almost nothing \u2014 a strong baseline, though correlated leverage and coverage dent the calibration of its probabilities.'}
+  },
+  aml:{
+    linsvm:{r:'poor',t:'Suspicious activity ringed around normal can\u2019t be fenced off by a straight line, and at ~1-in-10 positives a linear model slides toward \u201call clear.\u201d Recall collapses \u2014 the worst outcome for a compliance desk.'},
+    rbfsvm:{r:'good',t:'The kernel wraps the tight normal cloud and flags the outer scatter, lifting recall sharply. Tune \u03b3 so it doesn\u2019t chase individual alerts, and lean on AUC rather than any single cut-off.'},
+    tree:{r:'partial',t:'Boxes off outer regions and hands each alert a readable reason for the SAR file, but a hard-labelled tree only catches typologies it has already seen \u2014 weak against novel behaviour.'},
+    forest:{r:'good',t:'Stable detection of the scattered positives plus a clean risk ranking, so investigators work the riskiest account-months first. Judge on recall and AUC, never the flattering accuracy.'},
+    knn:{r:'good',t:'\u201cFar from normal behaviour\u201d is precisely a neighbour-distance signal, so KNN naturally flags the outliers \u2014 at the cost of scoring every account-month against history.'},
+    nb:{r:'good',t:'Because normal behaviour is a tight central cloud, its likelihood ratio ranks anything far out as suspicious, so it scores surprisingly well for almost no cost. It still treats the scattered suspicious class crudely \u2014 pair it with review, not blind trust.'}
+  },
+  p2p:{
+    linsvm:{r:'good',t:'The exception rule is essentially one threshold on match-variance, so a straight line separates it cleanly and cheaply \u2014 a solid, explainable baseline for straight-through processing.'},
+    rbfsvm:{r:'partial',t:'Overkill here \u2014 it can reproduce the split but layers on curvature the problem doesn\u2019t need, trading away the one-line explanation an AP policy wants.'},
+    tree:{r:'good',t:'The natural fit \u2014 it recovers the rule verbatim (\u201cmatch-variance\u202f>\u202ft \u2192 route to review\u201d) in a single split an auditor can read. Perfect when the control must be documented.'},
+    forest:{r:'good',t:'A little smoother and very stable, though for a near-single-split rule one shallow tree is already enough and more transparent.'},
+    knn:{r:'partial',t:'Works, but it\u2019s a heavy, opaque way to reproduce what is really a one-line threshold, and you lose the statable rule.'},
+    nb:{r:'good',t:'With an almost axis-aligned split its per-feature Gaussians line up well, and it\u2019s extremely cheap \u2014 a fine lightweight router.'}
+  },
+  mna:{
+    linsvm:{r:'good',t:'Break risk climbs smoothly with regulatory overlap and hostility, so a tilted straight boundary fits well and the weights quantify each driver. Watch recall on the minority break class \u2014 a wide margin can quietly under-flag the deals that matter.'},
+    rbfsvm:{r:'partial',t:'There\u2019s little curvature to exploit, so the kernel mostly adds variance and overfits the handful of breaks without improving the ranking.'},
+    tree:{r:'partial',t:'Staircases a boundary that is really a straight diagonal, and one tree is jumpy on the ~20% break class \u2014 useful mainly for the readable rule it produces.'},
+    forest:{r:'good',t:'Steadies the diagonal and ranks deals by break probability, exactly what an arb desk wants. Read AUC and break-class recall, not the flattering accuracy.'},
+    knn:{r:'good',t:'Local and reasonably accurate along the diagonal, though with breaks in the minority its neighbours skew toward completions, so recall on breaks slips near the boundary.'},
+    nb:{r:'good',t:'Two independent Gaussians capture the tilted separation well enough and cost nothing; overlap near the frontier just makes its probabilities a touch over-confident.'}
+  },
+  lapse:{
+    linsvm:{r:'partial',t:'Lapse fires only when premium burden AND missed payments are both high \u2014 a corner a straight line can\u2019t isolate, so it smears risk along the whole high-premium edge and mis-targets retention spend at single-factor customers.'},
+    rbfsvm:{r:'good',t:'The kernel bends smoothly around the compound-risk corner, capturing the \u201cboth high\u201d interaction the business actually cares about. You lose the simple rule, but the targeting is right.'},
+    tree:{r:'good',t:'Splits into the corner in two questions and states the compound rule plainly (\u201cpremium-ratio high AND \u2265\u202f2 missed \u2192 high lapse risk\u201d) \u2014 ideal for a retention playbook.'},
+    forest:{r:'good',t:'The highest-fidelity capture of the curved corner, smoothing the tree\u2019s staircase; the default when you want accuracy on the interaction.'},
+    knn:{r:'good',t:'Locally follows the corner without being told the interaction exists, so it captures the compound region well \u2014 at the usual deployment and opacity cost.'},
+    nb:{r:'partial',t:'Its independence assumption is the exact thing this problem violates, so it tends to over-flag single-factor cases. Cheap, but structurally blind to \u201crisky only when both are high.\u201d'}
+  },
+  gst:{
+    linsvm:{r:'partial',t:'The audit region is a right-angled corner, so a single straight line has to slice diagonally across it \u2014 clearing some evasion and flagging some clean returns along the kink. Serviceable, but never exact.'},
+    rbfsvm:{r:'partial',t:'Rounds the sharp corner into a curve \u2014 better than a straight cut, yet it blurs the crisp threshold auditors reason with and can over-soften the right angle.'},
+    tree:{r:'good',t:'The best fit here \u2014 two axis-aligned splits reproduce the hinge exactly and hand the tax team a precise, defensible rule (\u201cITC ratio\u202f>\u202f0.9 and mismatches\u202f>\u202fk \u2192 audit\u201d).'},
+    forest:{r:'good',t:'Matches the corner robustly and ranks returns for the audit queue, at the cost of the single readable split a lone tree gives you.'},
+    knn:{r:'partial',t:'Follows the corner locally but needs dense data near the kink and offers no statable threshold \u2014 awkward for a rule an authority must justify.'},
+    nb:{r:'partial',t:'Its axis-aligned Gaussians line up with the corner reasonably, but a hard hinge \u2014 nothing matters until you cross the threshold \u2014 isn\u2019t something smooth bell curves represent cleanly.'}
+  }
+};
+
+const METRIC_GUIDE = {
+  credit:{watch:'mRec',
+    lead:'Watch <b>Recall</b> on defaults \u2014 plus the <b>AUC</b> below \u2014 while keeping an eye on how many good borrowers you decline.',
+    body:'A missed default costs far more than a wrongly-declined applicant, so recall (the share of real defaults you catch) carries the most business weight. But over-declining destroys revenue and invites fair-lending scrutiny, so you don\u2019t maximise recall blindly \u2014 you use <b>AUC</b> to judge overall ranking power, then set the threshold to hit a target approval rate.',
+    thr:'Slide the threshold <b>down</b> to catch more defaults (recall up, more good customers declined); slide it <b>up</b> to approve more freely (revenue up, more defaults slip through).'},
+  fraud:{watch:'mF1',caveat:'Fraud is rare, so <b>accuracy is a trap</b>: a model that blindly labels everything \u201clegit\u201d can score ~95% accuracy while catching zero fraud. Ignore accuracy here.',
+    lead:'Watch <b>F1</b> \u2014 precision and recall together \u2014 not accuracy.',
+    body:'You need high <b>recall</b> (catch the fraud) but also high <b>precision</b> (keep false alarms low, or you decline real customers and your analysts drown). F1 balances the two, and the ROC/AUC shows ranking quality independent of the threshold.',
+    thr:'Lower the threshold to catch more fraud at the cost of more blocked-legit false alarms; raise it to reduce customer friction at the cost of letting some fraud through.'},
+  rating:{watch:'mAcc',
+    lead:'Watch <b>Accuracy / AUC</b> as <b>fidelity to the policy</b> \u2014 how faithfully the model reproduces the real approval frontier.',
+    body:'This scenario is about copying a known decision rule, so overall agreement matters \u2014 but read it with care: a linear model can post decent accuracy while making <span class="em">all</span> its errors in the compensating corners. Concentrated, systematic errors are a consistency and fair-lending concern even when the headline number looks fine.',
+    thr:'The threshold shifts the approval line in or out; watch <b>where</b> the errors land, not just how many there are.'},
+  anomaly:{watch:'mRec',caveat:'Anomalies are rare, so a \u201cnothing is anomalous\u201d model looks highly accurate and catches nothing. Judge on recall and alert volume, not accuracy.',
+    lead:'Watch <b>Recall</b> (don\u2019t miss anomalies) against the <b>false-alarm count</b> your team can review.',
+    body:'Missing a novel event is the costly failure, so recall leads \u2014 but every false alarm is analyst time, so precision sets a practical ceiling. The <b>\u03bd</b> knob is the direct lever: it trades recall against alert volume to match your review capacity.',
+    thr:'Lower the threshold (or raise \u03bd) to flag more and miss less, at the price of more false alarms for analysts to clear.'},
+  downgrade:{watch:'mF1',caveat:'Downgrades are rare \u2014 <b>accuracy is a trap</b>. A \u201cnever downgrades\u201d model looks ~86% accurate and protects nothing.',
+    lead:'Watch <b>F1</b> and <b>recall</b> on downgrades, plus the <b>AUC</b> \u2014 not accuracy.',
+    body:'Only ~1 in 7 issuers is downgraded, so overall accuracy is dominated by the easy stable names. Recall (downgrades caught) is what shields the portfolio; precision keeps you from trimming healthy issuers needlessly; F1 balances them and AUC judges the ranking that drives your watch-list.',
+    thr:'Lower the threshold to catch more downgrades ahead of the rating action, accepting more false flags on stable issuers.'},
+  aml:{watch:'mRec',caveat:'Extreme imbalance: a do-nothing model scores ~90%. Judge on recall and alert volume, <b>never accuracy</b>.',
+    lead:'Watch <b>Recall</b> above all \u2014 a missed case is a regulatory breach \u2014 bounded by how many alerts investigators can clear.',
+    body:'At ~10% suspicious, accuracy is meaningless. Recall is the whole job, but every false positive is investigator time, so precision sets a practical ceiling. Because labels are scarce and typologies novel, a one-class approach (the <b>Transaction anomaly</b> scenario) is often the natural production tool.',
+    thr:'Lower the threshold to raise recall and open more cases, up to the limit of your review capacity.'},
+  p2p:{watch:'mF1',
+    lead:'Watch <b>recall</b> on exceptions (don\u2019t auto-pay a bad invoice) against <b>precision</b> (don\u2019t swamp reviewers) \u2014 read F1.',
+    body:'The decision is straight-through-process vs human review. Missing an exception means a wrong invoice paid; over-flagging means reviewers drown in clean invoices. F1 captures that balance \u2014 and because the rule is nearly a single split, a good model reaches high precision and recall together.',
+    thr:'Lower the threshold to route more invoices to review (safer, costlier); raise it to auto-pay more (cheaper, riskier).'},
+  mna:{watch:'mRec',caveat:'The easy majority completes \u2014 <b>accuracy flatters</b> a model that catches none of the breaks that matter.',
+    lead:'Watch <b>Recall on breaks</b> and the <b>AUC</b> \u2014 the minority break class is the entire point.',
+    body:'About 80% of deals complete, so \u201calways completes\u201d scores ~80% accuracy and flags zero breaks \u2014 the exact deals that blow up a merger-arb spread. Recall on breaks protects the book; AUC shows whether the model ranks risky deals above safe ones.',
+    thr:'Lower the threshold to flag more potential breaks (pass or hedge more deals), accepting more false alarms on deals that would have closed.'},
+  lapse:{watch:'mF1',
+    lead:'Watch <b>recall</b> on likely lapsers against <b>precision</b> \u2014 read F1 \u2014 and note the <b>AUC</b> lift once the interaction is captured.',
+    body:'Miss a saveable customer and you lose the policy; call everyone and you burn the retention budget. F1 balances the two. Models that capture the premium\u00d7missed-payments interaction (kernel, tree, forest) rank far better than a linear model that ignores the corner.',
+    thr:'Lower the threshold to reach more at-risk policyholders (more retention spend); raise it to focus only on the clearest cases.'},
+  gst:{watch:'mPrec',
+    lead:'Watch <b>Precision at the top of the ranked list</b> \u2014 inspectors are finite \u2014 alongside recall on genuine flags.',
+    body:'Audit capacity is the binding constraint, so precision among the highest-scoring returns maximises revenue recovered per inspector-hour; recall ensures you don\u2019t leave obvious evasion unaudited. A model that captures the ITC-ratio hinge cleanly (a tree) pushes both up.',
+    thr:'Raise the threshold to audit only the most suspicious returns (higher precision, some evasion missed); lower it to widen the net when capacity allows.'}
+};
+
+/* ---- renderers ---- */
+function renderDeepScen(){
+  const k=state.scen, d=SCEN_DEEP[k];
+  let feats=d.feats.map(f=>`<div class="frow"><span class="k">${f[0]}</span><span>${f[1]}</span></div>`).join('');
+  document.getElementById('deepScen').innerHTML=
+    `<h4>The business problem</h4><p>${d.story}</p>`+
+    `<h4>What the axes mean</h4>${feats}`+
+    `<h4>Why it\u2019s hard</h4><p>${d.whyHard}</p>`+
+    `<h4>Cost of each error</h4>`+
+    `<div class="costgrid">`+
+      `<div class="costbox fn"><div class="ct">False negative</div><div class="cd"><b>${d.fn[0]}.</b> ${d.fn[1]}</div></div>`+
+      `<div class="costbox fp"><div class="ct">False positive</div><div class="cd"><b>${d.fp[0]}.</b> ${d.fp[1]}</div></div>`+
+    `</div><p style="color:var(--mute);font-size:11.5px;margin-top:6px">${d.real}</p>`;
+}
+function renderDeepAlgo(){
+  const sc=state.scen, al=state.algo, a=ALGO[al], ad=ALGO_DEEP[al];
+  const fit=(FIT[sc]&&FIT[sc][al])?FIT[sc][al]:{r:'partial',t:'Switch to the Transaction-anomaly scenario to use this model \u2014 it needs a one-class setup.'};
+  document.getElementById('deepAlgoName').textContent=a.name;
+  const badge={good:'Strong fit',partial:'Works, with caveats',poor:'Poor fit \u2014 instructive'}[fit.r];
+  document.getElementById('deepAlgo').innerHTML=
+    `<h4>Fit for the ${SCEN[sc].name} problem &nbsp;<span class="badge ${fit.r}">${badge}</span></h4>`+
+    `<p>${fit.t}</p>`+
+    `<h4>The knob, in business terms</h4><p>${ad.knob}</p>`+
+    `<h4>Interpretability</h4><p><b class="em">${ad.interp[0]}.</b> ${ad.interp[1]}</p>`;
+}
+function renderDeepMetric(){
+  const g=METRIC_GUIDE[state.scen];
+  let html=`<div class="metricflag"><div class="mt">${g.lead}</div></div>`+
+    `<h4>Why this metric here</h4><p>${g.body}</p>`+
+    `<h4>Moving the decision threshold</h4><p>${g.thr}</p>`;
+  if(g.caveat)html+=`<div class="caveat">\u26a0 ${g.caveat}</div>`;
+  document.getElementById('deepMetric').innerHTML=html;
+  ['mAcc','mPrec','mRec','mF1'].forEach(id=>{
+    document.getElementById(id).parentElement.classList.toggle('watch',id===g.watch);
+  });
+}
+function renderDeep(){renderDeepScen();renderDeepAlgo();renderDeepMetric();}
+
+const _origScen=refreshScenUI, _origAlgo=refreshAlgoUI;
+refreshScenUI=function(){_origScen.apply(this,arguments);renderDeep();};
+refreshAlgoUI=function(){_origAlgo.apply(this,arguments);renderDeepAlgo();renderDeepMetric();};
+renderDeep();
+
+</script>
+<script>
+/* ---- tab switching + domain-to-scenario jumps ---- */
+(function(){
+  function showTab(name){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.tab===name));
+    document.querySelectorAll(".pane").forEach(p=>p.classList.toggle("on",p.id==="tab-"+name));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>showTab(t.dataset.tab)));
+  document.querySelectorAll(".jump[data-goto]").forEach(j=>j.addEventListener("click",()=>{
+    showTab("playground");
+    if(typeof setScen==="function") setScen(j.dataset.goto);
+  }));
+})();
+</script>
+</body>
+</html>
