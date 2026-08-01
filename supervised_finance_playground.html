@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supervised Learning · Finance Playground</title>
+<style>
+:root{--bg:#0E1C2A;--panel:#16283A;--panel2:#1C3247;--card:#13273A;--teal:#33C7B4;--teald:#1F8F80;
+--copper:#E0924E;--red:#E36464;--gold:#E7C15A;--violet:#9A8CDB;--blue:#5AA9E6;--ink:#EAF1F6;--mute:#8DA2B5;--line:#27405F;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;padding:0 0 60px;-webkit-font-smoothing:antialiased}
+.top{background:linear-gradient(180deg,#132840,#0E1C2A);border-bottom:1px solid var(--line);padding:22px 26px 0}
+.top-in{max-width:1180px;margin:0 auto}
+.kicker{color:var(--teal);font-size:11.5px;font-weight:700;letter-spacing:2px;margin-bottom:8px}
+h1{font-family:Cambria,Georgia,serif;font-size:29px;font-weight:700;margin-bottom:7px}
+.intro{color:var(--mute);font-size:14px;max-width:880px;line-height:1.55;margin-bottom:18px}
+/* tab bar */
+.tabbar{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;scrollbar-width:thin}
+.tabbtn{background:none;border:none;border-bottom:2px solid transparent;color:var(--mute);font:inherit;font-size:13px;
+font-weight:600;padding:11px 14px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;margin-bottom:-1px;transition:.15s}
+.tabbtn:hover{color:var(--ink)}
+.tabbtn.on{color:var(--teal);border-bottom-color:var(--teal)}
+.tabnum{display:inline-flex;width:19px;height:19px;border-radius:50%;background:#20344a;color:var(--mute);
+font-size:11px;align-items:center;justify-content:center;font-weight:700}
+.tabbtn.on .tabnum{background:var(--teal);color:#08131d}
+/* panes */
+.wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+.uc-pane{display:none;padding-top:26px}
+.uc-pane.on{display:block}
+.uc-head{margin-bottom:8px}
+.uc-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 11px;border-radius:20px;border:1px solid;margin-bottom:12px}
+.uc-h2{font-family:Cambria,Georgia,serif;font-size:30px;font-weight:700;margin-bottom:7px}
+.uc-sub{color:var(--mute);font-size:14.5px;line-height:1.5;max-width:900px}
+/* sections */
+.wsec{border-top:1px solid var(--line);padding:24px 0 6px;margin-top:20px}
+.wkicker{color:var(--teal);font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:5px}
+.wtitle{font-family:Cambria,Georgia,serif;font-size:21px;font-weight:700;margin-bottom:14px}
+.wp{font-size:14px;color:#d3dee7;line-height:1.65;margin-bottom:14px;max-width:900px}
+.em{color:var(--teal)}
+/* persona / story */
+.story{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap}
+.persona{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid #223850;border-radius:12px;padding:14px 16px;min-width:230px}
+.pface{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#0E1C2A}
+.pname{font-size:16px;font-weight:700}
+.prole{font-size:12px;color:var(--mute);margin-top:2px}
+.storytext{flex:1;min-width:340px}
+.storytext p{font-size:14px;color:#d3dee7;line-height:1.6;margin-bottom:9px}
+.storytext b.em{color:var(--gold)}
+.laychip{display:inline-block;background:rgba(231,193,90,.14);color:var(--gold);font-size:10.5px;font-weight:700;
+letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin:10px 0 7px}
+.layman{background:var(--panel2);border-left:3px solid var(--gold);border-radius:8px;padding:12px 15px;font-size:14px;
+color:#f0e7d4;line-height:1.62;max-width:900px}
+/* data table */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #223850;margin-bottom:12px}
+.dtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.dtbl th{background:var(--teald);color:#fff;text-align:left;padding:9px 12px;font-weight:600;font-size:12px;white-space:nowrap}
+.dtbl td{padding:8px 12px;border-bottom:1px solid #1b3047;color:#cbd7e1;white-space:nowrap}
+.dtbl tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+.dtbl td.hl,.dtbl th.hl{background:rgba(51,199,180,.10)}
+.dtbl td.lab{font-weight:700}
+.dtbl td.pos{color:var(--red)} .dtbl td.neg{color:var(--teal)}
+.tbl-note{color:var(--mute);font-size:11.5px;font-style:italic;margin:-4px 0 12px}
+.collist{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:12px 15px;margin-bottom:12px}
+.collist-h{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:8px}
+.colrow{display:flex;gap:12px;font-size:13px;color:#cbd7e1;padding:4px 0;line-height:1.5}
+.colname{min-width:150px;font-weight:600;flex-shrink:0}
+/* viz */
+.vizbox{margin:6px 0 12px}
+.viz-canvas{display:block;width:100%;max-width:760px;border-radius:10px;background:var(--card);border:1px solid #223850}
+.cap{color:var(--mute);font-size:11.5px;margin-top:6px;font-style:italic}
+/* steps */
+.stepbox{display:flex;gap:14px;background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.stepnum{width:28px;height:28px;border-radius:8px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.steptitle{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.steptext{font-size:13px;color:#cbd7e1;line-height:1.6}
+.reveal-btn{background:var(--card);border:1px solid;border-radius:8px;padding:9px 18px;font:inherit;font-size:13px;
+font-weight:600;cursor:pointer;margin-top:4px;transition:.15s}
+.reveal-btn:hover{filter:brightness(1.2)}
+.stepio{margin:2px 0 12px 42px}
+.io{display:flex;align-items:stretch;gap:10px;background:#0d1a28;border:1px solid #223850;border-radius:9px;padding:11px 13px;flex-wrap:wrap}
+.io-col{flex:1;min-width:200px}
+.io-tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:1px;padding:2px 7px;border-radius:5px;margin-bottom:6px}
+.io-in{background:rgba(224,146,78,.18);color:var(--copper)}
+.io-out{background:rgba(51,199,180,.18);color:var(--teal)}
+.io-body{font-size:12.5px;color:#cbd7e1;line-height:1.55;overflow-x:auto}
+.io-body b{color:var(--ink)}
+.io-arrow{align-self:center;color:var(--mute);font-size:18px;flex-shrink:0}
+.iotbl{border-collapse:collapse;margin-top:3px;font-size:11.5px}
+.iotbl th{background:#1a304a;color:#b9c8d6;padding:3px 8px;text-align:left;font-weight:600;font-size:11px}
+.iotbl td{padding:3px 8px;border-bottom:1px solid #17293c;color:#cbd7e1;white-space:nowrap}
+.io-strike{text-decoration:line-through;color:var(--red);opacity:.7}
+.io-chip{display:inline-block;background:#16283a;border:1px solid #2a4256;border-radius:5px;padding:1px 7px;margin:2px 3px 0 0;font-size:11.5px;color:#cbd7e1;font-family:Cambria,Georgia,serif}
+.treebox{margin:4px 0 6px}
+.treecard{background:var(--card);border:1px solid #223850;border-radius:10px;padding:14px 12px 12px;overflow-x:auto}
+.treecard .cap{margin-top:8px;text-align:left}
+.votecard{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;margin-top:10px}
+.vote-h{font-size:13.5px;color:#dfe8ef;margin-bottom:10px}
+.vote-h b{color:var(--ink)}
+.vote-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.vote-chip{display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle}
+.vote-legend{font-size:11.5px;color:var(--mute);margin-bottom:11px}
+.vote-result{background:var(--card);border-radius:8px;padding:11px 13px;font-size:13.5px;color:#dfe8ef;line-height:1.6}
+/* results */
+.resultbox,.trywrap{margin-top:6px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:640px){.mgrid{grid-template-columns:1fr}}
+.mcard{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;text-align:center}
+.mval{font-size:26px;font-weight:800;line-height:1}
+.mlab{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--mute);margin-top:6px;font-weight:600}
+.msub{font-size:11px;color:var(--mute);margin-top:5px;line-height:1.35}
+.mgrid5{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px}
+@media(max-width:720px){.mgrid5{grid-template-columns:repeat(2,1fr)}}
+.mgrid5 .mval{font-size:22px}
+.mcard.watch{outline:2px solid var(--teal);outline-offset:1px;position:relative}
+.mcard.watch::after{content:'KEY METRIC';position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+background:var(--teal);color:#08131d;font-size:8px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap}
+.cmini{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:13px 15px;margin-bottom:14px}
+.cmini-h{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:9px}
+.cmtbl{border-collapse:collapse;margin:4px 0}
+.cmtbl td{padding:6px 11px;text-align:center;font-size:12.5px}
+.cmtbl .cmh{color:var(--mute);font-size:11px;font-weight:600}
+.cmtbl .cmc{background:none}
+.cmv{font-weight:700;font-size:15px;border-radius:5px}
+.cmv.ok{color:var(--teal);background:rgba(51,199,180,.12)}
+.cmv.bad{color:var(--red);background:rgba(227,100,100,.12)}
+.cmini-note{color:var(--mute);font-size:11px;margin-top:8px}
+.mathbox{background:linear-gradient(135deg,rgba(90,169,230,.07),rgba(154,140,219,.05));border:1px solid #2a4256;border-radius:12px;padding:16px 18px;margin:14px 0 6px}
+.math-h{font-size:12px;letter-spacing:.5px;color:var(--blue);font-weight:700;margin-bottom:11px}
+.math-eq{background:#0d1a28;border:1px solid #24405c;border-radius:8px;padding:16px 18px;text-align:center;
+font-family:'Cambria Math',Cambria,Georgia,serif;font-size:20px;color:var(--ink);line-height:1.7;overflow-x:auto}
+.math-eq .v{color:var(--teal);font-style:italic}
+.math-eq .c{color:var(--gold);font-style:italic}
+.math-eq sub{font-size:12px} .math-eq sup{font-size:12px}
+.math-where{color:var(--mute);font-size:12px;margin-top:8px;line-height:1.5;text-align:center}
+.math-where b{color:var(--teal)}
+.math-use{background:var(--card);border-radius:8px;padding:11px 14px;font-size:13.5px;color:#dfe8ef;line-height:1.6;margin-top:12px}
+.metric-explain{background:var(--panel2);border-left:3px solid var(--teal);border-radius:8px;padding:12px 15px;
+font-size:13.5px;color:#cdd9e3;line-height:1.62;margin-bottom:14px}
+.metric-explain b{color:var(--ink)}
+.decision{background:linear-gradient(135deg,rgba(51,199,180,.08),rgba(154,140,219,.06));border:1px solid #2a4256;
+border-radius:10px;padding:14px 16px;font-size:13.5px;color:#dfe8ef;line-height:1.65}
+.decision-h{font-weight:700;font-size:14px;margin-bottom:6px}
+.loading{color:var(--gold);font-size:13px;padding:10px}
+/* try widget */
+.try-inner{background:var(--panel);border:1px solid #2a4256;border-radius:12px;padding:16px 18px;margin-top:14px}
+.try-h{font-size:14px;font-weight:700;margin-bottom:12px}
+.try-sl{margin-bottom:12px}
+.try-sl label{display:flex;justify-content:space-between;font-size:13px;color:#cbd7e1;margin-bottom:5px}
+.try-sl label b{color:var(--teal)}
+.try-sl input[type=range]{width:100%;accent-color:var(--teal)}
+.tsel{width:100%;background:var(--card);border:1px solid #2E4A63;color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+.try-out{background:var(--card);border-radius:8px;padding:12px 14px;font-size:13.5px;color:#dfe8ef;line-height:1.6;margin-top:6px}
+footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;color:var(--mute);font-size:11px;font-style:italic;line-height:1.6;max-width:1180px;margin-left:auto;margin-right:auto;padding-left:26px;padding-right:26px}
+</style></head><body>
+<div class="top"><div class="top-in">
+<div class="kicker">TM2065 · SUPERVISED LEARNING · GUIDED USE-CASE WALKTHROUGHS</div>
+<h1>Supervised learning, one business story at a time</h1>
+<p class="intro">Twelve real finance use cases, each its own tab and each a different algorithm — from classification to linear regression. For every one: meet the company and the decision-maker, see and understand the labelled data, learn how the algorithm thinks in plain language (with the equation behind it explained like you’re in 6th class), watch it run step by step with the real inputs and outputs of each stage, and read the evaluation the way the decision-maker would.</p>
+<div class="tabbar" id="tabbar"></div>
+</div></div>
+<div class="wrap"><div id="panes"></div></div>
+<footer>Educational walkthroughs for TM2065 · Application of Machine Learning and Artificial Intelligence in Finance. Every algorithm (logistic regression, decision tree, random forest, k-NN, naïve Bayes, linear SVM, one-class anomaly detection, and simple &amp; multiple linear regression) is implemented from scratch and trained live in your browser on synthetic data. Company names and personas are fictitious.</footer>
+<script>
+/* ===== Supervised engines — all from scratch ===== */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* standardise a matrix of features (array of rows), return {Z, mu, sd} */
+function zstats(X){const n=X.length,d=X[0].length,mu=new Array(d).fill(0),sd=new Array(d).fill(0);
+  X.forEach(r=>r.forEach((v,j)=>mu[j]+=v));mu.forEach((_,j)=>mu[j]/=n);
+  X.forEach(r=>r.forEach((v,j)=>sd[j]+=(v-mu[j])**2));sd.forEach((_,j)=>sd[j]=Math.sqrt(sd[j]/n)||1);
+  const Z=X.map(r=>r.map((v,j)=>(v-mu[j])/sd[j]));return {Z,mu,sd};}
+function zapply(x,mu,sd){return x.map((v,j)=>(v-mu[j])/sd[j]);}
+
+/* train/test split */
+function split(X,y,frac,seed){const r=mulberry32(seed);const idx=X.map((_,i)=>i).sort(()=>r()-0.5);
+  const k=Math.floor(X.length*frac);const tr=idx.slice(0,k),te=idx.slice(k);
+  return {Xtr:tr.map(i=>X[i]),ytr:tr.map(i=>y[i]),Xte:te.map(i=>X[i]),yte:te.map(i=>y[i])};}
+
+/* ---- Logistic Regression (gradient descent) ---- */
+function logreg(X,y,{epochs=300,lr=0.3,l2=1e-3}={}){
+  const n=X.length,d=X[0].length;let w=new Array(d).fill(0),b=0;
+  for(let e=0;e<epochs;e++){const gw=new Array(d).fill(0);let gb=0;
+    for(let i=0;i<n;i++){let z=b;for(let j=0;j<d;j++)z+=w[j]*X[i][j];const p=1/(1+Math.exp(-z));const g=p-y[i];
+      for(let j=0;j<d;j++)gw[j]+=g*X[i][j];gb+=g;}
+    for(let j=0;j<d;j++)w[j]-=lr*(gw[j]/n+l2*w[j]);b-=lr*gb/n;}
+  const prob=x=>{let z=b;for(let j=0;j<x.length;j++)z+=w[j]*x[j];return 1/(1+Math.exp(-z));};
+  return {prob,predict:(x,t=0.5)=>prob(x)>=t?1:0,w,b};
+}
+
+/* ---- Decision Tree (CART, gini, depth-limited) ---- */
+function gini(y){const c={};y.forEach(v=>c[v]=(c[v]||0)+1);const n=y.length;let g=1;
+  for(const k in c)g-=(c[k]/n)**2;return g;}
+function buildTree(X,y,depth,maxDepth,minLeaf){
+  const cnt={};y.forEach(v=>cnt[v]=(cnt[v]||0)+1);
+  const major=+Object.keys(cnt).reduce((a,b)=>cnt[a]>cnt[b]?a:b);
+  const p1=(cnt[1]||0)/y.length;
+  if(depth>=maxDepth||y.length<2*minLeaf||new Set(y).size===1)return {leaf:true,cls:major,p1,n:y.length};
+  let best=null;
+  for(let f=0;f<X[0].length;f++){
+    const vals=[...new Set(X.map(r=>r[f]))].sort((a,b)=>a-b);
+    for(let vi=0;vi<vals.length-1;vi++){const thr=(vals[vi]+vals[vi+1])/2;
+      const li=[],ri=[];X.forEach((r,i)=>(r[f]<=thr?li:ri).push(i));
+      if(li.length<minLeaf||ri.length<minLeaf)continue;
+      const gl=gini(li.map(i=>y[i])),gr=gini(ri.map(i=>y[i]));
+      const wg=(li.length*gl+ri.length*gr)/y.length;
+      if(!best||wg<best.wg)best={wg,f,thr,li,ri};}}
+  if(!best)return {leaf:true,cls:major,p1,n:y.length};
+  return {leaf:false,f:best.f,thr:best.thr,n:y.length,p1,cls:major,
+    L:buildTree(best.li.map(i=>X[i]),best.li.map(i=>y[i]),depth+1,maxDepth,minLeaf),
+    R:buildTree(best.ri.map(i=>X[i]),best.ri.map(i=>y[i]),depth+1,maxDepth,minLeaf)};
+}
+function treePredict(node,x){while(!node.leaf)node=x[node.f]<=node.thr?node.L:node.R;return node;}
+function decisionTree(X,y,{maxDepth=4,minLeaf=5}={}){const root=buildTree(X,y,0,maxDepth,minLeaf);
+  return {root,prob:x=>treePredict(root,x).p1,predict:(x,t=0.5)=>treePredict(root,x).p1>=t?1:0};}
+
+/* ---- Random Forest (bagged trees) ---- */
+function randomForest(X,y,{trees=15,maxDepth=5,minLeaf=4,seed=1}={}){
+  const r=mulberry32(seed),n=X.length,models=[];
+  for(let t=0;t<trees;t++){const bi=[];for(let i=0;i<n;i++)bi.push(Math.floor(r()*n));
+    models.push(buildTree(bi.map(i=>X[i]),bi.map(i=>y[i]),0,maxDepth,minLeaf));}
+  const prob=x=>{let s=0;models.forEach(m=>s+=treePredict(m,x).p1);return s/models.length;};
+  return {prob,predict:(x,t=0.5)=>prob(x)>=t?1:0,trees:models.length,models};
+}
+
+/* ---- k-Nearest Neighbours ---- */
+function knn(Xtr,ytr,k=7){
+  const prob=x=>{const d=Xtr.map((r,i)=>[r.reduce((s,v,j)=>s+(v-x[j])**2,0),ytr[i]]);
+    d.sort((a,b)=>a[0]-b[0]);let s=0;for(let i=0;i<k;i++)s+=d[i][1];return s/k;};
+  return {prob,predict:(x,t=0.5)=>prob(x)>=t?1:0,k};
+}
+
+/* ---- Gaussian Naive Bayes ---- */
+function naiveBayes(X,y){
+  const cls=[...new Set(y)],stats={},prior={};
+  cls.forEach(c=>{const rows=X.filter((_,i)=>y[i]===c);const d=X[0].length;
+    const mu=new Array(d).fill(0),vr=new Array(d).fill(0);
+    rows.forEach(r=>r.forEach((v,j)=>mu[j]+=v));mu.forEach((_,j)=>mu[j]/=rows.length);
+    rows.forEach(r=>r.forEach((v,j)=>vr[j]+=(v-mu[j])**2));vr.forEach((_,j)=>vr[j]=vr[j]/rows.length+1e-6);
+    stats[c]={mu,vr};prior[c]=rows.length/X.length;});
+  const logp=(x,c)=>{let lp=Math.log(prior[c]);const {mu,vr}=stats[c];
+    for(let j=0;j<x.length;j++)lp+=-0.5*Math.log(2*Math.PI*vr[j])-(x[j]-mu[j])**2/(2*vr[j]);return lp;};
+  const prob=x=>{const l1=logp(x,1),l0=logp(x,0);const m=Math.max(l1,l0);
+    const e1=Math.exp(l1-m),e0=Math.exp(l0-m);return e1/(e1+e0);};
+  return {prob,predict:(x,t=0.5)=>prob(x)>=t?1:0};
+}
+
+/* ---- Linear SVM (hinge loss + subgradient) ---- */
+function linearSVM(X,y,{epochs=200,lr=0.05,C=1}={}){
+  const n=X.length,d=X[0].length;let w=new Array(d).fill(0),b=0;
+  const yy=y.map(v=>v===1?1:-1);
+  for(let e=0;e<epochs;e++)for(let i=0;i<n;i++){let z=b;for(let j=0;j<d;j++)z+=w[j]*X[i][j];
+    if(yy[i]*z<1){for(let j=0;j<d;j++)w[j]+=lr*(C*yy[i]*X[i][j]-w[j]/n);b+=lr*C*yy[i];}
+    else for(let j=0;j<d;j++)w[j]-=lr*w[j]/n;}
+  const score=x=>{let z=b;for(let j=0;j<x.length;j++)z+=w[j]*x[j];return z;};
+  const prob=x=>1/(1+Math.exp(-score(x)));
+  return {score,prob,predict:(x,t=0)=>score(x)>=t?1:0,w,b};
+}
+
+/* ---- One-Class anomaly (Mahalanobis distance on normal class) ---- */
+function anomalyModel(Xnormal){
+  const d=Xnormal[0].length,n=Xnormal.length,mu=new Array(d).fill(0);
+  Xnormal.forEach(r=>r.forEach((v,j)=>mu[j]+=v));mu.forEach((_,j)=>mu[j]/=n);
+  // diagonal covariance (simple, robust)
+  const vr=new Array(d).fill(0);Xnormal.forEach(r=>r.forEach((v,j)=>vr[j]+=(v-mu[j])**2));vr.forEach((_,j)=>vr[j]=vr[j]/n+1e-6);
+  const dist=x=>{let s=0;for(let j=0;j<x.length;j++)s+=(x[j]-mu[j])**2/vr[j];return Math.sqrt(s);};
+  return {dist,mu,vr};
+}
+
+/* ---- metrics ---- */
+function confusion(model,Xte,yte,t){const m=[[0,0],[0,0]];
+  Xte.forEach((x,i)=>{const p=model.predict(x,t);m[yte[i]][p]++;});return m;}
+function metricsFrom(cm){const TN=cm[0][0],FP=cm[0][1],FN=cm[1][0],TP=cm[1][1];
+  const acc=(TP+TN)/(TP+TN+FP+FN||1);const prec=TP/(TP+FP||1);const rec=TP/(TP+FN||1);
+  const f1=(prec+rec)?2*prec*rec/(prec+rec):0;return {TN,FP,FN,TP,acc,prec,rec,f1};}
+function auc(model,Xte,yte){const s=Xte.map((x,i)=>[model.prob?model.prob(x):model.score(x),yte[i]]);
+  s.sort((a,b)=>b[0]-a[0]);let pos=yte.filter(v=>v===1).length,neg=yte.length-pos;
+  if(!pos||!neg)return 0.5;let tp=0,fp=0,area=0,pfp=0,ptp=0;
+  s.forEach(([_,yl])=>{if(yl===1)tp++;else fp++;area+=(fp-pfp)*(tp+ptp)/2;pfp=fp;ptp=tp;});
+  return area/(pos*neg);}
+
+/* ---- Linear regression (normal equations, any #features incl. 1) ---- */
+function solveLinear(A,bv){const n=A.length;const M=A.map((r,i)=>r.concat(bv[i]));
+  for(let c=0;c<n;c++){let piv=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[piv][c]))piv=r;
+    [M[c],M[piv]]=[M[piv],M[c]];const d=M[c][c]||1e-9;
+    for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c]/d;for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}}
+  return M.map((r,i)=>r[n]/(r[i]||1e-9));}
+function linregN(X,y){const n=X.length,d=X[0].length,Xa=X.map(r=>[1,...r]),p=d+1;
+  const XtX=Array.from({length:p},()=>new Array(p).fill(0)),Xty=new Array(p).fill(0);
+  for(let i=0;i<n;i++)for(let a=0;a<p;a++){Xty[a]+=Xa[i][a]*y[i];for(let b=0;b<p;b++)XtX[a][b]+=Xa[i][a]*Xa[i][b];}
+  const coef=solveLinear(XtX,Xty);
+  return {coef,predict:x=>{let s=coef[0];for(let j=0;j<x.length;j++)s+=coef[j+1]*x[j];return s;}};}
+function regMetrics(model,X,y){const n=y.length,ybar=y.reduce((s,v)=>s+v,0)/n;
+  let ssRes=0,ssTot=0,absErr=0;
+  for(let i=0;i<n;i++){const pred=model.predict(X[i]);ssRes+=(y[i]-pred)**2;ssTot+=(y[i]-ybar)**2;absErr+=Math.abs(y[i]-pred);}
+  return {r2:1-ssRes/(ssTot||1),rmse:Math.sqrt(ssRes/n),mae:absErr/n};}
+
+if(typeof module!=='undefined')module.exports={mulberry32,gauss,zstats,zapply,split,logreg,decisionTree,
+  randomForest,knn,naiveBayes,linearSVM,anomalyModel,confusion,metricsFrom,auc,linregN,regMetrics,solveLinear};
+
+/* ===== Shared walkthrough framework (used by both playgrounds) ===== */
+const PAL={teal:'#33C7B4',teald:'#1F8F80',copper:'#E0924E',red:'#E36464',gold:'#E7C15A',
+  violet:'#9A8CDB',blue:'#5AA9E6',green:'#7ED957',ink:'#EAF1F6',mute:'#8DA2B5',
+  card:'#13273A',panel:'#16283A',panel2:'#1C3247',line:'#27405F',bg:'#0E1C2A'};
+
+/* ---- small helpers to build HTML strings ---- */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function dataTable(cols,rows,opts={}){
+  const hi=opts.highlightCol; const maxr=opts.max||rows.length;
+  let h='<div class="tbl-wrap"><table class="dtbl"><thead><tr>';
+  cols.forEach((c,i)=>h+=`<th${i===hi?' class="hl"':''}>${esc(c)}</th>`);
+  h+='</tr></thead><tbody>';
+  rows.slice(0,maxr).forEach(r=>{h+='<tr>';
+    r.forEach((v,i)=>{const cls=[]; if(i===hi)cls.push('hl');
+      if(opts.labelCol===i){cls.push('lab'); cls.push(v==opts.posLabel?'pos':'neg');}
+      h+=`<td${cls.length?' class="'+cls.join(' ')+'"':''}>${esc(v)}</td>`;});
+    h+='</tr>';});
+  h+='</tbody></table></div>';
+  if(rows.length>maxr) h+=`<div class="tbl-note">…and ${rows.length-maxr} more rows (${rows.length} total in the sample)</div>`;
+  return h;
+}
+
+function metricCard(label,value,color,sub){
+  return `<div class="mcard"><div class="mval" style="color:${color}">${value}</div>
+    <div class="mlab">${esc(label)}</div>${sub?`<div class="msub">${sub}</div>`:''}</div>`;
+}
+
+function stepBox(n,title,body,color){
+  return `<div class="stepbox"><div class="stepnum" style="background:${color||PAL.teald}">${n}</div>
+    <div class="stepbody"><div class="steptitle">${esc(title)}</div><div class="steptext">${body}</div></div></div>`;
+}
+
+/* progressive reveal: sections hidden until "next" clicked */
+function initReveal(tabId){
+  const steps=[...document.querySelectorAll(`#${tabId} .reveal-step`)];
+  let shown=1;
+  const paint=()=>{steps.forEach((s,i)=>{s.style.display=i<shown?'block':'none';});
+    const btn=document.querySelector(`#${tabId} .reveal-btn`);
+    if(btn){ if(shown>=steps.length){btn.style.display='none';}
+      else {btn.style.display='inline-block';btn.textContent=steps[shown]?.dataset.label||'Show next step ▸';}}
+  };
+  const btn=document.querySelector(`#${tabId} .reveal-btn`);
+  if(btn)btn.onclick=()=>{shown=Math.min(steps.length,shown+1);paint();
+    steps[shown-1]?.scrollIntoView({behavior:'smooth',block:'center'});};
+  paint();
+}
+
+/* section shell */
+function section(kicker,title,inner){
+  return `<section class="wsec"><div class="wkicker">${esc(kicker)}</div>
+    <h3 class="wtitle">${esc(title)}</h3>${inner}</section>`;
+}
+
+/* persona card */
+function personaCard(uc){
+  return `<div class="persona">
+    <div class="pface" style="background:${uc.accent}">${uc.persona.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+    <div class="pmeta"><div class="pname">${esc(uc.persona)}</div>
+      <div class="prole">${esc(uc.role)} · ${esc(uc.company)}</div></div></div>`;
+}
+
+/* the big renderer: build one use-case tab's full HTML */function renderUseCase(uc,idx){
+  const A=uc.accent;
+  let h=`<div class="uc-head"><div class="uc-badge" style="background:${A}22;color:${A};border-color:${A}">${esc(uc.tag)}</div>
+    <h2 class="uc-h2">${esc(uc.title)}</h2><p class="uc-sub">${esc(uc.subtitle)}</p></div>`;
+
+  // 1. BUSINESS STORY
+  h+=section('1 · The business story','Who needs this, and why',
+    `<div class="story">${personaCard(uc)}
+      <div class="storytext">
+        <p><b class="em">The company.</b> ${uc.story.company}</p>
+        <p><b class="em">The person.</b> ${uc.story.person}</p>
+        <p><b class="em">The problem.</b> ${uc.story.problem}</p>
+        <p><b class="em">How the algorithm helps.</b> ${uc.story.help}</p>
+      </div></div>
+      <div class="laychip">In one plain sentence</div>
+      <div class="layman">${uc.story.layman}</div>`);
+
+  // 2. THE DATA
+  h+=section('2 · The data we start with','What the computer is given',
+    `<p class="wp">${uc.data.intro}</p>
+     ${dataTable(uc.data.cols,uc.data.rows,uc.data.opts||{})}
+     <div class="collist"><div class="collist-h">What each column means</div>${
+       uc.data.colExplain.map(c=>`<div class="colrow"><span class="colname" style="color:${A}">${esc(c[0])}</span><span>${c[1]}</span></div>`).join('')}</div>
+     <div class="laychip">Reading one row</div>
+     <div class="layman">${uc.data.rowExplain}</div>`);
+
+  // 3. HOW THE ALGORITHM THINKS
+  h+=section('3 · How the algorithm thinks',uc.algo.name+' — in plain words',
+    `<p class="wp">${uc.algo.plain}</p>
+     ${uc.algo.viz?`<div class="vizbox"><canvas class="viz-canvas" id="viz-${idx}" width="1000" height="420"></canvas><div class="cap">${uc.algo.vizCap||''}</div></div>`:''}
+     <div class="treebox" id="tree-${idx}"></div>
+     ${uc.algo.analogy?`<div class="laychip">A simple analogy for understanding</div><div class="layman">${uc.algo.analogy}</div>`:''}
+     ${uc.math?`<div class="mathbox">
+        <div class="math-h">📐 The equation behind it</div>
+        <div class="math-eq">${uc.math.equation}</div>
+        <div class="math-where">${uc.math.where||''}</div>
+        <div class="laychip" style="margin-top:12px">The equation explained like you’re in 6th class</div>
+        <div class="layman">${uc.math.plain}</div>
+        <div class="math-use"><b style="color:${A}">In this tab →</b> ${uc.math.inScenario}</div>
+      </div>`:''}`);
+
+  // 4. RUNNING IT STEP BY STEP (progressive reveal)
+  let steps='';
+  uc.run.steps.forEach((s,i)=>{
+    steps+=`<div class="reveal-step" data-label="${esc(s.next||'Show next step ▸')}">${stepBox(i+1,s.title,s.body,A)}
+      <div class="stepio" id="io-${idx}-${i}"></div></div>`;
+  });
+  h+=section('4 · Running it, step by step','From raw data to a working model',
+    `<p class="wp">${uc.run.intro}</p>${steps}
+     <button class="reveal-btn" style="border-color:${A};color:${A}">Show next step ▸</button>`);
+
+  // 5. RESULTS & DECISION
+  h+=`<section class="wsec"><div class="wkicker">5 · The result &amp; the decision</div>
+    <h3 class="wtitle">What came out, and what ${uc.persona.split(' ')[0]} does with it</h3>
+    <div class="resultbox" id="result-${idx}"><div class="loading">computing live…</div></div>
+    ${uc.interaction?`<div class="trywrap" id="try-${idx}"></div>`:''}
+    </section>`;
+
+  return h;
+}
+
+/* ===== Step-by-step INPUT → OUTPUT panels (shared) ===== */
+function stepKind(title){
+  const t=title.toLowerCase();
+  if(/clean/.test(t))return 'clean';
+  if(/split/.test(t))return 'split';
+  if(/scale|prepare|prep|engineer|build (the )?(behaviour|risk )?(score|signal|measure|basket)|handle imbalance|put both|put the two/.test(t))return 'prep';
+  if(/choose k|choose ε|set ε|tune ε|set the alarm|set the threshold|choose the number/.test(t))return 'setparam';
+  if(/train|grow|fit|learn (each|the)|run k-means|run dbscan|compute the principal|count how often|compute confidence|distribution|shape of normal/.test(t))return 'train';
+  if(/collect|gather|assemble|label (historical|past|the)|build the baskets|label past/.test(t))return 'collect';
+  if(/evaluate/.test(t))return 'evaluate';
+  return 'apply';
+}
+function ioRow(inBody,outBody){
+  return `<div class="io"><div class="io-col"><span class="io-tag io-in">INPUT</span><div class="io-body">${inBody}</div></div>
+    <div class="io-arrow">➜</div>
+    <div class="io-col"><span class="io-tag io-out">OUTPUT</span><div class="io-body">${outBody}</div></div></div>`;
+}
+function ioMini(cols,rows){
+  let h='<table class="iotbl"><thead><tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr>'+r.map(v=>`<td>${v}</td>`).join('')+'</tr>';});
+  return h+'</tbody></table>';
+}
+/* fill every step's IO from a context object shared by both playgrounds */
+function fillPipelineIO(uc,idx,ctx){
+  uc.run.steps.forEach((s,i)=>{
+    const el=document.getElementById('io-'+idx+'-'+i);if(!el)return;
+    const kind=stepKind(s.title);
+    let io=ctx.custom&&ctx.custom(kind,s,i);
+    if(!io) io=ctx.build(kind,s,i);
+    el.innerHTML=io||'';
+  });
+}
+
+/* ===== Supervised use cases: content + data ===== */
+/* Each case generates 2 named features so we can visualise a decision boundary.
+   Positive class (index 1) is always the "event to catch" (default, fraud, lapse…). */
+
+function blobs(seed,n,spec){
+  const r=mulberry32(seed),X=[],y=[];
+  for(let i=0;i<n;i++){const pos=r()<spec.rate?1:0;const g=pos?spec.pos:spec.neg;
+    let a=g.c[0]+gauss(r)*g.s[0], b=g.c[1]+gauss(r)*g.s[1];
+    if(spec.clamp){a=Math.max(spec.clamp[0][0],Math.min(spec.clamp[0][1],a));
+      b=Math.max(spec.clamp[1][0],Math.min(spec.clamp[1][1],b));}
+    X.push([a,b]);y.push(pos);}
+  return {X,y};
+}
+
+const SUP_CASES=[
+{
+  id:'credit-default', tag:'CLASSIFICATION · LOGISTIC REGRESSION', accent:PAL.red,
+  title:'Credit-Default Prediction', subtitle:'Estimating the chance a borrower will stop repaying — as a clear percentage the lender can act on.',
+  company:'Arca Lending', persona:'Sanjay Gupta', role:'Chief Credit Officer',
+  model:'logreg', featNames:['Debt-to-income ratio','Missed payments (last 12 mo)'],
+  slider:[{lab:'Debt-to-income ratio',min:0.1,max:0.9,val:0.35,step:0.01,fmt:v=>v.toFixed(2)},
+          {lab:'Missed payments (12 mo)',min:0,max:6,val:1,step:1,fmt:v=>v}],
+  gen:(s,n)=>blobs(s,n,{rate:0.30,neg:{c:[0.32,0.6],s:[0.10,0.9]},pos:{c:[0.62,3.2],s:[0.11,1.3]},clamp:[[0.05,0.95],[0,6]]}),
+  posLabel:'will default', watch:'auc',
+  story:{
+    company:'Arca Lending is a mid-size consumer lender. It approves personal loans and lives or dies by one number: how many borrowers stop repaying.',
+    person:'Sanjay signs off on lending policy. Approve too freely and defaults pile up; approve too tightly and Arca loses good business to rivals.',
+    problem:'For every new applicant Sanjay needs a <b>defensible number</b>: “what is the chance this person defaults?” — not a vague gut feel, and something regulators will accept.',
+    help:'Logistic regression looks at an applicant’s finances and outputs a <b>probability of default</b> between 0% and 100%. Sanjay sets a cut-off (say 20%) above which loans are declined or priced higher.',
+    layman:'It’s like a weather forecast, but for “will this loan go bad?”. Instead of “70% chance of rain” it says “18% chance of default.” Sanjay then decides what chance is too risky to lend at.'
+  },
+  data:{
+    intro:'Each row is a past borrower we already know the outcome for (that’s what makes it “supervised” — we learn from labelled history).',
+    cols:['Borrower','Debt-to-income','Missed payments (12mo)','Outcome'],
+    rows:[['B-01','0.28','0','repaid'],['B-02','0.66','4','defaulted'],['B-03','0.31','1','repaid'],
+          ['B-04','0.71','3','defaulted'],['B-05','0.24','0','repaid'],['B-06','0.58','2','defaulted'],
+          ['B-07','0.35','1','repaid'],['B-08','0.62','5','defaulted']],
+    opts:{labelCol:3,posLabel:'defaulted'},
+    colExplain:[['Debt-to-income','How much of their income is already eaten by debt repayments. Higher = more stretched.'],
+      ['Missed payments','How many monthly payments they missed in the last year. A direct stress signal.'],
+      ['Outcome','What actually happened — repaid or defaulted. This is the “answer” the model learns from.']],
+    rowExplain:'Row B-02 — a stretched borrower (66% debt-to-income) who already missed 4 payments — defaulted. The model soaks up dozens of examples like this to learn the pattern that separates repayers from defaulters.'
+  },
+  algo:{name:'Logistic regression', viz:true, vizCap:'Red = defaulted, teal = repaid. The shaded split is the model’s “risk line”; the deeper the red zone, the higher the default probability.',
+    plain:'Logistic regression draws a smart dividing line through the borrowers and, crucially, doesn’t just say “yes/no” — it says <b>how far</b> each person is on the risky side and turns that distance into a <b>probability</b>. Stand deep in the risky zone → 85%. Sit near the line → 50%. Safe zone → 5%.',
+    analogy:'Think of a examiner grading on a curve. They don’t just pass/fail — they give a mark, and you choose the pass line. Logistic regression gives every applicant a “default mark” from 0 to 100%, and Sanjay picks the line above which he won’t lend.'
+  },
+  math:{equation:'<span class="v">p</span> = 1 / (1 + e<sup>−(b₀ + b₁·<span class="v">x₁</span> + b₂·<span class="v">x₂</span>)</sup>)', where:'<b>p</b> = probability of default (0–1) · <b>x₁,x₂</b> = the borrower’s numbers · <b>b</b>’s = weights the model learns · <b>e</b> ≈ 2.718', plain:'First the model adds up the risk: give each borrower number a weight and total them (that’s the b₀ + b₁x₁ + b₂x₂ part — just like adding up points). But a total can be any size, and we want a chance between 0% and 100%. So we push the total through a special S-shaped “squasher” (the 1/(1+e<sup>−…</sup>) part) that turns <i>any</i> number into a neat percentage. A big positive total → near 100%. A big negative total → near 0%.', inScenario:'A stretched borrower with missed payments produces a big positive total, which the squasher turns into (say) 85%. Sanjay declines or re-prices anyone above his cut-off.'},
+  run:{
+    intro:'The exact pipeline Arca runs to build and use the model:',
+    steps:[
+      {title:'Collect labelled history',body:'Pull thousands of past loans where we already know who repaid and who defaulted. No labels, no supervised learning.',next:'Next: clean the data ▸'},
+      {title:'Clean the data',body:'Remove duplicates, fix impossible values (a 300% debt-to-income is a typo), and handle blanks. Garbage in = garbage lending decisions.',next:'Next: prepare the features ▸'},
+      {title:'Prepare & scale features',body:'Put debt-to-income and missed-payments on a common scale so one doesn’t dominate just because its numbers are bigger.',next:'Next: split the data ▸'},
+      {title:'Split into train & test',body:'Learn on 70% of the history, then check honesty on the untouched 30%. Testing on data it already saw would be like marking your own exam.',next:'Next: train the model ▸'},
+      {title:'Train',body:'The model adjusts its risk line until it best separates past repayers from defaulters — turning each borrower into a probability.',next:'Next: evaluate ▸'},
+      {title:'Evaluate on the held-out test set',body:'Measure how well the probabilities rank real defaulters above real repayers. Only then is it trusted for live decisions.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Because the model outputs a <b>probability</b>, Sanjay doesn’t need a crystal ball — he needs a cut-off. He sets it where the business hurts least: decline or re-price any applicant above, say, a 20% default chance. The <b>AUC of ${(m.auc).toFixed(2)}</b> tells him the model is genuinely good at ranking risky borrowers above safe ones (0.5 would be a coin toss, 1.0 perfect). If AUC were near 0.5 he would not let it touch real lending decisions.`;}
+},
+{
+  id:'loan-approval', tag:'CLASSIFICATION · DECISION TREE', accent:PAL.teal, outcomes:['approve','reject'],
+  title:'Loan Approval Rules', subtitle:'Turning messy applicant data into a clear, explainable set of if-then rules a loan officer and a regulator can both read.',
+  company:'Grameen Plus', persona:'Anita Desai', role:'Head of Retail Credit',
+  model:'tree', featNames:['Monthly income (₹ ’000)','Existing EMIs (₹ ’000)'],
+  slider:[{lab:'Monthly income (₹ ’000)',min:15,max:200,val:60,step:1,fmt:v=>'₹'+v+'k'},
+          {lab:'Existing EMIs (₹ ’000)',min:0,max:120,val:20,step:1,fmt:v=>'₹'+v+'k'}],
+  gen:(s,n)=>blobs(s,n,{rate:0.4,neg:{c:[90,15],s:[35,10]},pos:{c:[40,45],s:[18,18]},clamp:[[15,200],[0,120]]}),
+  posLabel:'reject', watch:'acc',
+  story:{
+    company:'Grameen Plus lends to first-time borrowers, many with no credit score. It must decide fast and be able to <b>explain every rejection</b>.',
+    person:'Anita runs retail credit. Regulators and customers demand to know <i>why</i> a loan was refused — “the computer said no” is not allowed.',
+    problem:'Anita needs decisions that are accurate <b>and</b> transparent. A black box won’t survive an audit; she needs readable rules.',
+    help:'A decision tree learns a flowchart of yes/no questions — “income above ₹40k? EMIs below ₹30k?” — ending in approve or reject. It’s literally a set of if-then rules anyone can follow.',
+    layman:'Think of the flowchart a bank clerk keeps under the desk: “If income is above X and existing loans are below Y, approve.” The decision tree <i>builds that flowchart automatically</i> from past decisions — and you can print it out and hand it to an auditor.'
+  },
+  data:{
+    intro:'Past applications with the decision that was made. The tree learns the flowchart hidden inside these outcomes.',
+    cols:['Applicant','Monthly income','Existing EMIs','Decision'],
+    rows:[['A-01','₹85k','₹12k','approved'],['A-02','₹32k','₹40k','rejected'],['A-03','₹1,20k','₹20k','approved'],
+          ['A-04','₹38k','₹35k','rejected'],['A-05','₹95k','₹8k','approved'],['A-06','₹45k','₹52k','rejected']],
+    opts:{labelCol:3,posLabel:'rejected'},
+    colExplain:[['Monthly income','What the applicant earns each month.'],
+      ['Existing EMIs','How much they already pay every month on other loans.'],
+      ['Decision','Approved or rejected — the outcome the tree learns to reproduce and explain.']],
+    rowExplain:'A-02 earns ₹32k but already pays ₹40k in EMIs — clearly over-stretched, so rejected. The tree will discover a rule close to “reject if EMIs are high relative to income”, all on its own.'
+  },
+  algo:{name:'Decision tree', viz:true, vizCap:'The blocky boundary is the giveaway: a tree splits the world into rectangles with simple yes/no cuts.',
+    plain:'A decision tree repeatedly asks the <b>single most useful yes/no question</b> and splits the applicants into two groups, then does it again inside each group. Each split is a plain rule like “income ≤ ₹40k?”. Follow the branches and you reach an approve/reject leaf — no maths, just a flowchart.',
+    analogy:'It’s the game “20 Questions.” Each question chops the possibilities in half — “Is it alive? Bigger than a car?” The tree learns the best questions to ask, in the best order, to reach “approve” or “reject” as fast and accurately as possible.'
+  },
+  math:{equation:'if <span class="v">x</span> ≤ threshold → go left,&nbsp; else → go right &nbsp;•&nbsp; Gini = 1 − Σ p<sub>i</sub>²', where:'<b>x</b> = a feature (e.g. income) · <b>threshold</b> = a cut-off the tree picks · <b>p<sub>i</sub></b> = share of each outcome in a group', plain:'There’s no big formula — a tree is just a chain of yes/no questions. To choose the best question it uses a “messiness score” called <b>Gini</b>. A group that is all one outcome has Gini 0 (perfectly tidy); a 50-50 mix has the highest Gini (messiest). The tree always picks the question that chops the data into the two <i>tidiest</i> possible groups.', inScenario:'The tree discovers a cut-off like “EMIs-to-income above 60%?” because splitting there leaves one clean “reject” pile and one clean “approve” pile — the exact rule Anita shows the customer.'},
+  run:{
+    intro:'How Grameen Plus grows its approval tree:',
+    steps:[
+      {title:'Gather labelled decisions',body:'Collect past applications and whether each was approved or rejected.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Fix data-entry errors and remove incomplete applications so the rules aren’t learned from noise.',next:'Next: prepare features ▸'},
+      {title:'Prepare features',body:'Trees don’t need scaling (they only compare “above/below a threshold”), but we still tidy units and encode any categories.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Grow the tree on 70%, then test its rules on the unseen 30%.',next:'Next: grow the tree ▸'},
+      {title:'Grow the tree',body:'At each step it picks the question that best separates approvals from rejections, stopping before it gets so detailed it just memorises the training set.',next:'Next: evaluate & read the rules ▸'},
+      {title:'Evaluate & read the rules',body:'Check accuracy on the test set, then print the flowchart. Every future rejection now comes with a reason.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Anita gets two things she needs: an <b>accuracy of ${(m.acc*100).toFixed(0)}%</b> on unseen applications, and a <b>readable flowchart</b>. When a customer asks “why was I rejected?”, she can point to the exact branch — “existing EMIs too high for your income.” That explainability is often worth more to her than squeezing out the last few percent of accuracy, because it keeps the regulator satisfied and the process fair.`;}
+},
+{
+  id:'card-fraud', tag:'CLASSIFICATION · RANDOM FOREST', accent:PAL.copper, outcomes:['genuine','fraud'], forestExample:[2.5,3.2],
+  title:'Card-Fraud Detection', subtitle:'Catching fraudulent card transactions in real time by combining the votes of many decision trees.',
+  company:'Vault Cards', persona:'Karthik Reddy', role:'Fraud Risk Lead',
+  model:'forest', featNames:['Amount vs usual (×)','Distance from home (score)'],
+  slider:[{lab:'Amount vs the card’s usual (×)',min:0.2,max:8,val:1,step:0.1,fmt:v=>v.toFixed(1)+'×'},
+          {lab:'Distance-from-home score',min:0,max:10,val:1,step:0.5,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.28,neg:{c:[1.3,1.6],s:[0.9,1.5]},pos:{c:[3.2,4.6],s:[1.9,2.4]},clamp:[[0.2,8],[0,10]]}),
+  posLabel:'fraud', watch:'rec',
+  story:{
+    company:'Vault Cards issues millions of credit cards. Every swipe must be judged “ok” or “block” in a fraction of a second.',
+    person:'Karthik owns fraud losses. Miss a fraud and the bank eats the cost; block a genuine purchase and the customer is furious at the till.',
+    problem:'Fraud is rare, sneaky, and changes constantly. A single simple rule is easily fooled. Karthik needs a robust judge that weighs many signals at once.',
+    help:'A random forest is a <b>committee of decision trees</b>. Each tree sees the transaction slightly differently and votes “fraud” or “fine”; the majority wins. Many diverse opinions beat one — it’s far harder to fool.',
+    layman:'Instead of asking one expert, you ask a whole panel of them and go with the majority vote. Each panellist (tree) has quirks, but their combined verdict is steadier and harder to trick than any single one. That panel is a “random forest.”'
+  },
+  data:{
+    intro:'Past transactions we already know were genuine or fraud. Two of the many signals are shown.',
+    cols:['Txn','Amount vs usual','Distance-from-home','Label'],
+    rows:[['T-01','0.8×','0.5','genuine'],['T-02','5.4×','7.2','fraud'],['T-03','1.2×','1.1','genuine'],
+          ['T-04','4.1×','6.0','fraud'],['T-05','0.9×','0.3','genuine'],['T-06','6.2×','8.1','fraud']],
+    opts:{labelCol:3,posLabel:'fraud'},
+    colExplain:[['Amount vs usual','How big this purchase is compared with what this card normally spends. 5× = five times the usual.'],
+      ['Distance-from-home','How far the transaction is from where the cardholder usually shops (a computed score).'],
+      ['Label','Whether it turned out to be genuine or fraud.']],
+    rowExplain:'T-02 — a purchase 5.4× the card’s usual size, far from home — was fraud. No single clue is proof (holidays exist!), which is exactly why a <i>panel</i> of trees weighing several clues together works better than one rule.'
+  },
+  algo:{name:'Random forest', viz:true, vizCap:'A softer, wobbly boundary — the smoothed result of many trees voting, less jagged than a single tree.',
+    plain:'A random forest builds <b>many</b> decision trees, each on a slightly different random slice of the data. To judge a transaction, every tree votes and the forest takes the majority. Because the trees disagree in different ways, their <b>errors cancel out</b> — the crowd is wiser and steadier than any individual tree.',
+    analogy:'“Ask the audience” on a quiz show. Any one audience member might be wrong, but the majority answer is usually right. A random forest is a big audience of decision trees; the fraud verdict is their poll result.'
+  },
+  math:{equation:'ŷ = ( tree₁(<span class="v">x</span>) + tree₂(<span class="v">x</span>) + … + tree<sub>T</sub>(<span class="v">x</span>) ) / T', where:'<b>ŷ</b> = the forest’s fraud score (0–1) · <b>tree<sub>t</sub></b> = one tree’s vote · <b>T</b> = number of trees', plain:'Each tree looks at the case and votes (0 = no, 1 = yes). The forest simply takes the <b>average</b> of all the votes. If 13 of 18 trees vote “yes”, the score is 13 ÷ 18 ≈ 0.72. Averaging many opinions cancels out the odd mistake any single tree makes — the crowd is wiser than one.', inScenario:'A purchase that is 5× the usual size and far from home makes most trees vote “fraud”, so the average score is high and Karthik’s system blocks it.'},
+  run:{
+    intro:'How Vault Cards trains its fraud forest:',
+    steps:[
+      {title:'Label historical transactions',body:'Assemble millions of past transactions tagged genuine or fraud (from chargebacks and investigations).',next:'Next: clean & engineer ▸'},
+      {title:'Clean & engineer features',body:'Remove test transactions and build signals like “amount vs the card’s usual” and “distance from home”. Good features matter more than the algorithm.',next:'Next: prepare ▸'},
+      {title:'Prepare the data',body:'Handle the rare-fraud imbalance (fraud is a tiny fraction) so the forest doesn’t just learn to shout “genuine” at everything.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Train on the majority, keep a fresh slice to test honestly — split by time so we never test on the past.',next:'Next: grow many trees ▸'},
+      {title:'Grow the forest',body:'Build 15+ trees, each on a random sample. Together they form the voting committee.',next:'Next: evaluate on recall ▸'},
+      {title:'Evaluate (recall first)',body:'For fraud, missing a real fraud is the costly error, so we care most about recall — the share of true fraud we actually catch.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Karthik reads <b>recall = ${(m.rec*100).toFixed(0)}%</b> first: of all the real fraud, the forest caught that share. In fraud, a missed case is expensive, so recall is king. But he balances it against annoying genuine customers (false alarms), shown by <b>precision = ${(m.prec*100).toFixed(0)}%</b>. He tunes the alert threshold to catch as much fraud as possible while keeping false blocks bearable — a business trade-off the two numbers make explicit.`;}
+},
+{
+  id:'txn-anomaly', tag:'ANOMALY DETECTION · ONE-CLASS MODEL', accent:PAL.gold,
+  title:'Transaction Anomaly Screening', subtitle:'Flagging transactions unlike anything seen before — without ever being shown an example of the bad thing.',
+  company:'Meridian Bank', persona:'Fatima Sheikh', role:'Financial-Crime Analyst',
+  model:'anomaly', featNames:['Transaction size (score)','Timing oddness (score)'],
+  slider:[{lab:'Transaction-size score',min:-3,max:6,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Timing-oddness score',min:-3,max:6,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.12,neg:{c:[0,0],s:[1,1]},pos:{c:[3.5,3.5],s:[1.4,1.4]},clamp:[[-3,6],[-3,6]]}),
+  posLabel:'anomaly', watch:'rec',
+  story:{
+    company:'Meridian Bank must catch novel financial crime — schemes it has never seen before, so there are no labelled examples to learn from.',
+    person:'Fatima investigates suspicious activity. New laundering tricks appear constantly; by definition she has no past examples of them.',
+    problem:'You can’t train a normal classifier to spot a pattern you’ve never seen. Fatima needs a model that learns only what <b>normal</b> looks like and flags anything that doesn’t fit.',
+    help:'A one-class anomaly model studies the shape of normal transactions and measures how far each new one sits from that norm. Big distance = “this doesn’t belong” = investigate. It never needs a single fraud example.',
+    layman:'Imagine a bank teller who has seen a million ordinary transactions. They can’t list every possible scam, but they instantly sense when something “just feels off.” The anomaly model turns that gut feeling into a distance score — the further from normal, the louder the alarm.'
+  },
+  data:{
+    intro:'The model is trained on <b>normal transactions only</b>. The anomalies below are shown just so you can see what it will later flag.',
+    cols:['Txn','Size score','Timing score','(nature, hidden)'],
+    rows:[['T-01','0.2','-0.3','normal'],['T-02','0.1','0.4','normal'],['T-03','3.9','4.1','anomaly'],
+          ['T-04','-0.4','0.2','normal'],['T-05','4.3','3.6','anomaly'],['T-06','0.3','-0.1','normal']],
+    opts:{},
+    colExplain:[['Size / Timing score','Engineered numbers where 0 = perfectly ordinary. Normal transactions huddle near 0; odd ones drift far out.'],
+      ['(nature, hidden)','Shown for your understanding only. The model is trained without these — it only ever sees “normal”.']],
+    rowExplain:'T-05 sits far from the normal huddle (4.3, 3.6). The model was never told what fraud looks like — it flags T-05 simply because it’s <i>unlike everything normal it has seen</i>.'
+  },
+  algo:{name:'One-class anomaly detection', viz:true, vizCap:'Teal = normal (what the model learned); gold ring marks the “normal zone”. Anything outside is flagged.',
+    plain:'The model learns the <b>centre and spread of normal</b> transactions — essentially a cloud with a boundary around it. For any new transaction it measures the <b>distance</b> from the centre of normal. Inside the cloud → fine. Far outside → anomaly. It only ever needed examples of “normal”.',
+    analogy:'A shepherd who knows exactly where the flock grazes. Any sheep that wanders far from the herd stands out immediately — the shepherd doesn’t need to know <i>why</i> it wandered, just that it’s far from the flock. Distance from the flock = the anomaly score.'
+  },
+  math:{equation:'distance = √( Σ ( (<span class="v">x<sub>i</sub></span> − μ<sub>i</sub>)² ⁄ σ<sub>i</sub>² ) )', where:'<b>x<sub>i</sub></b> = the transaction’s value on signal i · <b>μ<sub>i</sub></b> = the average “normal” · <b>σ<sub>i</sub></b> = how much normal usually varies', plain:'Measure how far a transaction sits from the middle of “normal”, but count each step in units of how spread-out normal usually is. If normal barely varies and this one is way out, the distance is huge. The squares and √ are just the ordinary way to measure straight-line distance, like on a map.', inScenario:'A transaction far from the normal cloud gets a big distance; anything past Fatima’s alarm line is flagged — even though the model was never shown a single example of fraud.'},
+  run:{
+    intro:'Meridian’s anomaly-screening pipeline:',
+    steps:[
+      {title:'Collect normal transactions',body:'Gather a large set of transactions believed to be ordinary. Crucially, we need no fraud examples at all.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Strip out known errors and test entries so “normal” really means normal.',next:'Next: engineer & scale ▸'},
+      {title:'Engineer & scale features',body:'Build scores like size-oddness and timing-oddness, scaled so 0 means typical. Distance only means something on a common scale.',next:'Next: learn the normal shape ▸'},
+      {title:'Learn the shape of normal',body:'The model records where normal transactions sit and how far they usually spread — the “flock’s” centre and size.',next:'Next: set the alarm line ▸'},
+      {title:'Set the alarm threshold',body:'Choose a distance beyond which a transaction is “too far from normal”. Tighter = more alerts (more false alarms); looser = fewer.',next:'Next: screen live traffic ▸'},
+      {title:'Screen live transactions',body:'Every new transaction gets a distance score; anything past the line goes to Fatima’s queue.'}
+    ]
+  },
+  interaction:{type:'anomaly-score'},
+  decision(m){return `Fatima can’t measure “accuracy” the usual way — there were no fraud labels to train on. Instead she watches, on a <b>reviewed sample</b>, how many genuinely odd transactions the distance score surfaces (recall ≈ <b>${(m.rec*100).toFixed(0)}%</b> here). She sets the alarm line to catch as many true oddities as her team can realistically investigate. The model’s job isn’t to say “this is fraud” — it’s to hand Fatima a <b>short, ranked queue of the weirdest transactions</b> to look at first.`;}
+},
+{
+  id:'credit-downgrade', tag:'CLASSIFICATION · k-NEAREST NEIGHBOURS', accent:PAL.violet,
+  title:'Credit-Downgrade Early Warning', subtitle:'Predicting whether a company is heading for a credit downgrade by comparing it to the most similar past companies.',
+  company:'Northwind Ratings', persona:'Vikram Nair', role:'Credit Analyst',
+  model:'knn', featNames:['Leverage (debt/equity)','Interest-cover (×)'],
+  slider:[{lab:'Leverage (debt / equity)',min:0.5,max:6,val:2,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Interest-cover (× earnings)',min:0.5,max:10,val:4,step:0.1,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.35,neg:{c:[1.8,6],s:[0.7,1.6]},pos:{c:[4,1.8],s:[1.1,0.9]},clamp:[[0.5,6],[0.5,10]]}),
+  posLabel:'downgrade', watch:'f1',
+  story:{
+    company:'Northwind Ratings assesses corporate bonds. A downgrade moves markets, so spotting it early is gold.',
+    person:'Vikram covers dozens of companies. He wants an early warning of which ones look like past companies that were later downgraded.',
+    problem:'Financial ratios are subtle. Vikram wants a method that reasons the way he already does: “this company looks a lot like those three that got downgraded last year.”',
+    help:'k-Nearest Neighbours does exactly that. For a company in question it finds the <b>k most similar</b> past companies and checks what happened to them. If most were downgraded, that’s the warning.',
+    layman:'It’s “judge a company by the company it keeps.” To guess a firm’s fate, the model finds the handful of past firms with the most similar finances and simply asks: what happened to <i>them</i>? Most got downgraded → this one probably will too.'
+  },
+  data:{
+    intro:'Past companies with their key ratios and whether they were later downgraded.',
+    cols:['Company','Leverage','Interest-cover','Outcome (1yr later)'],
+    rows:[['Co-01','1.5','7.2','stable'],['Co-02','4.4','1.6','downgraded'],['Co-03','2.0','5.8','stable'],
+          ['Co-04','3.9','2.1','downgraded'],['Co-05','1.7','6.5','stable'],['Co-06','4.8','1.9','downgraded']],
+    opts:{labelCol:3,posLabel:'downgraded'},
+    colExplain:[['Leverage','Debt divided by equity. Higher = more borrowed, more fragile.'],
+      ['Interest-cover','How many times earnings cover the interest bill. Lower = closer to trouble.'],
+      ['Outcome','Whether the company was downgraded within a year — the label we learn from.']],
+    rowExplain:'Co-02 (high leverage 4.4, thin interest-cover 1.6) was downgraded. A new company with similar ratios will sit right next to Co-02 in the data — and k-NN will read the warning from its neighbours.'
+  },
+  algo:{name:'k-Nearest Neighbours (k-NN)', viz:true, vizCap:'The boundary hugs the data because each point is judged purely by its closest neighbours.',
+    plain:'k-NN does no upfront “training” at all. To judge a new company it simply finds the <b>k closest past companies</b> (say k=7) by their ratios and takes a vote: if most of those neighbours were downgraded, it predicts downgrade. Closeness = similar finances.',
+    analogy:'Ask “what happened to companies most like this one?” If you stand in a room and look at your 7 nearest neighbours, you can guess a lot about yourself from them. k-NN guesses a company’s fate from its 7 financial look-alikes.'
+  },
+  math:{equation:'dist(<span class="v">A</span>,<span class="v">B</span>) = √( (a₁−b₁)² + (a₂−b₂)² ) &nbsp;•&nbsp; then vote of the k nearest', where:'<b>A,B</b> = two companies · <b>a,b</b> = their ratios · <b>k</b> = how many neighbours to ask (here 7)', plain:'To measure how alike two companies are, treat their ratios as points on a graph and measure the straight-line distance between them — the same √ of squared differences you meet in school geometry. Then look at the 7 closest companies and go with the majority of what happened to them.', inScenario:'A firm with high leverage and thin interest-cover sits close to past downgraded firms, so most of its 7 nearest neighbours were downgraded — and Vikram gets his early warning.'},
+  run:{
+    intro:'Northwind’s early-warning pipeline:',
+    steps:[
+      {title:'Assemble labelled companies',body:'Collect past companies with their ratios and whether they were downgraded within a year.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove companies with missing filings and fix obviously wrong ratios.',next:'Next: scale (critical) ▸'},
+      {title:'Scale the ratios',body:'k-NN is <b>all about distance</b>, so scaling is essential — otherwise a big-number ratio drowns out a small-number one and “similarity” becomes meaningless.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Keep a held-out set of companies to check the warnings are real, not lucky.',next:'Next: choose k ▸'},
+      {title:'Choose k',body:'Try k = 3, 5, 7… and pick the value that gives the best balance of catching downgrades without false alarms.',next:'Next: evaluate ▸'},
+      {title:'Evaluate with F1',body:'Because both missing a downgrade and crying wolf are costly, we judge the model on F1 — the balance of the two.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Vikram leans on the <b>F1 score = ${m.f1.toFixed(2)}</b>, which balances two mistakes: missing a real downgrade (embarrassing and risky) and false-alarming on a healthy company (wastes his time and rattles clients). A high F1 means the model does both well. When a covered company drifts next to past downgraded firms, Vikram gets an early nudge to dig deeper — weeks before the rating committee meets.`;}
+},
+{
+  id:'aml-alert', tag:'CLASSIFICATION · NAÏVE BAYES', accent:PAL.blue,
+  title:'AML Alert Triage', subtitle:'Scoring anti-money-laundering alerts by how suspicious their combination of signals is — fast, and on huge volumes.',
+  company:'Crescent Bank', persona:'Deepa Krishnan', role:'AML Operations Head',
+  model:'nb', featNames:['Cash-intensity score','Cross-border score'],
+  slider:[{lab:'Cash-intensity score',min:-2,max:5,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Cross-border score',min:-2,max:5,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.3,neg:{c:[0,0],s:[1,1]},pos:{c:[2.8,2.8],s:[1.2,1.2]},clamp:[[-2,5],[-2,5]]}),
+  posLabel:'truly suspicious', watch:'prec',
+  story:{
+    company:'Crescent Bank generates tens of thousands of AML alerts a month. Most are false alarms, but each must be reviewed.',
+    person:'Deepa runs the AML team. Her analysts drown in alerts; she needs to push the genuinely suspicious ones to the top.',
+    problem:'With huge volumes and limited staff, Deepa needs a <b>fast</b> way to score each alert’s suspiciousness from its signals — quickly enough to run on everything, every day.',
+    help:'Naïve Bayes is a lightning-fast probability calculator. It learns how typical each signal is among truly-suspicious vs innocent cases, then combines them into a suspiciousness score. It scales to millions effortlessly.',
+    layman:'It’s a “weight of evidence” calculator. Each clue (lots of cash, many cross-border hops) nudges the suspicion meter up or down, and Naïve Bayes adds them up into a final score. It’s simple and blazing fast — perfect when you must score everything.'
+  },
+  data:{
+    intro:'Past alerts, each later confirmed truly suspicious or a false alarm, described by two risk signals.',
+    cols:['Alert','Cash-intensity','Cross-border','Verdict'],
+    rows:[['AL-01','0.3','-0.2','false alarm'],['AL-02','3.1','2.6','suspicious'],['AL-03','-0.1','0.4','false alarm'],
+          ['AL-04','2.4','3.0','suspicious'],['AL-05','0.2','0.1','false alarm'],['AL-06','3.4','2.2','suspicious']],
+    opts:{labelCol:3,posLabel:'suspicious'},
+    colExplain:[['Cash-intensity','How cash-heavy the activity is versus normal — a classic laundering signal.'],
+      ['Cross-border','How much money hops across borders in unusual ways.'],
+      ['Verdict','What investigators concluded — suspicious or false alarm.']],
+    rowExplain:'AL-02 scores high on both cash-intensity and cross-border activity and was confirmed suspicious. Naïve Bayes learns how common such scores are among real cases vs false alarms and blends them into one number.'
+  },
+  algo:{name:'Naïve Bayes', viz:true, vizCap:'A smooth probability gradient — Naïve Bayes assigns every point a suspiciousness likelihood.',
+    plain:'Naïve Bayes learns, for each signal separately, how it’s distributed among suspicious vs innocent cases. For a new alert it asks “how likely is this exact combination of signals if the case were suspicious? …if innocent?” and turns the comparison into a probability. It assumes signals act independently — “naïve”, but astonishingly effective and fast.',
+    analogy:'A doctor’s quick mental triage: a fever pushes suspicion of infection up a bit, a cough a bit more, body-aches more still. Each symptom independently nudges the odds, and the doctor combines them in seconds. Naïve Bayes does this with financial-crime signals.'
+  },
+  math:{equation:'P(suspicious | clues) ∝ P(suspicious) × P(s₁|suspicious) × P(s₂|suspicious)', where:'<b>P(…)</b> = a probability · <b>s₁,s₂</b> = the alert’s signals · <b>∝</b> means “proportional to”', plain:'Start with how common suspicious cases are in general. Then, for each clue, multiply in how typical that clue is among suspicious cases. Multiplying these “how likely is this clue” numbers together gives one overall suspicion score. It’s called “naïve” because it treats each clue as independent — a simplification that keeps it lightning fast.', inScenario:'An alert with heavy cash use AND unusual cross-border hops multiplies two “very suspicious” numbers into a high score, so Deepa’s team reviews it first.'},
+  run:{
+    intro:'Crescent’s alert-triage pipeline:',
+    steps:[
+      {title:'Label historical alerts',body:'Take past alerts with the investigators’ final verdict (suspicious / false alarm).',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove withdrawn alerts and fix corrupt records.',next:'Next: build signals ▸'},
+      {title:'Build the signals',body:'Compute scores like cash-intensity and cross-border activity for each alert.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Learn on past alerts, validate on a held-out batch.',next:'Next: learn the distributions ▸'},
+      {title:'Learn each signal’s distribution',body:'For suspicious and for innocent cases, learn how each signal is spread. This is near-instant, even on millions of rows.',next:'Next: evaluate on precision ▸'},
+      {title:'Evaluate (precision matters)',body:'Because analyst time is scarce, we care that alerts pushed to the top are truly worth reviewing — that’s precision.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Deepa focuses on <b>precision = ${(m.prec*100).toFixed(0)}%</b>: of the alerts the model ranks as high-suspicion, that share turn out genuinely worth investigating. High precision means her analysts spend their scarce hours on real cases, not wild-goose chases. She uses the score to <b>rank</b> the daily flood of alerts so the most suspicious are worked first — the same headcount now catches more real crime.`;}
+},
+{
+  id:'invoice-exception', tag:'CLASSIFICATION · LINEAR SVM', accent:PAL.teal,
+  title:'Invoice Exception Detection', subtitle:'Separating invoices that will need manual intervention from the clean ones, with the widest possible safety margin.',
+  company:'Ledgerline', persona:'Rohan Malhotra', role:'Accounts-Payable Manager',
+  model:'svm', featNames:['Amount vs PO mismatch (%)','Approval delay (days)'],
+  slider:[{lab:'Amount-vs-PO mismatch (%)',min:0,max:40,val:3,step:0.5,fmt:v=>v.toFixed(1)+'%'},
+          {lab:'Approval delay (days)',min:0,max:30,val:2,step:1,fmt:v=>v+'d'}],
+  gen:(s,n)=>blobs(s,n,{rate:0.35,neg:{c:[4,4],s:[3,3]},pos:{c:[13,12],s:[6.5,6.5]},clamp:[[0,40],[0,30]]}),
+  posLabel:'exception', watch:'f1',
+  story:{
+    company:'Ledgerline runs accounts-payable for large firms, processing thousands of supplier invoices a day.',
+    person:'Rohan manages the AP team. Most invoices sail through, but “exceptions” (mismatches, delays) need a human — and finding them by hand is slow.',
+    problem:'Rohan wants a clean, reliable line between “process automatically” and “route to a human”, with a comfortable safety margin so borderline invoices don’t get mislabelled.',
+    help:'A linear SVM finds the dividing line that leaves the <b>widest gap</b> between the two groups. That wide margin makes its decisions robust — small quirks in an invoice won’t flip the verdict.',
+    layman:'Imagine drawing a line between two crowds so that the line is as far as possible from <i>both</i> crowds — a nice wide no-man’s-land in between. That safety gap means new invoices near the middle are still classified confidently. That “widest street” idea is exactly what an SVM does.'
+  },
+  data:{
+    intro:'Past invoices, each cleared automatically or flagged as an exception, with two tell-tale features.',
+    cols:['Invoice','Amount-vs-PO mismatch','Approval delay','Result'],
+    rows:[['I-01','2%','1d','auto-cleared'],['I-02','19%','14d','exception'],['I-03','4%','3d','auto-cleared'],
+          ['I-04','22%','11d','exception'],['I-05','1%','0d','auto-cleared'],['I-06','16%','18d','exception']],
+    opts:{labelCol:3,posLabel:'exception'},
+    colExplain:[['Amount-vs-PO mismatch','How far the invoiced amount differs from the agreed purchase order.'],
+      ['Approval delay','How long the invoice has been stuck awaiting sign-off.'],
+      ['Result','Whether it cleared automatically or needed a human — the label.']],
+    rowExplain:'I-02 (19% mismatch, stuck 14 days) was an exception. The SVM finds the line that best separates such troublesome invoices from clean ones, keeping the widest possible buffer between them.'
+  },
+  algo:{name:'Linear SVM (Support Vector Machine)', viz:true, vizCap:'A straight dividing line placed to keep the biggest possible margin between the two groups.',
+    plain:'An SVM draws a straight boundary, but not just any boundary — the one that sits as <b>far as possible</b> from the nearest points of both classes. Those nearest points are the “support vectors” that hold the line in place. The wide margin makes the classifier stable and confident.',
+    analogy:'Building the widest possible road between two rows of houses so nobody’s doorstep is too close to the traffic. The SVM builds the widest “road” between clean and exception invoices, so borderline cases still fall clearly on one side.'
+  },
+  math:{equation:'verdict = sign( <span class="c">w₁</span>·<span class="v">x₁</span> + <span class="c">w₂</span>·<span class="v">x₂</span> + b ) &nbsp;•&nbsp; with the widest margin', where:'<b>w</b>’s = weights that define the line · <b>x</b>’s = the invoice’s numbers · <b>b</b> = a shift · <b>margin</b> = the empty gap around the line', plain:'The model builds a straight line and checks which side an invoice falls on (that’s the “sign” — plus or minus). What makes an SVM special: of all the lines that separate the two groups, it picks the one with the <b>widest empty gap</b> on both sides. A wide gap means borderline invoices are still judged confidently.', inScenario:'The widest-gap line sits comfortably between clean and exception invoices, so when Rohan feeds in a new one, small quirks don’t flip its verdict.'},
+  run:{
+    intro:'Ledgerline’s exception-detection pipeline:',
+    steps:[
+      {title:'Label past invoices',body:'Collect invoices tagged auto-cleared or exception.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove cancelled invoices and fix bad amounts.',next:'Next: scale ▸'},
+      {title:'Scale the features',body:'SVMs are distance-based, so features are scaled to a common range — otherwise the widest-margin line is distorted.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Fit on 70%, check the margin holds on the unseen 30%.',next:'Next: fit the widest margin ▸'},
+      {title:'Fit the maximum-margin line',body:'The SVM positions the boundary to maximise the gap to the nearest invoices of each type.',next:'Next: evaluate ▸'},
+      {title:'Evaluate with F1',body:'We balance catching real exceptions against needlessly flagging clean invoices — the F1 score.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Rohan trusts the wide margin: because the SVM keeps the biggest buffer between clean and exception invoices, its verdicts on borderline cases are stable. With an <b>F1 of ${m.f1.toFixed(2)}</b> he confidently auto-clears the invoices on the safe side and routes only the flagged ones to his team — cutting manual review sharply while keeping mistakes low. If the two groups ever start to overlap heavily, the shrinking margin warns him the rule needs a rethink.`;}
+},
+{
+  id:'ma-break', tag:'CLASSIFICATION · LOGISTIC REGRESSION', accent:PAL.red,
+  title:'M&A Deal-Break Risk', subtitle:'Estimating the probability an announced merger collapses before completion — as a percentage arbitrageurs can trade on.',
+  company:'Sable Advisory', persona:'Neha Kapoor', role:'Risk-Arbitrage Strategist',
+  model:'logreg', featNames:['Regulatory-risk score','Financing-gap score'],
+  slider:[{lab:'Regulatory-risk score',min:0,max:10,val:3,step:0.5,fmt:v=>v.toFixed(1)},
+          {lab:'Financing-gap score',min:0,max:10,val:2,step:0.5,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.3,neg:{c:[2.5,2],s:[1.4,1.3]},pos:{c:[6.5,6],s:[1.8,1.9]},clamp:[[0,10],[0,10]]}),
+  posLabel:'deal breaks', watch:'auc',
+  story:{
+    company:'Sable Advisory runs a merger-arbitrage strategy: it buys shares of takeover targets and profits if the deal closes — but loses if it breaks.',
+    person:'Neha decides which announced deals to bet on. A broken deal can wipe out months of gains, so judging break-risk is everything.',
+    problem:'Neha needs a <b>probability</b> that each announced deal falls apart, so she can size her positions and demand enough return for the risk.',
+    help:'Logistic regression turns deal features (regulatory hurdles, financing gaps) into a <b>probability of the deal breaking</b>. Neha bets big on low-risk deals and small (or not at all) on high-risk ones.',
+    layman:'Same idea as the default forecaster, but for mergers: instead of “will this loan go bad?” it answers “will this deal fall through?” with a percentage. Neha then only takes bets where the reward is worth the break-risk the model quotes.'
+  },
+  data:{
+    intro:'Past announced deals we know the outcome of, scored on two break-risk drivers.',
+    cols:['Deal','Regulatory-risk','Financing-gap','Outcome'],
+    rows:[['D-01','2.1','1.5','completed'],['D-02','7.4','6.8','broke'],['D-03','3.0','2.2','completed'],
+          ['D-04','6.1','5.9','broke'],['D-05','1.8','2.4','completed'],['D-06','7.9','5.5','broke']],
+    opts:{labelCol:3,posLabel:'broke'},
+    colExplain:[['Regulatory-risk','How likely regulators are to block or delay the deal.'],
+      ['Financing-gap','How shaky the buyer’s funding for the deal looks.'],
+      ['Outcome','Whether the deal completed or broke — the label.']],
+    rowExplain:'D-02 faced heavy regulatory risk and a big financing gap, and it broke. The model learns how these drivers translate into break-probability for the next announced deal.'
+  },
+  algo:{name:'Logistic regression', viz:true, vizCap:'Red = deals that broke, teal = completed. Shading shows the probability of a break rising toward the red corner.',
+    plain:'Just like the credit model, logistic regression converts each deal’s risk drivers into a single <b>break probability</b> from 0% to 100%. Deep in the risky corner → 80% break chance; near the line → a coin toss; safe corner → 5%. Neha reads it straight off.',
+    analogy:'A bookmaker setting odds. They weigh every factor and quote a chance. Logistic regression is Neha’s in-house bookmaker for deal-breaks, quoting a percentage she can size her bets against.'
+  },
+  math:{equation:'<span class="v">p</span> = 1 / (1 + e<sup>−(b₀ + b₁·<span class="v">x₁</span> + b₂·<span class="v">x₂</span>)</sup>)', where:'<b>p</b> = probability the deal breaks · <b>x₁,x₂</b> = the deal’s risk scores · <b>b</b>’s = learned weights · <b>e</b> ≈ 2.718', plain:'First the model adds up the risk: give each borrower number a weight and total them (that’s the b₀ + b₁x₁ + b₂x₂ part — just like adding up points). But a total can be any size, and we want a chance between 0% and 100%. So we push the total through a special S-shaped “squasher” (the 1/(1+e<sup>−…</sup>) part) that turns <i>any</i> number into a neat percentage. A big positive total → near 100%. A big negative total → near 0%.', inScenario:'A deal with heavy regulatory risk and a shaky financing gap gives a big total → maybe a 70% break-chance → Neha takes only a tiny position, or passes.'},
+  run:{
+    intro:'Sable’s deal-break model pipeline:',
+    steps:[
+      {title:'Assemble past deals',body:'Collect announced deals with outcomes (completed / broke) and their features.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove still-pending deals (no outcome yet) and fix data gaps.',next:'Next: prepare & scale ▸'},
+      {title:'Prepare & scale',body:'Put the risk scores on a common scale so the model weighs them fairly.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Learn on past deals, test on a held-out set of deals the model never saw.',next:'Next: train ▸'},
+      {title:'Train',body:'The model fits the risk line that best separates completed deals from broken ones, as probabilities.',next:'Next: evaluate ▸'},
+      {title:'Evaluate with AUC',body:'We check the model ranks truly-broken deals above completed ones — measured by AUC.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Neha reads the break-probability and the model’s <b>AUC = ${(m.auc).toFixed(2)}</b> (how well it ranks doomed deals above safe ones). She converts the probability into position size: a deal with a 5% break-chance gets a full position; a 40% break-chance gets a tiny one or a pass. The percentage lets her demand a spread that pays her for exactly the risk she’s taking — the whole edge of merger arbitrage.`;}
+},
+{
+  id:'policy-lapse', tag:'CLASSIFICATION · DECISION TREE', accent:PAL.teal, outcomes:['retain','lapse'],
+  title:'Insurance Policy-Lapse Prediction', subtitle:'Spotting which policyholders are about to stop paying premiums — with clear reasons the retention team can act on.',
+  company:'SafeGuard Life', persona:'Priyanka Bose', role:'Customer-Retention Lead',
+  model:'tree', featNames:['Payment lateness (score)','Engagement drop (score)'],
+  slider:[{lab:'Payment-lateness score',min:0,max:10,val:2,step:0.5,fmt:v=>v.toFixed(1)},
+          {lab:'Engagement-drop score',min:0,max:10,val:2,step:0.5,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.35,neg:{c:[2,2],s:[1.3,1.3]},pos:{c:[6.5,6],s:[1.8,1.9]},clamp:[[0,10],[0,10]]}),
+  posLabel:'will lapse', watch:'rec',
+  story:{
+    company:'SafeGuard Life sells long-term insurance. When a policyholder “lapses” (stops paying), the company loses future premiums and the customer loses cover.',
+    person:'Priyanka runs retention. If she knows <i>who</i> is about to lapse and <i>why</i>, she can intervene — a call, a payment plan, a reminder.',
+    problem:'She needs to flag likely lapsers early <b>and</b> understand the reason, so her team’s intervention actually fits the customer.',
+    help:'A decision tree flags likely lapsers and, being a flowchart, tells her <i>which</i> behaviour triggered the flag — late payments, dropping engagement — so the retention offer can target the real cause.',
+    layman:'Same explainable flowchart as the loan example, but pointed at “who’s about to quit?”. It not only says “this customer is at risk” but shows the branch — “because payments keep arriving late” — so Priyanka’s team knows exactly what to fix.'
+  },
+  data:{
+    intro:'Past policyholders, each of whom later kept paying or lapsed, with two behaviour scores.',
+    cols:['Policy','Payment-lateness','Engagement-drop','Outcome'],
+    rows:[['P-01','1.2','1.8','retained'],['P-02','6.8','6.1','lapsed'],['P-03','2.0','2.4','retained'],
+          ['P-04','7.1','5.5','lapsed'],['P-05','1.5','1.2','retained'],['P-06','6.2','6.9','lapsed']],
+    opts:{labelCol:3,posLabel:'lapsed'},
+    colExplain:[['Payment-lateness','How consistently late their premium payments have become.'],
+      ['Engagement-drop','How much their interaction with the insurer has fallen off.'],
+      ['Outcome','Whether they stayed or lapsed — the label the tree learns.']],
+    rowExplain:'P-02 shows rising payment-lateness and falling engagement, and lapsed. The tree learns rules like “if lateness is high and engagement has dropped, high lapse risk” — and shows that reason on every flag.'
+  },
+  algo:{name:'Decision tree', viz:true, vizCap:'Rectangular, rule-based regions — each block is a plain “if this and that” condition.',
+    plain:'The tree asks the most telling yes/no questions in turn — “payments often late? engagement fallen?” — splitting policyholders until each branch is mostly lapsers or mostly stayers. Following the branches gives both a prediction <b>and</b> the reason.',
+    analogy:'A retention playbook written as a flowchart: “Late payments AND gone quiet? → call within 48 hours.” The tree writes that playbook automatically from who actually lapsed in the past.'
+  },
+  math:{equation:'if <span class="v">x</span> ≤ threshold → go left,&nbsp; else → go right &nbsp;•&nbsp; Gini = 1 − Σ p<sub>i</sub>²', where:'<b>x</b> = a behaviour score · <b>threshold</b> = a cut-off the tree picks · <b>p<sub>i</sub></b> = share of each outcome in a group', plain:'There’s no big formula — a tree is just a chain of yes/no questions. To choose the best question it uses a “messiness score” called <b>Gini</b>. A group that is all one outcome has Gini 0 (perfectly tidy); a 50-50 mix has the highest Gini (messiest). The tree always picks the question that chops the data into the two <i>tidiest</i> possible groups.', inScenario:'The tree finds a rule like “payments often late AND engagement dropped → high lapse risk”, which tells Priyanka both WHO to call and WHY.'},
+  run:{
+    intro:'SafeGuard’s lapse-prediction pipeline:',
+    steps:[
+      {title:'Label past policyholders',body:'Gather policies with their behaviour history and whether they lapsed.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove policies closed for unrelated reasons (death, maturity) so “lapse” means what we think.',next:'Next: build behaviour scores ▸'},
+      {title:'Build behaviour scores',body:'Turn raw history into scores like payment-lateness and engagement-drop.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Grow the tree on most policies, test its flags on a held-out set.',next:'Next: grow the tree ▸'},
+      {title:'Grow the tree',body:'It finds the behaviour thresholds that best separate lapsers from stayers, stopping before it over-memorises.',next:'Next: evaluate on recall ▸'},
+      {title:'Evaluate (catch the lapsers)',body:'Missing a lapser means a lost customer, so recall — the share of real lapsers we flag — matters most.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Priyanka watches <b>recall = ${(m.rec*100).toFixed(0)}%</b>: of everyone who was truly about to lapse, that share got flagged in time to act. She’d rather over-flag (a wasted friendly call is cheap) than miss a leaver (a lost customer is expensive). And because the tree hands her the <b>reason</b> for each flag, the retention team tailors the save — a payment plan for the chronically-late, a re-engagement offer for the disengaged.`;}
+},
+{
+  id:'gst-audit', tag:'CLASSIFICATION · RANDOM FOREST', accent:PAL.copper, outcomes:['compliant','under-reporting'], forestExample:[15,5],
+  title:'GST Audit Flagging', subtitle:'Pointing tax auditors at the returns most likely to be under-reporting — so scarce audit capacity hits the right cases.',
+  company:'State Revenue Dept.', persona:'Ramesh Iyer', role:'Data & Audit Officer',
+  model:'forest', featNames:['Input-output mismatch (%)','Filing-irregularity score'],
+  slider:[{lab:'Input-output mismatch (%)',min:0,max:50,val:5,step:1,fmt:v=>v+'%'},
+          {lab:'Filing-irregularity score',min:0,max:10,val:2,step:0.5,fmt:v=>v.toFixed(1)}],
+  gen:(s,n)=>blobs(s,n,{rate:0.25,neg:{c:[7,2.5],s:[5,1.6]},pos:{c:[21,5.5],s:[10,2.3]},clamp:[[0,50],[0,10]]}),
+  posLabel:'under-reporting', watch:'prec',
+  story:{
+    company:'The State Revenue Department receives millions of GST returns but can only audit a tiny fraction each year.',
+    person:'Ramesh decides which returns to audit. Auditing at random wastes officers on honest taxpayers and lets evaders slip through.',
+    problem:'Ramesh needs to <b>rank</b> returns by their chance of under-reporting, so his limited auditors are sent to the highest-value cases first.',
+    help:'A random forest weighs many return signals at once and scores each return’s risk. Officers then work the highest-scoring returns — dramatically more evasion caught per audit.',
+    layman:'Same “panel of experts voting” idea as card fraud, but pointed at tax returns. The forest reads each return’s signals and scores how likely it hides under-reporting, so Ramesh sends his handful of auditors to the riskiest returns instead of picking names from a hat.'
+  },
+  data:{
+    intro:'Past audited returns, each found compliant or under-reporting, with two risk signals.',
+    cols:['Return','Input-output mismatch','Filing-irregularity','Audit result'],
+    rows:[['R-01','4%','1.5','compliant'],['R-02','31%','7.0','under-reporting'],['R-03','7%','2.1','compliant'],
+          ['R-04','26%','5.8','under-reporting'],['R-05','3%','1.0','compliant'],['R-06','35%','6.4','under-reporting']],
+    opts:{labelCol:3,posLabel:'under-reporting'},
+    colExplain:[['Input-output mismatch','Gap between the tax credits claimed on inputs and the tax charged on sales — a red flag when large.'],
+      ['Filing-irregularity','A score for odd filing behaviour (late, revised, inconsistent).'],
+      ['Audit result','What the audit found — compliant or under-reporting. The label.']],
+    rowExplain:'R-02 had a big input-output mismatch (31%) and irregular filings, and was found under-reporting. The forest learns these combined signatures to score every un-audited return.'
+  },
+  algo:{name:'Random forest', viz:true, vizCap:'A smoothed, voted boundary — many trees combine into one steady risk score per return.',
+    plain:'The forest grows many decision trees on different random slices of past returns. Each tree votes on whether a return looks like under-reporting; the share of “yes” votes becomes a <b>risk score</b> from 0 to 100%. Many diverse trees make the score robust to any single quirky signal.',
+    analogy:'A jury rather than a single judge. Twelve jurors (trees) each look at the return and vote; the verdict’s confidence is how many voted “suspicious.” Ramesh audits the returns with the strongest jury consensus first.'
+  },
+  math:{equation:'ŷ = ( tree₁(<span class="v">x</span>) + tree₂(<span class="v">x</span>) + … + tree<sub>T</sub>(<span class="v">x</span>) ) / T', where:'<b>ŷ</b> = the return’s risk score (0–1) · <b>tree<sub>t</sub></b> = one tree’s vote · <b>T</b> = number of trees', plain:'Each tree looks at the case and votes (0 = no, 1 = yes). The forest simply takes the <b>average</b> of all the votes. If 13 of 18 trees vote “yes”, the score is 13 ÷ 18 ≈ 0.72. Averaging many opinions cancels out the odd mistake any single tree makes — the crowd is wiser than one.', inScenario:'A return with a big input-output mismatch makes most trees vote “under-reporting”, giving a high score, so Ramesh audits it before the low-scoring ones.'},
+  run:{
+    intro:'The Revenue Department’s audit-targeting pipeline:',
+    steps:[
+      {title:'Label past audits',body:'Use previously audited returns with known outcomes (compliant / under-reporting).',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove returns audited for unrelated reasons and fix data errors.',next:'Next: engineer signals ▸'},
+      {title:'Engineer risk signals',body:'Compute signals like input-output mismatch and filing-irregularity for every return.',next:'Next: handle imbalance & split ▸'},
+      {title:'Handle imbalance & split',body:'Under-reporting is a minority, so we balance it, then keep a held-out test set.',next:'Next: grow the forest ▸'},
+      {title:'Grow the forest',body:'Build many trees; their combined vote gives each return a risk score.',next:'Next: evaluate on precision ▸'},
+      {title:'Evaluate (precision matters)',body:'Auditors are scarce, so we care that the top-scored returns really are evaders — precision.'}
+    ]
+  },
+  interaction:{type:'score'},
+  decision(m){return `Ramesh cares about <b>precision = ${(m.prec*100).toFixed(0)}%</b>: of the returns the forest ranks as high-risk, that share genuinely turn out to be under-reporting. High precision means his limited auditors spend their days on real evaders, not honest taxpayers. He simply works down the ranked list until audit capacity runs out — recovering far more tax per audit than random selection ever could.`;}
+},
+{
+  id:'collateral-valuation', tag:'REGRESSION · SIMPLE LINEAR', accent:PAL.green, kind:'regression',
+  title:'Collateral Valuation', subtitle:'Predicting a property’s market value from a single driver — its size — so a lender knows how much to lend against it.',
+  company:'Habitat Housing Finance', persona:'Kavya Menon', role:'Valuation Officer',
+  model:'linreg', featNames:['Property area (sq ft)'],
+  target:{name:'Market value', fmt:v=>'₹'+(v/100000).toFixed(1)+' L'},
+  slider:[{lab:'Property area (sq ft)',min:400,max:3000,val:1200,step:50,fmt:v=>v.toLocaleString('en-IN')+' sq ft'}],
+  gen:(seed,n)=>{const r=mulberry32(seed),X=[],y=[];for(let i=0;i<n;i++){const area=500+r()*2400;
+    X.push([area]);y.push(500000+4000*area+gauss(r)*350000);}return {X,y};},
+  story:{
+    company:'Habitat Housing Finance gives home loans. Before lending, it must value the property being pledged as collateral.',
+    person:'Kavya values properties. She needs a fast, defensible estimate of what a home is worth before the bank lends against it.',
+    problem:'Full manual valuations are slow and subjective. For a quick first estimate, Kavya wants a simple rule linking a property’s <b>size</b> to its <b>value</b>.',
+    help:'Simple linear regression learns the straight-line relationship “value goes up by a fixed amount for every extra square foot.” Feed in the area, read out the estimated value.',
+    layman:'It’s the same idea as “₹4,000 per square foot.” The model looks at hundreds of past sales, works out the going rate per square foot (plus a base value), and draws the best straight line through them. Give it an area and it reads the price straight off the line.'
+  },
+  data:{
+    intro:'Past property sales: each row is a home with its area and the price it actually sold for.',
+    cols:['Property','Area (sq ft)','Sold value (₹)'],
+    rows:[['P-01','650','₹31.5 L'],['P-02','1,200','₹53.0 L'],['P-03','1,850','₹79.5 L'],
+          ['P-04','900','₹41.0 L'],['P-05','2,400','₹1.01 Cr'],['P-06','1,500','₹64.5 L']],
+    colExplain:[['Area','Size of the property in square feet — the single input (the “x”).'],
+      ['Sold value','The price the property actually fetched — the number we want to predict (the “y”).']],
+    rowExplain:'P-02 — a 1,200 sq ft home — sold for ₹53 lakh. Line up hundreds of such (area, price) pairs and a clear straight-line trend appears: bigger area, higher price. Regression measures that trend exactly.'
+  },
+  algo:{name:'Simple linear regression', viz:true, vizCap:'Each dot is a past sale; the green line is the best straight-line fit — the model’s learned “price per sq ft”.',
+    plain:'Simple linear regression fits the <b>single best straight line</b> through the cloud of (area, price) dots. “Best” means the line whose total vertical distance to all the dots is as small as possible — the famous <b>least-squares</b> line. Once it has the line, predicting is trivial: read the line’s height at the area you care about.',
+    analogy:'Pricing fruit by weight: a base handling charge plus a fixed rate per kilo. A property is the same — a base value plus a fixed rate per square foot. Regression simply measures that per-square-foot rate from past sales.'
+  },
+  math:{
+    equation:'<span class="v">Value</span> = <span class="c">a</span> + <span class="c">b</span> × <span class="v">Area</span>',
+    where:'<b>Value</b> = predicted price (₹) · <b>Area</b> = size in sq ft · <b>a</b> = base value · <b>b</b> = rupees added per extra sq ft',
+    plain:'This is just the equation of a straight line — the y = mx + c you drew in school. Start with a base value <b>a</b> (worth even of a tiny plot), then add a fixed amount <b>b</b> for every extra square foot. Plot area against price and the model literally draws the best straight line through the dots, then reads prices off it.',
+    inScenario:'The model learns something like <b>Value = ₹5 lakh + ₹4,000 × area</b>. So a 1,500 sq ft flat ≈ ₹5L + ₹60L = ₹65 lakh — and Kavya lends a set percentage of that estimate.'
+  },
+  run:{
+    intro:'Habitat’s valuation pipeline:',
+    steps:[
+      {title:'Collect past sales',body:'Gather many past transactions with each property’s area and the price it sold for. Known prices are what make this “supervised”.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove mis-recorded areas and distress sales (a fire-sale price would bend the line unfairly).',next:'Next: prepare ▸'},
+      {title:'Prepare (keep raw units)',body:'One number in (area), one number out (price). We keep raw units on purpose so the learned “₹ per sq ft” stays meaningful and explainable.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Fit the line on most sales, then check it predicts prices for held-out properties it never saw.',next:'Next: fit the line ▸'},
+      {title:'Fit the least-squares line',body:'The model finds the base value <b>a</b> and the per-sq-ft rate <b>b</b> that make the line hug the dots as closely as possible.',next:'Next: evaluate ▸'},
+      {title:'Evaluate (R² and typical error)',body:'Check how much of the price variation the line explains (R²) and the typical rupee error (RMSE) before trusting it.'}
+    ]
+  },
+  interaction:{type:'reg-predict'},
+  decision(m){return `Kavya reads <b>R² = ${m.r2.toFixed(2)}</b> — the share of price differences that area alone explains. A high R² means size predicts value well, so she trusts the line for a first estimate and lends, say, 80% of it (the loan-to-value). The <b>typical error of about ₹${(m.rmse/100000).toFixed(1)} lakh</b> tells her how much cushion to keep for uncertainty — she lends a little conservatively so a small over-estimate never leaves the loan under-secured.`;}
+},
+{
+  id:'loan-pricing', tag:'REGRESSION · MULTIPLE LINEAR', accent:PAL.blue, kind:'regression',
+  title:'Loan Interest-Rate Pricing', subtitle:'Setting a fair interest rate from several borrower factors at once — each factor adding or subtracting a clear, explainable amount.',
+  company:'Prime Capital', persona:'Aditya Sharma', role:'Pricing Analyst',
+  model:'linreg', featNames:['Income (₹k/mo)','Existing EMIs (₹k)','Loan tenure (yrs)'],
+  target:{name:'Interest rate', fmt:v=>v.toFixed(2)+'%'},
+  slider:[{lab:'Monthly income (₹k)',min:20,max:250,val:80,step:5,fmt:v=>'₹'+v+'k'},
+          {lab:'Existing EMIs (₹k)',min:0,max:80,val:20,step:2,fmt:v=>'₹'+v+'k'},
+          {lab:'Loan tenure (years)',min:1,max:10,val:5,step:1,fmt:v=>v+' yr'}],
+  gen:(seed,n)=>{const r=mulberry32(seed),X=[],y=[];for(let i=0;i<n;i++){const inc=30+r()*180,emi=r()*70,ten=1+r()*9;
+    X.push([inc,emi,ten]);y.push(9-0.015*inc+0.04*emi+0.25*ten+gauss(r)*0.45);}return {X,y};},
+  story:{
+    company:'Prime Capital prices personal loans. The interest rate it quotes must reflect each borrower’s risk — too low loses money, too high loses the customer.',
+    person:'Aditya sets the pricing rules. He needs a rate that fairly reflects several borrower factors at once, and that he can justify line by line.',
+    problem:'Risk depends on many things together — income, existing debt, loan length. A single-factor rule is too crude; Aditya needs to weigh them all at once.',
+    help:'Multiple linear regression gives each factor its own weight and adds them to a base rate. The result is one quoted rate — and Aditya can read off exactly how much each factor contributed.',
+    layman:'Think of a salary formula: base pay, plus so much per year of experience, plus so much per extra skill. Here it’s a base rate, minus a bit for higher income, plus a bit for existing EMIs, plus a bit for a longer tenure. Add them up and you get the borrower’s rate.'
+  },
+  data:{
+    intro:'Past loans: several borrower factors and the interest rate that was set for each.',
+    cols:['Loan','Income (₹k)','Existing EMIs (₹k)','Tenure (yr)','Rate set'],
+    rows:[['L-01','₹120k','₹10k','3','8.4%'],['L-02','₹45k','₹40k','7','11.7%'],['L-03','₹80k','₹20k','5','9.9%'],
+          ['L-04','₹200k','₹5k','2','6.7%'],['L-05','₹60k','₹55k','8','12.3%'],['L-06','₹150k','₹15k','4','8.4%']],
+    colExplain:[['Income','Monthly income — higher income lowers risk, so tends to lower the rate.'],
+      ['Existing EMIs','Money already committed to other loans — more of this raises risk and the rate.'],
+      ['Tenure','How long the loan runs — longer loans carry more risk, nudging the rate up.'],
+      ['Rate set','The interest rate actually charged — the number we predict.']],
+    rowExplain:'L-05 — modest income, heavy existing EMIs, long tenure — was priced at 12.3%, the highest here. The model learns how much each of the three factors pushed that rate up or down.'
+  },
+  algo:{name:'Multiple linear regression', viz:true, vizCap:'Each dot compares the model’s predicted rate with the real rate; the closer the dots hug the diagonal, the better the model.',
+    plain:'Multiple linear regression is the same least-squares idea as the straight line, but the answer now depends on <b>several inputs at once</b>. Each input gets its own weight (slope) saying how much it moves the rate, holding the others steady. Add the base rate and every weighted factor together to get the prediction.',
+    analogy:'A points-based visa or a salary band: start at a base, then each factor adds or removes points. Experience +, gaps −, extra skills +. Multiple regression discovers each factor’s exact “points value” from past decisions.'
+  },
+  math:{
+    equation:'<span class="v">Rate</span> = <span class="c">b₀</span> + <span class="c">b₁</span>·<span class="v">income</span> + <span class="c">b₂</span>·<span class="v">EMIs</span> + <span class="c">b₃</span>·<span class="v">tenure</span>',
+    where:'<b>Rate</b> = predicted % · <b>b₀</b> = base rate · <b>b₁,b₂,b₃</b> = the weight (effect) of each factor',
+    plain:'Exactly the straight-line idea, but with several ingredients instead of one. Start from a base rate <b>b₀</b>, then add each factor multiplied by its own weight. A factor that pushes the rate up (like big existing EMIs) gets a <b>positive</b> weight; one that pulls it down (like high income) gets a <b>negative</b> weight. Sum them for the final rate.',
+    inScenario:'The model learns weights like <b>9% − 0.015×income + 0.04×EMIs + 0.25×tenure</b>. Aditya reads them directly — each extra year of tenure adds ≈0.25% — so every quote is fair and fully explainable.'
+  },
+  run:{
+    intro:'Prime Capital’s pricing pipeline:',
+    steps:[
+      {title:'Collect past loans',body:'Gather past loans with their borrower factors and the rate that was charged.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove cancelled loans and fix impossible values (a negative income is a typo).',next:'Next: prepare ▸'},
+      {title:'Prepare the factors',body:'Line up the three factors per loan. We keep interpretable units so each learned weight has a plain-English meaning.',next:'Next: split ▸'},
+      {title:'Split train & test',body:'Fit the weights on most loans, then test the predicted rates on held-out loans.',next:'Next: fit the weights ▸'},
+      {title:'Fit the weights (least squares)',body:'The model finds the base rate and the three weights that make its predicted rates hug the real ones as closely as possible.',next:'Next: evaluate ▸'},
+      {title:'Evaluate (R² and typical error)',body:'Check how much of the rate variation the factors explain (R²) and the typical error in percentage points (RMSE).'}
+    ]
+  },
+  interaction:{type:'reg-predict'},
+  decision(m){return `Aditya reads <b>R² = ${m.r2.toFixed(2)}</b> (how much of the rate differences the three factors explain) and a <b>typical error of about ${m.rmse.toFixed(2)} percentage points</b>. Because each factor carries a clear weight, he can justify every quote to a customer or auditor — “your rate is higher because of your existing EMIs and longer tenure.” That transparency is exactly why a simple, explainable model is often preferred over a black box for regulated pricing.`;}
+}
+];
+
+/* ===== Supervised: pipeline + viz + interactions + boot ===== */
+const SCOL={pos:PAL.red,neg:PAL.teal};
+
+function trainCase(uc){
+  if(uc.kind==='regression'){
+    const {X,y}=uc.gen(7,300);
+    const {Xtr,ytr,Xte,yte}=split(X,y,0.7,3);
+    const model=linregN(Xtr,ytr);
+    const met=regMetrics(model,Xte,yte);met.coef=model.coef;
+    return {model,Xte,yte,X,y,met,kind:'regression'};
+  }
+  const {X,y}=uc.gen(7,320);
+  const {Z,mu,sd}=zstats(X);
+  const {Xtr,ytr,Xte,yte}=split(Z,y,0.7,3);
+  let model;
+  switch(uc.model){
+    case 'logreg': model=logreg(Xtr,ytr,{epochs:300,lr:0.4}); break;
+    case 'tree':   model=decisionTree(Xtr,ytr,{maxDepth:4,minLeaf:6}); break;
+    case 'forest': model=randomForest(Xtr,ytr,{trees:18,maxDepth:5,minLeaf:4,seed:2}); break;
+    case 'knn':    model=knn(Xtr,ytr,7); break;
+    case 'nb':     model=naiveBayes(Xtr,ytr); break;
+    case 'svm':    model=linearSVM(Xtr,ytr,{epochs:250,lr:0.05,C:1}); break;
+    case 'anomaly':{
+      const normals=Xtr.filter((_,i)=>ytr[i]===0);const am=anomalyModel(normals);
+      const dtr=Xtr.map(x=>am.dist(x)).sort((a,b)=>a-b);const thr=dtr[Math.floor(dtr.length*0.9)];
+      model={dist:am.dist,thr,prob:x=>Math.min(1,am.dist(x)/(thr*2)),
+        predict:x=>am.dist(x)>=thr?1:0, mu:am.mu, vr:am.vr};break;}
+  }
+  let cm,m,a;
+  if(uc.model==='anomaly'){
+    cm=[[0,0],[0,0]];Xte.forEach((x,i)=>{const p=model.predict(x);cm[yte[i]][p]++;});
+    m=metricsFrom(cm);a=auc({prob:model.prob},Xte,yte);
+  } else {
+    cm=confusion(model,Xte,yte,0.5);m=metricsFrom(cm);a=auc(model,Xte,yte);
+  }
+  m.auc=a;
+  return {model,mu,sd,Xte,yte,X:Z,y,cm,m};
+}
+
+function drawBoundary(id,tc,uc){
+  const cv=document.getElementById(id);if(!cv)return;const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,pad=46;ctx.clearRect(0,0,W,H);ctx.fillStyle=PAL.card;ctx.fillRect(0,0,W,H);
+  const xs=tc.X.map(p=>p[0]),ys=tc.X.map(p=>p[1]);
+  const xlo=Math.min(...xs),xhi=Math.max(...xs),ylo=Math.min(...ys),yhi=Math.max(...ys);
+  const sx=v=>pad+(v-xlo)/(xhi-xlo||1)*(W-2*pad), sy=v=>H-pad-(v-ylo)/(yhi-ylo||1)*(H-2*pad);
+  // shade decision regions on a grid
+  const step=14;
+  for(let px=pad;px<W-pad;px+=step)for(let py=pad;py<H-pad;py+=step){
+    const fx=xlo+(px-pad)/(W-2*pad)*(xhi-xlo), fy=ylo+(H-pad-py)/(H-2*pad)*(yhi-ylo);
+    let pr;
+    if(uc.model==='anomaly'){const d=tc.model.dist([fx,fy]);pr=d>=tc.model.thr?0.8:0.2;}
+    else pr=tc.model.prob([fx,fy]);
+    ctx.globalAlpha=0.18;ctx.fillStyle=pr>0.5?PAL.red:PAL.teal;ctx.fillRect(px,py,step,step);
+  }
+  ctx.globalAlpha=1;
+  // axes labels
+  ctx.strokeStyle=PAL.line;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.stroke();
+  ctx.fillStyle=PAL.mute;ctx.font='19px Segoe UI';ctx.textAlign='center';
+  ctx.fillText(uc.featNames[0]+' →',W/2,H-12);
+  ctx.save();ctx.translate(18,H/2);ctx.rotate(-Math.PI/2);ctx.fillText(uc.featNames[1]+' →',0,0);ctx.restore();
+  // points (test set)
+  tc.Xte.forEach((p,i)=>{const anom=uc.model==='anomaly';
+    ctx.fillStyle=tc.yte[i]===1?SCOL.pos:SCOL.neg;
+    ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(14,28,42,.6)';ctx.lineWidth=1;ctx.stroke();});
+}
+
+/* ---- regression viz ---- */
+function drawRegLine(id,tc,uc){
+  const cv=document.getElementById(id);if(!cv)return;const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,pad=64;ctx.clearRect(0,0,W,H);ctx.fillStyle=PAL.card;ctx.fillRect(0,0,W,H);
+  const xs=tc.X.map(p=>p[0]),ys=tc.y;
+  const xlo=Math.min(...xs),xhi=Math.max(...xs),ylo=Math.min(...ys),yhi=Math.max(...ys);
+  const sx=v=>pad+(v-xlo)/(xhi-xlo||1)*(W-2*pad),sy=v=>H-pad-(v-ylo)/(yhi-ylo||1)*(H-2*pad);
+  ctx.strokeStyle=PAL.line;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.stroke();
+  // points
+  tc.X.forEach((p,i)=>{ctx.fillStyle='rgba(126,217,87,.55)';ctx.beginPath();ctx.arc(sx(p[0]),sy(tc.y[i]),5,0,7);ctx.fill();});
+  // fitted line
+  ctx.strokeStyle=PAL.green;ctx.lineWidth=4;ctx.beginPath();
+  ctx.moveTo(sx(xlo),sy(tc.model.predict([xlo])));ctx.lineTo(sx(xhi),sy(tc.model.predict([xhi])));ctx.stroke();
+  ctx.fillStyle=PAL.mute;ctx.font='19px Segoe UI';ctx.textAlign='center';
+  ctx.fillText(uc.featNames[0]+' →',W/2,H-16);
+  ctx.save();ctx.translate(20,H/2);ctx.rotate(-Math.PI/2);ctx.fillText(uc.target.name+' →',0,0);ctx.restore();
+}
+function drawPvA(id,tc,uc){
+  const cv=document.getElementById(id);if(!cv)return;const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,pad=64;ctx.clearRect(0,0,W,H);ctx.fillStyle=PAL.card;ctx.fillRect(0,0,W,H);
+  const preds=tc.Xte.map(x=>tc.model.predict(x)),act=tc.yte;
+  const all=preds.concat(act);const lo=Math.min(...all),hi=Math.max(...all);
+  const sx=v=>pad+(v-lo)/(hi-lo||1)*(W-2*pad),sy=v=>H-pad-(v-lo)/(hi-lo||1)*(H-2*pad);
+  ctx.strokeStyle=PAL.line;ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.stroke();
+  // perfect diagonal
+  ctx.strokeStyle=PAL.gold;ctx.setLineDash([7,6]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(sx(lo),sy(lo));ctx.lineTo(sx(hi),sy(hi));ctx.stroke();ctx.setLineDash([]);
+  act.forEach((a,i)=>{ctx.fillStyle='rgba(90,169,230,.6)';ctx.beginPath();ctx.arc(sx(a),sy(preds[i]),5.5,0,7);ctx.fill();});
+  ctx.fillStyle=PAL.mute;ctx.font='19px Segoe UI';ctx.textAlign='center';
+  ctx.fillText('actual '+uc.target.name+' →',W/2,H-16);
+  ctx.save();ctx.translate(20,H/2);ctx.rotate(-Math.PI/2);ctx.fillText('predicted →',0,0);ctx.restore();
+  ctx.fillStyle=PAL.gold;ctx.font='16px Segoe UI';ctx.textAlign='right';ctx.fillText('dashed = perfect prediction',W-pad,pad+4);
+}
+
+/* ---- regression result + interaction ---- */
+function renderRegResult(uc,tc,mount){
+  const m=tc.m||tc.met;const c=m.coef;
+  const eqStr=uc.featNames.length===1
+    ? `${uc.target.name} = ${fmtNum(c[0])} + ${fmtNum(c[1])} × ${uc.featNames[0]}`
+    : `${uc.target.name} = ${fmtNum(c[0])} ${c.slice(1).map((b,i)=>(b>=0?'+ ':'− ')+fmtNum(Math.abs(b))+'·'+shortFeat(uc.featNames[i])).join(' ')}`;
+  const card=(lab,val,col)=>`<div class="mcard"><div class="mval" style="color:${col}">${val}</div><div class="mlab">${lab}</div></div>`;
+  const rmseFmt=uc.featNames.length===1?('₹'+(m.rmse/100000).toFixed(1)+' L'):(m.rmse.toFixed(2)+' pts');
+  mount.innerHTML=`<p class="wp">Fitted on past records and tested on held-out ones it never saw, the model learned this equation:</p>
+    <div class="math-eq" style="margin-bottom:14px"><span class="v">${eqStr}</span></div>
+    <div class="mgrid">
+      ${card('R² (fit quality)',m.r2.toFixed(2),PAL.teal)}
+      ${card('Typical error (RMSE)',rmseFmt,PAL.copper)}
+      ${card('Avg error (MAE)',uc.featNames.length===1?('₹'+(m.mae/100000).toFixed(1)+' L'):(m.mae.toFixed(2)+' pts'),PAL.gold)}
+    </div>
+    <div class="metric-explain"><b>In plain words:</b> <b>R²</b> runs 0 to 1 and says how much of the ups-and-downs in the answer the model explains — ${ (m.r2>=0.85?'a high':'a moderate') } ${m.r2.toFixed(2)} means the inputs predict the answer ${ (m.r2>=0.85?'very well':'reasonably') }. <b>RMSE</b> and <b>MAE</b> are the typical size of the model’s miss, in real units — smaller is better. There’s no confusion matrix here because we’re predicting a <i>number</i>, not a yes/no.</div>
+    <div class="decision"><div class="decision-h" style="color:${uc.accent}">▶ How ${uc.persona.split(' ')[0]} uses this to decide</div>${uc.decision(m)}</div>`;
+}
+function fmtNum(v){if(Math.abs(v)>=100000)return '₹'+(v/100000).toFixed(1)+'L';
+  if(Math.abs(v)>=1000)return '₹'+Math.round(v).toLocaleString('en-IN');
+  return (Math.round(v*1000)/1000).toString();}
+function shortFeat(f){return f.replace(/\s*\(.*\)/,'').split(' ')[0].toLowerCase();}
+
+function buildRegInteraction(uc,idx,tc){
+  const mount=document.getElementById('try-'+idx);if(!mount)return;const A=uc.accent;
+  const sl=(k,sp)=>`<div class="try-sl"><label>${sp.lab} <b id="sv-${k}-${idx}">${sp.fmt(sp.val)}</b></label>
+    <input type="range" id="ss-${k}-${idx}" min="${sp.min}" max="${sp.max}" step="${sp.step}" value="${sp.val}"></div>`;
+  mount.innerHTML=`<div class="try-inner"><div class="try-h" style="color:${A}">🎛 Try it — predict a brand-new case</div>
+    ${uc.slider.map((sp,i)=>sl(i,sp)).join('')}<div class="try-out" id="tryout-${idx}"></div></div>`;
+  const upd=()=>{const vals=uc.slider.map((sp,i)=>{const v=+document.getElementById('ss-'+i+'-'+idx).value;
+      document.getElementById('sv-'+i+'-'+idx).textContent=sp.fmt(v);return v;});
+    const pred=tc.model.predict(vals);
+    document.getElementById('tryout-'+idx).innerHTML=`Predicted <b>${uc.target.name.toLowerCase()}</b> → <b style="color:${A}">${uc.target.fmt(pred)}</b>. ${uc.persona.split(' ')[0]} plugs the inputs into the equation above and reads the answer straight off.`;};
+  uc.slider.forEach((_,i)=>document.getElementById('ss-'+i+'-'+idx).oninput=upd);upd();
+}
+
+
+function renderResult(uc,tc,mount){
+  const m=tc.m;const W=uc.watch;
+  const card=(lab,val,col,watch)=>`<div class="mcard${watch?' watch':''}"><div class="mval" style="color:${col}">${val}</div><div class="mlab">${lab}</div></div>`;
+  const pct=v=>(v*100).toFixed(0)+'%';
+  // confusion matrix mini
+  const cm=tc.cm;
+  const cmHtml=`<div class="cmini"><div class="cmini-h">What it got right &amp; wrong (on unseen test cases)</div>
+    <table class="cmtbl"><tr><td class="cmc"></td><td class="cmh">predicted&nbsp;✓no</td><td class="cmh">predicted&nbsp;⚠yes</td></tr>
+    <tr><td class="cmh">actually no</td><td class="cmv ok">${cm[0][0]}</td><td class="cmv bad">${cm[0][1]}</td></tr>
+    <tr><td class="cmh">actually yes</td><td class="cmv bad">${cm[1][0]}</td><td class="cmv ok">${cm[1][1]}</td></tr></table>
+    <div class="cmini-note">Green = correct calls · red = mistakes. “yes” = ${esc(uc.posLabel)}.</div></div>`;
+  const explain=`<div class="metric-explain">
+    <b>In plain words:</b> <b>Accuracy</b> = of all cases, how many the model called correctly. 
+    <b>Precision</b> = when it says “${esc(uc.posLabel)}”, how often it’s right (don’t cry wolf). 
+    <b>Recall</b> = of all the real “${esc(uc.posLabel)}” cases, how many it caught (don’t miss any). 
+    <b>F1</b> = a single score balancing precision and recall. 
+    <b>AUC</b> = how well it ranks risky cases above safe ones (0.5 = coin toss, 1.0 = perfect).</div>`;
+  mount.innerHTML=`<p class="wp">Trained on the labelled history and tested on cases it had never seen, the model scored:</p>
+    <div class="mgrid5">
+      ${card('Accuracy',pct(m.acc),PAL.teal,W==='acc')}
+      ${card('Precision',pct(m.prec),PAL.gold,W==='prec')}
+      ${card('Recall',pct(m.rec),PAL.copper,W==='rec')}
+      ${card('F1 score',m.f1.toFixed(2),PAL.violet,W==='f1')}
+      ${card('AUC',m.auc.toFixed(2),PAL.blue,W==='auc')}
+    </div>
+    ${cmHtml}
+    ${explain}
+    <div class="decision"><div class="decision-h" style="color:${uc.accent}">▶ How ${uc.persona.split(' ')[0]} uses this to decide</div>${uc.decision(m)}</div>`;
+}
+
+/* ---- interactions ---- */
+function buildSupInteraction(uc,idx,tc){
+  const mount=document.getElementById('try-'+idx);if(!mount||!uc.interaction)return;const A=uc.accent;
+  const s1=uc.slider[0],s2=uc.slider[1];
+  const sl=(k,sp)=>`<div class="try-sl"><label>${sp.lab} <b id="sv-${k}-${idx}">${sp.fmt(sp.val)}</b></label>
+    <input type="range" id="ss-${k}-${idx}" min="${sp.min}" max="${sp.max}" step="${sp.step}" value="${sp.val}"></div>`;
+  mount.innerHTML=`<div class="try-inner"><div class="try-h" style="color:${A}">🎛 Try it — score a brand-new case</div>
+    ${sl('a',s1)}${sl('b',s2)}<div class="try-out" id="tryout-${idx}"></div></div>`;
+  const upd=()=>{const a=+document.getElementById('ss-a-'+idx).value,b=+document.getElementById('ss-b-'+idx).value;
+    document.getElementById('sv-a-'+idx).textContent=s1.fmt(a);
+    document.getElementById('sv-b-'+idx).textContent=s2.fmt(b);
+    const z=zapply([a,b],tc.mu,tc.sd);
+    let out;
+    if(uc.model==='anomaly'){const d=tc.model.dist(z);const flag=d>=tc.model.thr;
+      out=`Distance from “normal” = <b>${d.toFixed(2)}</b> (alarm line ${tc.model.thr.toFixed(2)}). → ${flag
+        ?`<b style="color:${PAL.red}">FLAG for review</b> — this is unlike normal activity.`
+        :`<b style="color:${PAL.teal}">looks normal</b> — no alert.`}`;
+    } else {
+      const p=tc.model.prob(z);const yes=p>=0.5;
+      out=`Model says: <b style="color:${yes?PAL.red:PAL.teal}">${(p*100).toFixed(0)}% chance of “${esc(uc.posLabel)}”</b> → ${yes
+        ?`<b style="color:${PAL.red}">flagged</b>`:`<b style="color:${PAL.teal}">cleared</b>`}. ${uc.persona.split(' ')[0]} acts on the percentage, not a bare yes/no.`;
+    }
+    document.getElementById('tryout-'+idx).innerHTML=out;};
+  ['a','b'].forEach(k=>document.getElementById('ss-'+k+'-'+idx).oninput=upd);upd();
+}
+
+/* ---- build the INPUT→OUTPUT context for the step flow ---- */
+function supIOContext(uc,tc){
+  const reg=uc.kind==='regression';
+  const nTotal=reg?300:320, nTrain=Math.round(nTotal*0.7), nTest=nTotal-nTrain;
+  const f=uc.featNames;
+  // 3 sample rows from the case's realistic table (first 3 rows, all columns)
+  const cols=uc.data.cols, rows=uc.data.rows.slice(0,3).map(r=>r.slice());
+  // a raw example (slider defaults) and its scaled version
+  const rawEx=uc.slider.map(s=>s.val);
+  let scaledStr='';
+  if(!reg){const z=zapply([rawEx[0],rawEx[1]],tc.mu,tc.sd);
+    scaledStr=`${f[0]} ${uc.slider[0].fmt(rawEx[0])} → <b>${z[0].toFixed(2)}</b>, ${f[1]} ${uc.slider[1].fmt(rawEx[1])} → <b>${z[1].toFixed(2)}</b>`;}
+  // learned artifact
+  let artifact='';
+  const m=tc.model;
+  if(uc.model==='logreg')artifact=`a probability formula with learned weights <span class="io-chip">w₁=${m.w[0].toFixed(2)}</span><span class="io-chip">w₂=${m.w[1].toFixed(2)}</span><span class="io-chip">bias=${m.b.toFixed(2)}</span>`;
+  else if(uc.model==='svm')artifact=`a max-margin line <span class="io-chip">w₁=${m.w[0].toFixed(2)}</span><span class="io-chip">w₂=${m.w[1].toFixed(2)}</span>`;
+  else if(uc.model==='tree')artifact=`a flowchart of yes/no rules (depth ≤ 4), first split on <b>${f[m.root.f]}</b>`;
+  else if(uc.model==='forest')artifact=`a committee of <b>18 decision trees</b>, each grown on a random slice`;
+  else if(uc.model==='knn')artifact=`the <b>${nTrain} training points memorised</b>; new cases compared to the k=7 nearest`;
+  else if(uc.model==='nb')artifact=`the average &amp; spread of each signal, learned separately for each class`;
+  else if(uc.model==='anomaly')artifact=`the centre of “normal” + an alarm distance of <b>${m.thr.toFixed(2)}</b>`;
+  else if(uc.model==='linreg')artifact=`the fitted equation <span class="io-chip">${reg&&tc.met.coef?uc.target.name+' = '+fmtNum(tc.met.coef[0])+' + …':'y = a + b·x'}</span>`;
+  // metric line
+  let metricLine=reg
+    ? `<span class="io-chip">R² = ${tc.met.r2.toFixed(2)}</span> <span class="io-chip">typical error ${uc.featNames.length===1?('₹'+(tc.met.rmse/100000).toFixed(1)+'L'):(tc.met.rmse.toFixed(2)+' pts')}</span>`
+    : `<span class="io-chip">Accuracy ${(tc.m.acc*100).toFixed(0)}%</span> <span class="io-chip">Recall ${(tc.m.rec*100).toFixed(0)}%</span> <span class="io-chip">Precision ${(tc.m.prec*100).toFixed(0)}%</span>`;
+  const dirtyRow=rows[0].map((v,i)=>i===0?rows[0][0].replace(/\d+$/,'x'):(i===2||i===3?v:'—'));
+  return {build(kind){
+    switch(kind){
+      case 'collect': return ioRow('raw records / system logs (no structure yet)',
+        'a labelled table:<br>'+ioMini(cols,rows.map(r=>r.map((c,i)=>i===cols.length-1?`<b>${c}</b>`:c))));
+      case 'clean': return ioRow('the raw table — a few rows have blanks or typos<br>'+ioMini(cols.slice(0,3),[rows[0].slice(0,3),dirtyRow.slice(0,3).map(v=>`<span class="io-strike">${v}</span>`)]),
+        `<b>${nTotal}</b> clean, complete rows (bad rows dropped)`);
+      case 'prep': return reg
+        ? ioRow(`raw values in real units (e.g. ${f[0]})`,'<b>kept in raw units</b> on purpose, so each learned weight stays meaningful')
+        : ioRow(`raw values on different scales<br><span class="io-chip">${f[0]}</span><span class="io-chip">${f[1]}</span>`,
+          `same values <b>rescaled</b> to a common range:<br>${scaledStr}`);
+      case 'split': return ioRow(`the clean dataset — <b>${nTotal}</b> rows`,
+        `<span class="io-chip">Train ${nTrain} rows</span> to learn from &nbsp;+&nbsp; <span class="io-chip">Test ${nTest} rows</span> kept hidden to check honestly`);
+      case 'setparam': return ioRow('the training rows + a few candidate settings',
+        uc.model==='anomaly'?`an alarm distance chosen so ~10% most-distant count as odd`:'the setting that scored best on validation');
+      case 'train': return ioRow(`the <b>${nTrain}</b> training rows (features + known outcome)`,artifact);
+      case 'evaluate': return ioRow(`the <b>${nTest}</b> hidden test rows (outcomes withheld)`,'scores on cases never seen before:<br>'+metricLine);
+      default: return ioRow('the trained model’s score for each new case',
+        `a business action — ${esc(uc.posLabel?('flag / clear on “'+uc.posLabel+'”'):'a predicted number to act on')}`);
+    }
+  }};
+}
+
+/* ---- decision-tree flowchart diagram (real learned tree, top splits) ---- */
+function renderTreeDiagram(idx,tc,uc){
+  const mount=document.getElementById('tree-'+idx);if(!mount)return;
+  const maxD=3; // show root + 3 levels: reveals real decisions, deeper nodes marked "splits further"
+  const [negW,posW]=uc.outcomes||['no','yes'];
+  const rawThr=(f,thr)=>{let v=tc.mu[f]+thr*tc.sd[f];const sp=uc.slider[f];
+    if(sp&&sp.step)v=Math.round(v/sp.step)*sp.step;
+    const fmt=(sp&&sp.fmt)||(x=>x.toFixed(1));return fmt(v);};
+  // layout: assign leaf slots left→right
+  let slot=0;
+  function lay(node,depth){
+    if(node.leaf||depth===maxD){const s=slot++;return {node,depth,leaf:true,slot:s,kids:[]};}
+    const L=lay(node.L,depth+1),R=lay(node.R,depth+1);
+    return {node,depth,leaf:false,slot:(L.slot+R.slot)/2,kids:[L,R]};}
+  const T=lay(tc.model.root,0);
+  const nLeaves=slot||1;
+  const W=Math.max(560,Math.min(1240,nLeaves*205));
+  const padX=30, colW=(W-2*padX)/nLeaves, rowH=104, boxW=Math.min(190,colW-16), boxH=52;
+  const H=(maxD+1)*rowH+20;
+  const X=n=>padX+(n.slot+0.5)*colW, Y=n=>28+n.depth*rowH;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px;display:block;margin:2px auto">`;
+  // edges first
+  (function edges(n){if(n.leaf)return;n.kids.forEach((k,ki)=>{
+    const x1=X(n),y1=Y(n)+boxH,x2=X(k),y2=Y(k);
+    svg+=`<path d="M${x1} ${y1} C ${x1} ${(y1+y2)/2}, ${x2} ${(y1+y2)/2}, ${x2} ${y2}" fill="none" stroke="${PAL.line}" stroke-width="2"/>`;
+    const mx=(x1+x2)/2,my=(y1+y2)/2-2;
+    svg+=`<rect x="${mx-24}" y="${my-11}" width="48" height="20" rx="5" fill="${PAL.card}" stroke="${ki===0?PAL.teal:PAL.copper}" stroke-width="1"/>`;
+    svg+=`<text x="${mx}" y="${my+4}" fill="${ki===0?PAL.teal:PAL.copper}" font-size="12" font-weight="700" text-anchor="middle">${ki===0?'YES':'NO'}</text>`;
+    edges(k);});})(T);
+  // nodes
+  (function nodes(n){const x=X(n),y=Y(n);
+    const truncated=!n.node.leaf && n.leaf; // internal node shown at the display cutoff
+    if(n.node.leaf){const p1=n.node.p1!=null?n.node.p1:(n.node.cls===1?1:0);const isPos=p1>=0.5;
+      const col=isPos?PAL.red:PAL.teal;const pct=Math.round((isPos?p1:1-p1)*100);
+      svg+=`<rect x="${x-boxW/2}" y="${y}" width="${boxW}" height="${boxH}" rx="9" fill="${col}22" stroke="${col}" stroke-width="1.6"/>`;
+      svg+=`<text x="${x}" y="${y+22}" fill="${col}" font-size="14" font-weight="700" text-anchor="middle">➜ ${isPos?posW:negW}</text>`;
+      svg+=`<text x="${x}" y="${y+40}" fill="${PAL.mute}" font-size="11" text-anchor="middle">${pct}% of these · n=${n.node.n}</text>`;
+    } else if(truncated){const p1=n.node.p1!=null?n.node.p1:0;const isPos=p1>=0.5;
+      const pct=Math.round((isPos?p1:1-p1)*100);
+      svg+=`<rect x="${x-boxW/2}" y="${y}" width="${boxW}" height="${boxH}" rx="9" fill="${PAL.panel}" stroke="${PAL.mute}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+      svg+=`<text x="${x}" y="${y+21}" fill="${PAL.mute}" font-size="12" font-weight="600" text-anchor="middle">splits further…</text>`;
+      svg+=`<text x="${x}" y="${y+39}" fill="${PAL.mute}" font-size="11" text-anchor="middle">so far ${pct}% ${isPos?posW:negW} · n=${n.node.n}</text>`;
+    } else {
+      svg+=`<rect x="${x-boxW/2}" y="${y}" width="${boxW}" height="${boxH}" rx="9" fill="${PAL.panel2}" stroke="${uc.accent}" stroke-width="1.6"/>`;
+      const feat=(uc.featNames[n.node.f]||'feature');
+      svg+=`<text x="${x}" y="${y+21}" fill="${PAL.ink}" font-size="12.5" font-weight="600" text-anchor="middle">${feat.replace(/\s*\(.*\)/,'')}</text>`;
+      svg+=`<text x="${x}" y="${y+39}" fill="${uc.accent}" font-size="12.5" font-weight="700" text-anchor="middle">≤ ${rawThr(n.node.f,n.node.thr)} ?</text>`;
+    }
+    n.kids.forEach(nodes);})(T);
+  svg+='</svg>';
+  mount.innerHTML=`<div class="laychip">The actual tree it learned — how it splits</div>
+    <div class="treecard">${svg}
+    <div class="cap">Start at the top. At each box the tree asks one yes/no question about a real number; <b style="color:${PAL.teal}">YES</b> goes left, <b style="color:${PAL.copper}">NO</b> goes right. Solid coloured boxes are final decisions (with how pure they are and how many cases landed there). Dashed grey boxes are branches that keep splitting deeper — shown here only to the top ${maxD} levels to stay readable.</div></div>`;
+}
+
+/* ---- random-forest diagram: sample trees + the vote ---- */
+function renderForestDiagram(idx,tc,uc){
+  const mount=document.getElementById('tree-'+idx);if(!mount)return;
+  const trees=tc.model.models;if(!trees||!trees.length)return;
+  const [negW,posW]=uc.outcomes||['no','yes'];
+  const rawThr=(f,thr)=>{let v=tc.mu[f]+thr*tc.sd[f];const sp=uc.slider[f];
+    if(sp&&sp.step)v=Math.round(v/sp.step)*sp.step;const fmt=(sp&&sp.fmt)||(x=>x.toFixed(1));return fmt(v);};
+  const featShort=f=>(uc.featNames[f]||'feature').replace(/\s*\(.*\)/,'');
+  // --- three sample mini-trees (root + its two children) showing the trees differ ---
+  const pick=[0,Math.floor(trees.length/2),trees.length-1];
+  const panelW=270,PH=190,gap=14;
+  const SVGW=panelW*3+gap*2;
+  let svg=`<svg viewBox="0 0 ${SVGW} ${PH}" width="100%" style="max-width:${SVGW}px;display:block;margin:0 auto">`;
+  pick.forEach((ti,pi)=>{
+    const ox=pi*(panelW+gap), root=trees[ti];
+    svg+=`<text x="${ox+panelW/2}" y="16" fill="${PAL.mute}" font-size="12" font-weight="700" text-anchor="middle">Tree #${ti+1}</text>`;
+    const bw=150,bh=44,cx=ox+panelW/2,ry=30;
+    const node=(x,y,node2,isRoot)=>{
+      if(!isRoot&&node2.leaf){const p1=node2.p1,isPos=p1>=0.5,col=isPos?PAL.red:PAL.teal,pct=Math.round((isPos?p1:1-p1)*100);
+        svg+=`<rect x="${x-58}" y="${y}" width="116" height="40" rx="7" fill="${col}22" stroke="${col}" stroke-width="1.4"/>`;
+        svg+=`<text x="${x}" y="${y+17}" fill="${col}" font-size="12" font-weight="700" text-anchor="middle">➜ ${isPos?posW:negW}</text>`;
+        svg+=`<text x="${x}" y="${y+32}" fill="${PAL.mute}" font-size="10" text-anchor="middle">${pct}% · n=${node2.n}</text>`;
+      } else if(!isRoot){const p1=node2.p1!=null?node2.p1:0,isPos=p1>=0.5,pct=Math.round((isPos?p1:1-p1)*100);
+        svg+=`<rect x="${x-58}" y="${y}" width="116" height="40" rx="7" fill="${PAL.panel}" stroke="${PAL.mute}" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+        svg+=`<text x="${x}" y="${y+17}" fill="${PAL.mute}" font-size="10.5" text-anchor="middle">splits further…</text>`;
+        svg+=`<text x="${x}" y="${y+32}" fill="${PAL.mute}" font-size="10" text-anchor="middle">${pct}% ${isPos?posW:negW}·n=${node2.n}</text>`;
+      } else {
+        svg+=`<rect x="${x-bw/2}" y="${y}" width="${bw}" height="${bh}" rx="8" fill="${PAL.panel2}" stroke="${uc.accent}" stroke-width="1.5"/>`;
+        svg+=`<text x="${x}" y="${y+18}" fill="${PAL.ink}" font-size="11.5" font-weight="600" text-anchor="middle">${featShort(node2.f)}</text>`;
+        svg+=`<text x="${x}" y="${y+34}" fill="${uc.accent}" font-size="11.5" font-weight="700" text-anchor="middle">≤ ${rawThr(node2.f,node2.thr)} ?</text>`;
+      }
+    };
+    if(root.leaf){node(cx,ry+40,root,false);}
+    else{node(cx,ry,root,true);
+      const cy=ry+bh+40, lx=ox+panelW*0.28, rx2=ox+panelW*0.72;
+      [['YES',root.L,lx],['NO',root.R,rx2]].forEach(([lab,ch,x])=>{
+        svg+=`<path d="M${cx} ${ry+bh} C ${cx} ${ry+bh+18}, ${x} ${cy-18}, ${x} ${cy}" fill="none" stroke="${PAL.line}" stroke-width="1.6"/>`;
+        svg+=`<text x="${(cx+x)/2}" y="${cy-12}" fill="${lab==='YES'?PAL.teal:PAL.copper}" font-size="10" font-weight="700" text-anchor="middle">${lab}</text>`;
+        node(x,cy,ch,false);});
+    }
+  });
+  svg+='</svg>';
+  // --- the vote on one representative case ---
+  const exRaw=uc.forestExample||uc.slider.map(s=>s.val);
+  const z=zapply(exRaw,tc.mu,tc.sd);
+  const votes=trees.map(t=>treePredict(t,z).p1>=0.5?1:0);
+  const nPos=votes.reduce((a,b)=>a+b,0);
+  const score=tc.model.prob(z);const isPos=score>=0.5;
+  const exDesc=uc.slider.map((s,i)=>`${featShort(i)} ${s.fmt(exRaw[i])}`).join(', ');
+  const chips=votes.map(v=>`<span class="vote-chip" style="background:${v?PAL.red:PAL.teal}"></span>`).join('');
+  mount.innerHTML=`<div class="laychip">The forest = many trees, each trained on a different random slice</div>
+    <div class="treecard">${svg}
+      <div class="cap">Three of the ${trees.length} trees. Notice they ask <b>different</b> first questions and split at different thresholds — because each was grown on its own random sample of the data. That diversity is the whole point.</div>
+    </div>
+    <div class="votecard">
+      <div class="vote-h">Now they vote on one example — <b>${esc(exDesc)}</b></div>
+      <div class="vote-chips">${chips}</div>
+      <div class="vote-legend"><span class="vote-chip" style="background:${PAL.red}"></span> tree votes “${posW}” &nbsp;&nbsp; <span class="vote-chip" style="background:${PAL.teal}"></span> tree votes “${negW}”</div>
+      <div class="vote-result"><b>${nPos} of ${trees.length}</b> trees vote “${posW}” → forest score = <b style="color:${isPos?PAL.red:PAL.teal}">${(score*100).toFixed(0)}%</b> → final call: <b style="color:${isPos?PAL.red:PAL.teal}">${isPos?posW:negW}</b>. The majority wins, so one odd tree can’t swing the verdict.</div>
+    </div>`;
+}
+
+/* ---- boot ---- */
+const SBOOT={};
+function sActivate(idx){
+  document.querySelectorAll('.tabbtn').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  document.querySelectorAll('.uc-pane').forEach((p,i)=>p.classList.toggle('on',i===idx));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(!SBOOT[idx]){SBOOT[idx]=true;const uc=SUP_CASES[idx];
+    initReveal('pane-'+idx);
+    try{const tc=trainCase(uc);
+      fillPipelineIO(uc,idx,supIOContext(uc,tc));
+      if(uc.kind==='regression'){
+        if(uc.featNames.length===1)drawRegLine('viz-'+idx,tc,uc);else drawPvA('viz-'+idx,tc,uc);
+        renderRegResult(uc,tc,document.getElementById('result-'+idx));
+        buildRegInteraction(uc,idx,tc);
+      } else {
+        drawBoundary('viz-'+idx,tc,uc);
+        if(uc.model==='tree')renderTreeDiagram(idx,tc,uc);
+        if(uc.model==='forest')renderForestDiagram(idx,tc,uc);
+        renderResult(uc,tc,document.getElementById('result-'+idx));
+        buildSupInteraction(uc,idx,tc);
+      }
+    }catch(e){console.error('case',idx,e);
+      const r=document.getElementById('result-'+idx);if(r)r.innerHTML='<div class="loading">error: '+e.message+'</div>';}
+  }
+}
+function boot(){
+  const tabbar=document.getElementById('tabbar'),panes=document.getElementById('panes');
+  SUP_CASES.forEach((uc,i)=>{
+    const b=document.createElement('button');b.className='tabbtn';b.innerHTML=`<span class="tabnum">${i+1}</span>${uc.title}`;
+    b.onclick=()=>sActivate(i);tabbar.appendChild(b);
+    const pane=document.createElement('div');pane.className='uc-pane';pane.id='pane-'+i;pane.innerHTML=renderUseCase(uc,i);
+    panes.appendChild(pane);
+  });
+  sActivate(0);
+}
+document.addEventListener('DOMContentLoaded',boot);
+
+</script>
+</body></html>
