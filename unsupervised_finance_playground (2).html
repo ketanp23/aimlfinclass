@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsupervised Learning · Finance Playground</title>
+<style>
+:root{--bg:#0E1C2A;--panel:#16283A;--panel2:#1C3247;--card:#13273A;--teal:#33C7B4;--teald:#1F8F80;
+--copper:#E0924E;--red:#E36464;--gold:#E7C15A;--violet:#9A8CDB;--blue:#5AA9E6;--ink:#EAF1F6;--mute:#8DA2B5;--line:#27405F;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;padding:0 0 60px;-webkit-font-smoothing:antialiased}
+.top{background:linear-gradient(180deg,#132840,#0E1C2A);border-bottom:1px solid var(--line);padding:22px 26px 0}
+.top-in{max-width:1180px;margin:0 auto}
+.kicker{color:var(--teal);font-size:11.5px;font-weight:700;letter-spacing:2px;margin-bottom:8px}
+h1{font-family:Cambria,Georgia,serif;font-size:29px;font-weight:700;margin-bottom:7px}
+.intro{color:var(--mute);font-size:14px;max-width:880px;line-height:1.55;margin-bottom:18px}
+/* tab bar */
+.tabbar{display:flex;gap:4px;overflow-x:auto;padding-bottom:0;scrollbar-width:thin}
+.tabbtn{background:none;border:none;border-bottom:2px solid transparent;color:var(--mute);font:inherit;font-size:13px;
+font-weight:600;padding:11px 14px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;margin-bottom:-1px;transition:.15s}
+.tabbtn:hover{color:var(--ink)}
+.tabbtn.on{color:var(--teal);border-bottom-color:var(--teal)}
+.tabnum{display:inline-flex;width:19px;height:19px;border-radius:50%;background:#20344a;color:var(--mute);
+font-size:11px;align-items:center;justify-content:center;font-weight:700}
+.tabbtn.on .tabnum{background:var(--teal);color:#08131d}
+/* panes */
+.wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+.uc-pane{display:none;padding-top:26px}
+.uc-pane.on{display:block}
+.uc-head{margin-bottom:8px}
+.uc-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 11px;border-radius:20px;border:1px solid;margin-bottom:12px}
+.uc-h2{font-family:Cambria,Georgia,serif;font-size:30px;font-weight:700;margin-bottom:7px}
+.uc-sub{color:var(--mute);font-size:14.5px;line-height:1.5;max-width:900px}
+/* sections */
+.wsec{border-top:1px solid var(--line);padding:24px 0 6px;margin-top:20px}
+.wkicker{color:var(--teal);font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:5px}
+.wtitle{font-family:Cambria,Georgia,serif;font-size:21px;font-weight:700;margin-bottom:14px}
+.wp{font-size:14px;color:#d3dee7;line-height:1.65;margin-bottom:14px;max-width:900px}
+.em{color:var(--teal)}
+/* persona / story */
+.story{display:flex;gap:20px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap}
+.persona{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid #223850;border-radius:12px;padding:14px 16px;min-width:230px}
+.pface{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#0E1C2A}
+.pname{font-size:16px;font-weight:700}
+.prole{font-size:12px;color:var(--mute);margin-top:2px}
+.storytext{flex:1;min-width:340px}
+.storytext p{font-size:14px;color:#d3dee7;line-height:1.6;margin-bottom:9px}
+.storytext b.em{color:var(--gold)}
+.laychip{display:inline-block;background:rgba(231,193,90,.14);color:var(--gold);font-size:10.5px;font-weight:700;
+letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin:10px 0 7px}
+.layman{background:var(--panel2);border-left:3px solid var(--gold);border-radius:8px;padding:12px 15px;font-size:14px;
+color:#f0e7d4;line-height:1.62;max-width:900px}
+/* data table */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #223850;margin-bottom:12px}
+.dtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:480px}
+.dtbl th{background:var(--teald);color:#fff;text-align:left;padding:9px 12px;font-weight:600;font-size:12px;white-space:nowrap}
+.dtbl td{padding:8px 12px;border-bottom:1px solid #1b3047;color:#cbd7e1;white-space:nowrap}
+.dtbl tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+.dtbl td.hl,.dtbl th.hl{background:rgba(51,199,180,.10)}
+.dtbl td.lab{font-weight:700}
+.dtbl td.pos{color:var(--red)} .dtbl td.neg{color:var(--teal)}
+.tbl-note{color:var(--mute);font-size:11.5px;font-style:italic;margin:-4px 0 12px}
+.collist{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:12px 15px;margin-bottom:12px}
+.collist-h{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:8px}
+.colrow{display:flex;gap:12px;font-size:13px;color:#cbd7e1;padding:4px 0;line-height:1.5}
+.colname{min-width:150px;font-weight:600;flex-shrink:0}
+/* viz */
+.vizbox{margin:6px 0 12px}
+.viz-canvas{display:block;width:100%;max-width:760px;border-radius:10px;background:var(--card);border:1px solid #223850}
+.cap{color:var(--mute);font-size:11.5px;margin-top:6px;font-style:italic}
+/* steps */
+.stepbox{display:flex;gap:14px;background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.stepnum{width:28px;height:28px;border-radius:8px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.steptitle{font-size:14.5px;font-weight:700;margin-bottom:4px}
+.steptext{font-size:13px;color:#cbd7e1;line-height:1.6}
+.reveal-btn{background:var(--card);border:1px solid;border-radius:8px;padding:9px 18px;font:inherit;font-size:13px;
+font-weight:600;cursor:pointer;margin-top:4px;transition:.15s}
+.reveal-btn:hover{filter:brightness(1.2)}
+.stepio{margin:2px 0 12px 42px}
+.io{display:flex;align-items:stretch;gap:10px;background:#0d1a28;border:1px solid #223850;border-radius:9px;padding:11px 13px;flex-wrap:wrap}
+.io-col{flex:1;min-width:200px}
+.io-tag{display:inline-block;font-size:9px;font-weight:800;letter-spacing:1px;padding:2px 7px;border-radius:5px;margin-bottom:6px}
+.io-in{background:rgba(224,146,78,.18);color:var(--copper)}
+.io-out{background:rgba(51,199,180,.18);color:var(--teal)}
+.io-body{font-size:12.5px;color:#cbd7e1;line-height:1.55;overflow-x:auto}
+.io-body b{color:var(--ink)}
+.io-arrow{align-self:center;color:var(--mute);font-size:18px;flex-shrink:0}
+.iotbl{border-collapse:collapse;margin-top:3px;font-size:11.5px}
+.iotbl th{background:#1a304a;color:#b9c8d6;padding:3px 8px;text-align:left;font-weight:600;font-size:11px}
+.iotbl td{padding:3px 8px;border-bottom:1px solid #17293c;color:#cbd7e1;white-space:nowrap}
+.io-strike{text-decoration:line-through;color:var(--red);opacity:.7}
+.io-chip{display:inline-block;background:#16283a;border:1px solid #2a4256;border-radius:5px;padding:1px 7px;margin:2px 3px 0 0;font-size:11.5px;color:#cbd7e1;font-family:Cambria,Georgia,serif}
+.treebox{margin:4px 0 6px}
+.treecard{background:var(--card);border:1px solid #223850;border-radius:10px;padding:14px 12px 12px;overflow-x:auto}
+.treecard .cap{margin-top:8px;text-align:left}
+.votecard{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;margin-top:10px}
+.vote-h{font-size:13.5px;color:#dfe8ef;margin-bottom:10px}
+.vote-h b{color:var(--ink)}
+.vote-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px}
+.vote-chip{display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle}
+.vote-legend{font-size:11.5px;color:var(--mute);margin-bottom:11px}
+.vote-result{background:var(--card);border-radius:8px;padding:11px 13px;font-size:13.5px;color:#dfe8ef;line-height:1.6}
+/* results */
+.resultbox,.trywrap{margin-top:6px}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+@media(max-width:640px){.mgrid{grid-template-columns:1fr}}
+.mcard{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:14px 16px;text-align:center}
+.mval{font-size:26px;font-weight:800;line-height:1}
+.mlab{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--mute);margin-top:6px;font-weight:600}
+.msub{font-size:11px;color:var(--mute);margin-top:5px;line-height:1.35}
+.mgrid5{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px}
+@media(max-width:720px){.mgrid5{grid-template-columns:repeat(2,1fr)}}
+.mgrid5 .mval{font-size:22px}
+.mgrid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:720px){.mgrid4{grid-template-columns:repeat(2,1fr)}}
+.mgrid4 .mval{font-size:23px}
+.mcard.watch{outline:2px solid var(--teal);outline-offset:1px;position:relative}
+.mcard.watch::after{content:'KEY METRIC';position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+background:var(--teal);color:#08131d;font-size:8px;font-weight:800;padding:1px 6px;border-radius:6px;white-space:nowrap}
+.cmini{background:var(--panel);border:1px solid #223850;border-radius:10px;padding:13px 15px;margin-bottom:14px}
+.cmini-h{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:9px}
+.cmtbl{border-collapse:collapse;margin:4px 0}
+.cmtbl td{padding:6px 11px;text-align:center;font-size:12.5px}
+.cmtbl .cmh{color:var(--mute);font-size:11px;font-weight:600}
+.cmtbl .cmc{background:none}
+.cmv{font-weight:700;font-size:15px;border-radius:5px}
+.cmv.ok{color:var(--teal);background:rgba(51,199,180,.12)}
+.cmv.bad{color:var(--red);background:rgba(227,100,100,.12)}
+.cmini-note{color:var(--mute);font-size:11px;margin-top:8px}
+.mathbox{background:linear-gradient(135deg,rgba(90,169,230,.07),rgba(154,140,219,.05));border:1px solid #2a4256;border-radius:12px;padding:16px 18px;margin:14px 0 6px}
+.math-h{font-size:12px;letter-spacing:.5px;color:var(--blue);font-weight:700;margin-bottom:11px}
+.math-eq{background:#0d1a28;border:1px solid #24405c;border-radius:8px;padding:16px 18px;text-align:center;
+font-family:'Cambria Math',Cambria,Georgia,serif;font-size:20px;color:var(--ink);line-height:1.7;overflow-x:auto}
+.math-eq .v{color:var(--teal);font-style:italic}
+.math-eq .c{color:var(--gold);font-style:italic}
+.math-eq sub{font-size:12px} .math-eq sup{font-size:12px}
+.math-where{color:var(--mute);font-size:12px;margin-top:8px;line-height:1.5;text-align:center}
+.math-where b{color:var(--teal)}
+.math-use{background:var(--card);border-radius:8px;padding:11px 14px;font-size:13.5px;color:#dfe8ef;line-height:1.6;margin-top:12px}
+.metric-explain{background:var(--panel2);border-left:3px solid var(--teal);border-radius:8px;padding:12px 15px;
+font-size:13.5px;color:#cdd9e3;line-height:1.62;margin-bottom:14px}
+.metric-explain b{color:var(--ink)}
+.decision{background:linear-gradient(135deg,rgba(51,199,180,.08),rgba(154,140,219,.06));border:1px solid #2a4256;
+border-radius:10px;padding:14px 16px;font-size:13.5px;color:#dfe8ef;line-height:1.65}
+.decision-h{font-weight:700;font-size:14px;margin-bottom:6px}
+.loading{color:var(--gold);font-size:13px;padding:10px}
+/* try widget */
+.try-inner{background:var(--panel);border:1px solid #2a4256;border-radius:12px;padding:16px 18px;margin-top:14px}
+.try-h{font-size:14px;font-weight:700;margin-bottom:12px}
+.try-sl{margin-bottom:12px}
+.try-sl label{display:flex;justify-content:space-between;font-size:13px;color:#cbd7e1;margin-bottom:5px}
+.try-sl label b{color:var(--teal)}
+.try-sl input[type=range]{width:100%;accent-color:var(--teal)}
+.tsel{width:100%;background:var(--card);border:1px solid #2E4A63;color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px}
+.try-out{background:var(--card);border-radius:8px;padding:12px 14px;font-size:13.5px;color:#dfe8ef;line-height:1.6;margin-top:6px}
+footer{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;color:var(--mute);font-size:11px;font-style:italic;line-height:1.6;max-width:1180px;margin-left:auto;margin-right:auto;padding-left:26px;padding-right:26px}
+</style></head><body>
+<div class="top"><div class="top-in">
+<div class="kicker">TM2065 · UNSUPERVISED LEARNING · GUIDED USE-CASE WALKTHROUGHS</div>
+<h1>Unsupervised learning, one business story at a time</h1>
+<p class="intro">Six real finance use cases, each its own tab and each a different unsupervised algorithm — from clustering to dimensionality reduction to association rules. For every one: meet the company and the decision-maker, see and understand the <b>unlabelled</b> data, learn how the algorithm thinks in plain language (with the equation behind it explained like you’re in 6th class), watch it run step by step with the real inputs and outputs of each stage, and read the label-free evaluation the way the decision-maker would.</p>
+<div class="tabbar" id="tabbar"></div>
+</div></div>
+<div class="wrap"><div id="panes"></div></div>
+<footer>Educational walkthroughs for TM2065 · Application of Machine Learning and Artificial Intelligence in Finance. Every algorithm (K-Means, DBSCAN density clustering, PCA, LDA, and Apriori-style association-rule mining) is implemented from scratch and run live in your browser on synthetic data. Because there are no labels, every evaluation metric is <em>internal</em> — computed from geometry, not from an answer key. Company names and personas are fictitious.</footer>
+<script>
+
+/* ===== Unsupervised engines — all from scratch =====
+   K-Means (+k-means++, inertia, silhouette) · DBSCAN (core/border/noise) ·
+   PCA (2×2 covariance eigen) · LDA direction · Apriori-style association rules.
+   Everything genuinely computed in-browser. No libraries. */
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function randn(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const dist2=(a,b)=>{let s=0;for(let i=0;i<2;i++){const d=a[i]-b[i];s+=d*d;}return s;};
+
+/* ---------- scenarios (2-D synthetic finance data; some carry a hidden class in slot [2]) ---------- */
+const SCENU={
+  segments:{gen(r){const P=[];const C=[[-1.4,-1.1,0.42],[1.5,1.3,0.5],[1.3,-1.4,0.45]];
+      C.forEach(c=>{for(let i=0;i<45;i++)P.push([c[0]+randn(r)*c[2],c[1]+randn(r)*c[2]]);});return P;}},
+  fraud:{gen(r){const P=[];for(let i=0;i<110;i++)P.push([randn(r)*0.75,randn(r)*0.75]);
+      for(let i=0;i<28;i++){const a=r()*6.28,rad=1.9+randn(r)*0.12;P.push([rad*Math.cos(a),rad*Math.sin(a)*0.5+1.4]);}
+      for(let i=0;i<8;i++)P.push([r()*6-3,r()*6-3]);return P;}},
+  moons:{gen(r){const P=[];for(let i=0;i<80;i++){const t=r()*Math.PI;
+      P.push([Math.cos(t)*1.6+randn(r)*0.12,Math.sin(t)*1.6+randn(r)*0.12-0.4]);
+      P.push([1.6-Math.cos(t)*1.6+randn(r)*0.12,0.4-Math.sin(t)*1.6+randn(r)*0.12]);}return P;}},
+  elong:{gen(r){const P=[];const rot=(x,y)=>[x+0.7*y,0.6*x+y];
+      for(let i=0;i<70;i++){const [x,y]=rot(-1+randn(r)*1.5,-0.6+randn(r)*0.35);P.push([x,y,0]);}
+      for(let i=0;i<70;i++){const [x,y]=rot(1+randn(r)*1.5,0.6+randn(r)*0.35);P.push([x,y,1]);}return P;}},
+};
+
+/* ---------- standardise (keeps the hidden class in slot [2] if present) ---------- */
+function standardise(P){const n=P.length;const mu=[0,0],sd=[0,0];
+  for(const p of P){mu[0]+=p[0];mu[1]+=p[1];}mu[0]/=n;mu[1]/=n;
+  for(const p of P){sd[0]+=(p[0]-mu[0])**2;sd[1]+=(p[1]-mu[1])**2;}
+  sd[0]=Math.sqrt(sd[0]/n)||1;sd[1]=Math.sqrt(sd[1]/n)||1;
+  return P.map(p=>[(p[0]-mu[0])/sd[0],(p[1]-mu[1])/sd[1],p[2]]);}
+
+/* ---------- K-Means (k-means++ init) ---------- */
+function kmeans(P,k,seed){
+  const r=mulberry32(seed),n=P.length,X=P.map(p=>[p[0],p[1]]);
+  let cent=[X[Math.floor(r()*n)].slice()];
+  while(cent.length<k){
+    const d=X.map(x=>Math.min(...cent.map(c=>dist2(x,c))));
+    const sum=d.reduce((a,b)=>a+b,0);let t=r()*sum,idx=0;
+    for(let i=0;i<n;i++){t-=d[i];if(t<=0){idx=i;break;}}
+    cent.push(X[idx].slice());
+  }
+  let lab=new Array(n).fill(0),iters=0;
+  for(;iters<60;iters++){let changed=false;
+    for(let i=0;i<n;i++){let bd=1e9,bk=0;
+      for(let c=0;c<k;c++){const dd=dist2(X[i],cent[c]);if(dd<bd){bd=dd;bk=c;}}
+      if(lab[i]!==bk){lab[i]=bk;changed=true;}}
+    const sum=Array.from({length:k},()=>[0,0,0]);
+    for(let i=0;i<n;i++){sum[lab[i]][0]+=X[i][0];sum[lab[i]][1]+=X[i][1];sum[lab[i]][2]++;}
+    for(let c=0;c<k;c++)if(sum[c][2]){cent[c]=[sum[c][0]/sum[c][2],sum[c][1]/sum[c][2]];}
+    if(!changed)break;}
+  let inertia=0;for(let i=0;i<n;i++)inertia+=dist2(X[i],cent[lab[i]]);
+  const sizes=new Array(k).fill(0);lab.forEach(l=>sizes[l]++);
+  return {lab,cent,inertia,k,iters,sizes};
+}
+
+/* ---------- DBSCAN ---------- */
+function dbscan(P,eps,minPts){
+  const n=P.length,X=P.map(p=>[p[0],p[1]]),e2=eps*eps;
+  const lab=new Array(n).fill(-2); // -2 unvisited · -1 noise · >=0 cluster id
+  const region=i=>{const out=[];for(let j=0;j<n;j++)if(dist2(X[i],X[j])<=e2)out.push(j);return out;};
+  let c=-1;
+  for(let i=0;i<n;i++){
+    if(lab[i]!==-2)continue;
+    const nb=region(i);
+    if(nb.length<minPts){lab[i]=-1;continue;}
+    c++;lab[i]=c;const q=nb.slice();
+    for(let qi=0;qi<q.length;qi++){const j=q[qi];
+      if(lab[j]===-1)lab[j]=c;
+      if(lab[j]!==-2)continue;
+      lab[j]=c;const nb2=region(j);
+      if(nb2.length>=minPts)for(const x of nb2)q.push(x);}
+  }
+  const noise=lab.filter(l=>l===-1).length;
+  return {lab,k:c+1,noise,X,eps,minPts};
+}
+
+/* ---------- silhouette (average over clustered points) ---------- */
+function silhouette(P,lab){
+  const X=P.map(p=>[p[0],p[1]]),n=X.length;
+  const ids=[...new Set(lab)].filter(l=>l>=0);
+  if(ids.length<2)return NaN;
+  const byc={};ids.forEach(c=>byc[c]=[]);
+  lab.forEach((l,i)=>{if(l>=0)byc[l].push(i);});
+  let sum=0,cnt=0;
+  for(let i=0;i<n;i++){
+    if(lab[i]<0)continue;const own=byc[lab[i]];if(own.length<=1)continue;
+    let a=0;for(const j of own)if(j!==i)a+=Math.sqrt(dist2(X[i],X[j]));a/=(own.length-1);
+    let b=1e9;
+    for(const c of ids){if(c===lab[i])continue;let m=0;for(const j of byc[c])m+=Math.sqrt(dist2(X[i],X[j]));m/=byc[c].length;if(m<b)b=m;}
+    sum+=(b-a)/Math.max(a,b);cnt++;
+  }
+  return cnt?sum/cnt:NaN;
+}
+
+/* ---------- PCA (2×2 symmetric eigen, closed form) ---------- */
+function pca(P){
+  const n=P.length;let mx=0,my=0;for(const p of P){mx+=p[0];my+=p[1];}mx/=n;my/=n;
+  let cxx=0,cyy=0,cxy=0;for(const p of P){const x=p[0]-mx,y=p[1]-my;cxx+=x*x;cyy+=y*y;cxy+=x*y;}
+  cxx/=n;cyy/=n;cxy/=n;
+  const tr=cxx+cyy,det=cxx*cyy-cxy*cxy;
+  const l1=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),l2=tr/2-Math.sqrt(Math.max(0,tr*tr/4-det));
+  const ev=(l)=>{let vx=cxy,vy=l-cxx;if(Math.abs(vx)<1e-9&&Math.abs(vy)<1e-9){vx=1;vy=0;}const nrm=Math.hypot(vx,vy);return [vx/nrm,vy/nrm];};
+  return {mean:[mx,my],pc1:ev(l1),pc2:ev(l2),l1,l2,explained:l1/(l1+l2)};
+}
+
+/* ---------- LDA direction (2 classes) + separation quality ---------- */
+function lda(P){
+  const A=P.filter(p=>p[2]===0),B=P.filter(p=>p[2]===1);
+  if(!A.length||!B.length)return null;
+  const mean=g=>{let x=0,y=0;g.forEach(p=>{x+=p[0];y+=p[1];});return [x/g.length,y/g.length];};
+  const mA=mean(A),mB=mean(B);
+  const scatter=(g,m)=>{let sxx=0,sxy=0,syy=0;g.forEach(p=>{const x=p[0]-m[0],y=p[1]-m[1];sxx+=x*x;sxy+=x*y;syy+=y*y;});return [sxx,sxy,syy];};
+  const [axx,axy,ayy]=scatter(A,mA),[bxx,bxy,byy]=scatter(B,mB);
+  const Sxx=axx+bxx,Sxy=axy+bxy,Syy=ayy+byy;
+  const det=Sxx*Syy-Sxy*Sxy||1e-9;
+  const dx=mB[0]-mA[0],dy=mB[1]-mA[1];
+  let wx=(Syy*dx-Sxy*dy)/det,wy=(-Sxy*dx+Sxx*dy)/det;
+  const nrm=Math.hypot(wx,wy)||1;wx/=nrm;wy/=nrm;
+  return {w:[wx,wy],mA,mB};
+}
+/* Fisher-style separation: (gap between class means)² / (spread within classes), measured along an axis w */
+function projSeparation(P,w){
+  const proj=p=>p[0]*w[0]+p[1]*w[1];
+  const A=P.filter(p=>p[2]===0).map(proj),B=P.filter(p=>p[2]===1).map(proj);
+  if(!A.length||!B.length)return NaN;
+  const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+  const varr=(a,m)=>a.reduce((s,v)=>s+(v-m)**2,0)/a.length;
+  const mA=mean(A),mB=mean(B);
+  return (mB-mA)**2/(varr(A,mA)+varr(B,mB)+1e-9);
+}
+/* how cleanly a single threshold on the projection splits the two classes (best accuracy) */
+function projSplitAccuracy(P,w){
+  const proj=p=>p[0]*w[0]+p[1]*w[1];
+  const pts=P.map(p=>[proj(p),p[2]]).sort((a,b)=>a[0]-b[0]);
+  const n=pts.length;let best=0;
+  for(let i=0;i<=n;i++){const thr=i===0?pts[0][0]-1:(i===n?pts[n-1][0]+1:(pts[i-1][0]+pts[i][0])/2);
+    let ok=0;pts.forEach(([v,c])=>{const pred=v>=thr?1:0;if(pred===c)ok++;});
+    const acc=Math.max(ok,n-ok)/n;if(acc>best)best=acc;}
+  return best;
+}
+
+/* ---------- association rules (transactional baskets) ---------- */
+const PRODUCTS=['Current a/c','Savings','Credit card','FX hedge','Rate swap','Trade finance','Credit line','Wealth mgmt'];
+function genBaskets(seed){
+  const r=mulberry32(seed),B=[];const has=p=>r()<p;
+  for(let i=0;i<600;i++){const b=new Set();
+    if(has(0.85))b.add(0);
+    if(has(0.5))b.add(1);
+    if(has(0.4))b.add(2);
+    const corp=r()<0.4;
+    if(corp){
+      if(has(0.55))b.add(3);
+      if(b.has(3)&&has(0.72))b.add(4); else if(has(0.12))b.add(4);
+      if(has(0.5))b.add(5);
+      if(b.has(5)&&has(0.62))b.add(6); else if(has(0.15))b.add(6);
+    } else { if(has(0.25))b.add(7); }
+    B.push(b);}
+  return B;
+}
+function mineRules(B,minSup,minConf){
+  const n=B.length,K=PRODUCTS.length;
+  const cnt1=new Array(K).fill(0);B.forEach(b=>b.forEach(i=>cnt1[i]++));
+  const rules=[];
+  for(let a=0;a<K;a++)for(let c=0;c<K;c++){
+    if(a===c)continue;
+    let ab=0;B.forEach(b=>{if(b.has(a)&&b.has(c))ab++;});
+    const sup=ab/n;if(sup<minSup)continue;
+    const conf=ab/cnt1[a];if(conf<minConf)continue;
+    const lift=conf/(cnt1[c]/n);
+    rules.push({a,c,sup,conf,lift});}
+  rules.sort((x,y)=>y.lift-x.lift);
+  return {rules,cnt1,n};
+}
+
+/* ===== Shared walkthrough framework (used by both playgrounds) ===== */
+const PAL={teal:'#33C7B4',teald:'#1F8F80',copper:'#E0924E',red:'#E36464',gold:'#E7C15A',
+  violet:'#9A8CDB',blue:'#5AA9E6',green:'#7ED957',ink:'#EAF1F6',mute:'#8DA2B5',
+  card:'#13273A',panel:'#16283A',panel2:'#1C3247',line:'#27405F',bg:'#0E1C2A'};
+
+/* ---- small helpers to build HTML strings ---- */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function dataTable(cols,rows,opts={}){
+  const hi=opts.highlightCol; const maxr=opts.max||rows.length;
+  let h='<div class="tbl-wrap"><table class="dtbl"><thead><tr>';
+  cols.forEach((c,i)=>h+=`<th${i===hi?' class="hl"':''}>${esc(c)}</th>`);
+  h+='</tr></thead><tbody>';
+  rows.slice(0,maxr).forEach(r=>{h+='<tr>';
+    r.forEach((v,i)=>{const cls=[]; if(i===hi)cls.push('hl');
+      if(opts.labelCol===i){cls.push('lab'); cls.push(v==opts.posLabel?'pos':'neg');}
+      h+=`<td${cls.length?' class="'+cls.join(' ')+'"':''}>${esc(v)}</td>`;});
+    h+='</tr>';});
+  h+='</tbody></table></div>';
+  if(rows.length>maxr) h+=`<div class="tbl-note">…and ${rows.length-maxr} more rows (${rows.length} total in the sample)</div>`;
+  return h;
+}
+
+function metricCard(label,value,color,sub){
+  return `<div class="mcard"><div class="mval" style="color:${color}">${value}</div>
+    <div class="mlab">${esc(label)}</div>${sub?`<div class="msub">${sub}</div>`:''}</div>`;
+}
+
+function stepBox(n,title,body,color){
+  return `<div class="stepbox"><div class="stepnum" style="background:${color||PAL.teald}">${n}</div>
+    <div class="stepbody"><div class="steptitle">${esc(title)}</div><div class="steptext">${body}</div></div></div>`;
+}
+
+/* progressive reveal: sections hidden until "next" clicked */
+function initReveal(tabId){
+  const steps=[...document.querySelectorAll(`#${tabId} .reveal-step`)];
+  let shown=1;
+  const paint=()=>{steps.forEach((s,i)=>{s.style.display=i<shown?'block':'none';});
+    const btn=document.querySelector(`#${tabId} .reveal-btn`);
+    if(btn){ if(shown>=steps.length){btn.style.display='none';}
+      else {btn.style.display='inline-block';btn.textContent=steps[shown]?.dataset.label||'Show next step ▸';}}
+  };
+  const btn=document.querySelector(`#${tabId} .reveal-btn`);
+  if(btn)btn.onclick=()=>{shown=Math.min(steps.length,shown+1);paint();
+    steps[shown-1]?.scrollIntoView({behavior:'smooth',block:'center'});};
+  paint();
+}
+
+/* section shell */
+function section(kicker,title,inner){
+  return `<section class="wsec"><div class="wkicker">${esc(kicker)}</div>
+    <h3 class="wtitle">${esc(title)}</h3>${inner}</section>`;
+}
+
+/* persona card */
+function personaCard(uc){
+  return `<div class="persona">
+    <div class="pface" style="background:${uc.accent}">${uc.persona.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+    <div class="pmeta"><div class="pname">${esc(uc.persona)}</div>
+      <div class="prole">${esc(uc.role)} · ${esc(uc.company)}</div></div></div>`;
+}
+
+/* the big renderer: build one use-case tab's full HTML */function renderUseCase(uc,idx){
+  const A=uc.accent;
+  let h=`<div class="uc-head"><div class="uc-badge" style="background:${A}22;color:${A};border-color:${A}">${esc(uc.tag)}</div>
+    <h2 class="uc-h2">${esc(uc.title)}</h2><p class="uc-sub">${esc(uc.subtitle)}</p></div>`;
+
+  // 1. BUSINESS STORY
+  h+=section('1 · The business story','Who needs this, and why',
+    `<div class="story">${personaCard(uc)}
+      <div class="storytext">
+        <p><b class="em">The company.</b> ${uc.story.company}</p>
+        <p><b class="em">The person.</b> ${uc.story.person}</p>
+        <p><b class="em">The problem.</b> ${uc.story.problem}</p>
+        <p><b class="em">How the algorithm helps.</b> ${uc.story.help}</p>
+      </div></div>
+      <div class="laychip">In one plain sentence</div>
+      <div class="layman">${uc.story.layman}</div>`);
+
+  // 2. THE DATA
+  h+=section('2 · The data we start with','What the computer is given',
+    `<p class="wp">${uc.data.intro}</p>
+     ${dataTable(uc.data.cols,uc.data.rows,uc.data.opts||{})}
+     <div class="collist"><div class="collist-h">What each column means</div>${
+       uc.data.colExplain.map(c=>`<div class="colrow"><span class="colname" style="color:${A}">${esc(c[0])}</span><span>${c[1]}</span></div>`).join('')}</div>
+     <div class="laychip">Reading one row</div>
+     <div class="layman">${uc.data.rowExplain}</div>`);
+
+  // 3. HOW THE ALGORITHM THINKS
+  h+=section('3 · How the algorithm thinks',uc.algo.name+' — in plain words',
+    `<p class="wp">${uc.algo.plain}</p>
+     ${uc.algo.viz?`<div class="vizbox"><canvas class="viz-canvas" id="viz-${idx}" width="1000" height="420"></canvas><div class="cap">${uc.algo.vizCap||''}</div></div>`:''}
+     <div class="treebox" id="tree-${idx}"></div>
+     ${uc.algo.analogy?`<div class="laychip">A simple analogy for understanding</div><div class="layman">${uc.algo.analogy}</div>`:''}
+     ${uc.math?`<div class="mathbox">
+        <div class="math-h">📐 The equation behind it</div>
+        <div class="math-eq">${uc.math.equation}</div>
+        <div class="math-where">${uc.math.where||''}</div>
+        <div class="laychip" style="margin-top:12px">The equation explained like you’re in 6th class</div>
+        <div class="layman">${uc.math.plain}</div>
+        <div class="math-use"><b style="color:${A}">In this tab →</b> ${uc.math.inScenario}</div>
+      </div>`:''}`);
+
+  // 4. RUNNING IT STEP BY STEP (progressive reveal)
+  let steps='';
+  uc.run.steps.forEach((s,i)=>{
+    steps+=`<div class="reveal-step" data-label="${esc(s.next||'Show next step ▸')}">${stepBox(i+1,s.title,s.body,A)}
+      <div class="stepio" id="io-${idx}-${i}"></div></div>`;
+  });
+  h+=section('4 · Running it, step by step','From raw data to a working model',
+    `<p class="wp">${uc.run.intro}</p>${steps}
+     <button class="reveal-btn" style="border-color:${A};color:${A}">Show next step ▸</button>`);
+
+  // 5. RESULTS & DECISION
+  h+=`<section class="wsec"><div class="wkicker">5 · The result &amp; the decision</div>
+    <h3 class="wtitle">What came out, and what ${uc.persona.split(' ')[0]} does with it</h3>
+    <div class="resultbox" id="result-${idx}"><div class="loading">computing live…</div></div>
+    ${uc.interaction?`<div class="trywrap" id="try-${idx}"></div>`:''}
+    </section>`;
+
+  return h;
+}
+
+/* ===== Step-by-step INPUT → OUTPUT panels (shared) ===== */
+function stepKind(title){
+  const t=title.toLowerCase();
+  if(/clean/.test(t))return 'clean';
+  if(/split/.test(t))return 'split';
+  if(/scale|prepare|prep|engineer|build (the )?(behaviour|risk )?(score|signal|measure|basket)|handle imbalance|put both|put the two/.test(t))return 'prep';
+  if(/choose k|choose ε|set ε|tune ε|set the alarm|set the threshold|choose the number/.test(t))return 'setparam';
+  if(/train|grow|fit|learn (each|the)|run k-means|run dbscan|compute the principal|count how often|compute confidence|distribution|shape of normal/.test(t))return 'train';
+  if(/collect|gather|assemble|label (historical|past|the)|build the baskets|label past/.test(t))return 'collect';
+  if(/evaluate/.test(t))return 'evaluate';
+  return 'apply';
+}
+function ioRow(inBody,outBody){
+  return `<div class="io"><div class="io-col"><span class="io-tag io-in">INPUT</span><div class="io-body">${inBody}</div></div>
+    <div class="io-arrow">➜</div>
+    <div class="io-col"><span class="io-tag io-out">OUTPUT</span><div class="io-body">${outBody}</div></div></div>`;
+}
+function ioMini(cols,rows){
+  let h='<table class="iotbl"><thead><tr>'+cols.map(c=>`<th>${esc(c)}</th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{h+='<tr>'+r.map(v=>`<td>${v}</td>`).join('')+'</tr>';});
+  return h+'</tbody></table>';
+}
+/* fill every step's IO from a context object shared by both playgrounds */
+function fillPipelineIO(uc,idx,ctx){
+  uc.run.steps.forEach((s,i)=>{
+    const el=document.getElementById('io-'+idx+'-'+i);if(!el)return;
+    const kind=stepKind(s.title);
+    let io=ctx.custom&&ctx.custom(kind,s,i);
+    if(!io) io=ctx.build(kind,s,i);
+    el.innerHTML=io||'';
+  });
+}
+
+/* ===== Unsupervised use cases: content + data =====
+   Each case is one business story built on one unsupervised algorithm.
+   There is no label column and no "accuracy" — every metric is internal. */
+
+const UCL=[PAL.teal,PAL.copper,PAL.violet,PAL.gold,PAL.blue,PAL.red,PAL.green,'#F0A6CA'];
+
+const UNSUP_CASES=[
+/* ------------------------------------------------------------------ 1 · K-MEANS */
+{
+  id:'segments', tag:'CLUSTERING · K-MEANS', accent:PAL.teal,
+  title:'Customer Segmentation', subtitle:'Splitting a whole customer base into a handful of natural behavioural groups — with no labels and no answer key to learn from.',
+  company:'Sundara Bank', persona:'Meera Iyer', role:'Head of Retail Marketing',
+  model:'kmeans', scen:'segments', k:3,
+  featNames:['Monthly spend (norm.)','Average balance (norm.)'],
+  slider:[{lab:'Monthly spend (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Average balance (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  story:{
+    company:'Sundara Bank has millions of retail customers and almost nothing tagging them. Nobody ever wrote down “this person is a saver” or “this one is a heavy spender”.',
+    person:'Meera plans marketing campaigns. Blasting the same offer to everyone wastes money and annoys people; she wants a few clear groups she can actually name and target.',
+    problem:'There is no list of “correct” segments to copy. Meera needs the data itself to reveal the natural groupings hidden in how customers spend and save.',
+    help:'K-Means drops a few “centres” into the spend-vs-balance picture and lets every customer join the nearest one, then nudges the centres until the groups settle. Out come a handful of tidy archetypes.',
+    layman:'Imagine scattering a few flags on a field of people and asking everyone to stand by their closest flag. Then you move each flag to the middle of its crowd and let everyone shuffle again. Repeat until nobody moves — the flags now sit on the natural groups.'
+  },
+  data:{
+    intro:'Each row is one customer, described by two behaviour scores. Crucially there is <b>no “segment” column</b> — that is exactly what we are trying to discover.',
+    cols:['Customer','Monthly spend','Avg balance','(segment?)'],
+    rows:[['C-01','high','low','?'],['C-02','low','high','?'],['C-03','high','high','?'],
+          ['C-04','mid','low','?'],['C-05','low','low','?'],['C-06','high','mid','?']],
+    opts:{},
+    colExplain:[['Monthly spend','How much the customer spends each month (standardised so 0 = average).'],
+      ['Avg balance','How much they typically keep in the account (standardised so 0 = average).'],
+      ['(segment?)','Left blank on purpose — there is no ground-truth label. The algorithm has to invent the groups.']],
+    rowExplain:'C-03 spends a lot <i>and</i> keeps a high balance — probably an affluent archetype. But nobody told the model that. K-Means will place a centre near customers like C-03 only if enough of them cluster together in the data.'
+  },
+  algo:{name:'K-Means clustering', viz:true, vizCap:'Coloured dots = customers coloured by the group K-Means assigned; the ✕ marks are the learned cluster centres.',
+    plain:'K-Means splits the data into <b>k</b> round groups. You pick k; the algorithm does the rest. It places k centres, assigns each point to its nearest centre, moves every centre to the average of its members, and repeats until nothing changes. The one thing it is trying to make small is the total distance from points to their own centre.',
+    analogy:'Like organising a party into conversation circles. Put a few hosts around the room, let each guest join the nearest host, then move each host to the middle of their circle. After a couple of rounds the circles are as tight and separate as they can be.'
+  },
+  math:{equation:'minimise &nbsp; Σ<sub>k</sub> Σ<sub><span class="v">x</span>∈k</sub> ‖ <span class="v">x</span> − <span class="c">μ<sub>k</sub></span> ‖²',
+    where:'<b>x</b> = a customer’s two numbers · <b>μ<sub>k</sub></b> = the centre of cluster k · <b>‖·‖²</b> = squared straight-line distance',
+    plain:'The formula just adds up how far every point sits from the centre of its own group, squared, and asks K-Means to make that total as small as possible. Tight, well-separated blobs give a small total; smeared, overlapping blobs give a big one. Everything the algorithm does — assign, re-centre, repeat — is chipping away at this one number.',
+    inScenario:'K-Means keeps shuffling customers and moving the three centres until moving anything would only <i>increase</i> the total spread. The three groups that remain are Meera’s customer archetypes.'
+  },
+  run:{
+    intro:'How Sundara Bank builds its segments:',
+    steps:[
+      {title:'Collect customer records',body:'Pull behaviour data for every customer — spend, balance, transaction counts. No labels needed; that’s the point of unsupervised learning.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove closed accounts, fix impossible values, drop rows with big gaps. Distances are only as trustworthy as the numbers behind them.',next:'Next: scale ▸'},
+      {title:'Scale the features',body:'Put spend and balance on a common scale (mean 0, spread 1). Otherwise the feature with bigger raw numbers would silently dominate every distance.',next:'Next: choose k ▸'},
+      {title:'Choose k',body:'K-Means can’t pick the number of clusters — you do. Try a few values of k and keep the one where the silhouette score peaks.',next:'Next: run K-Means ▸'},
+      {title:'Run K-Means',body:'Place k centres, assign, re-centre, repeat until the groups stop moving. It converges in a handful of passes.',next:'Next: evaluate ▸'},
+      {title:'Evaluate the clustering',body:'There’s no accuracy here. Judge the groups by silhouette (are they tight and separate?) and by whether the business can actually name and serve them.'}
+    ]
+  },
+  interaction:{type:'assign'},
+  decision(m){return `Meera reads the <b>silhouette of ${isNaN(m.sil)?'–':m.sil.toFixed(2)}</b> first — above ~0.5 means the groups are genuinely tight and separate, not wishful thinking. K-Means found <b>${m.k} segments</b> of sizes ${m.sizes.join(' / ')}. But the number that matters to her is the business one: can she <i>name</i> each group and design an offer for it? A clean silhouette that produces two meaningless blobs is worthless; three archetypes she can call “savers”, “spenders” and “affluent” are gold. The maths proposes; Meera disposes.`;}
+},
+/* ------------------------------------------------------------------ 2 · DBSCAN (density) */
+{
+  id:'fraud', tag:'CLUSTERING · DBSCAN (DENSITY)', accent:PAL.copper,
+  title:'Fraud-Ring Detection', subtitle:'Finding a tight, oddly-shaped cluster of coordinated fraud hidden in ordinary activity — and flagging the loners as anomalies, all without labels.',
+  company:'Meridian Bank', persona:'Fatima Sheikh', role:'Financial-Crime Analyst',
+  model:'dbscan', scen:'fraud', eps:0.55, minPts:5,
+  featNames:['Txn feature 1 (norm.)','Txn feature 2 (norm.)'],
+  slider:[{lab:'Transaction feature 1 (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Transaction feature 2 (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  story:{
+    company:'Meridian Bank watches a firehose of transactions. Fraud rings act together, leaving a dense little knot of similar activity — but nobody has labelled which transactions are the ring.',
+    person:'Fatima hunts coordinated fraud. She needs the odd, tightly-packed cluster pulled out of the ordinary crowd, and the random one-off weirdos flagged separately.',
+    problem:'Fraud is a minority, irregularly shaped, and surrounded by genuine outliers that belong to no group. A method that forces every point into a neat round cluster would smear the ring away.',
+    help:'DBSCAN clusters by <b>density</b>: wherever points are packed tightly it grows a cluster of any shape, and it refuses to absorb isolated points — it labels them “noise”. That noise list is a ready-made anomaly feed.',
+    layman:'Think of spotting friend-groups at a crowded market by looking for knots of people standing close together, whatever shape the knot is. Anyone wandering alone isn’t forced into a group — they’re simply “on their own”, which is often the most interesting thing about them.'
+  },
+  data:{
+    intro:'Each row is a transaction described by two engineered risk features. Again, <b>no label</b> — the ring must be found by how tightly points pack together.',
+    cols:['Txn','Feature 1','Feature 2','(type?)'],
+    rows:[['T-01','≈0','≈0','?'],['T-02','ring','ring','?'],['T-03','≈0','≈0','?'],
+          ['T-04','far out','far out','?'],['T-05','ring','ring','?'],['T-06','≈0','≈0','?']],
+    opts:{},
+    colExplain:[['Feature 1 / 2','Two engineered signals where ordinary activity sits near 0 and clusters tightly.'],
+      ['(type?)','Unknown to the model. DBSCAN never sees “fraud” or “genuine” — it only sees which points crowd together.']],
+    rowExplain:'T-04 sits far from everything — DBSCAN will call it noise (a one-off oddity). T-02 and T-05 sit inside the tight ring — DBSCAN groups them because they’re packed together, not because anyone said “fraud”.'
+  },
+  algo:{name:'DBSCAN', viz:true, vizCap:'Coloured dots = points in a dense cluster; red ✕ = points DBSCAN labelled “noise” (isolated). The dashed circle shows the ε radius to scale.',
+    plain:'DBSCAN needs no k. It defines a point as “dense” if it has at least <b>minPts</b> neighbours within a radius <b>ε</b>. Dense points that lie within ε of each other merge into one cluster of whatever shape. Points that are neither dense nor beside a dense point are labelled <b>noise</b> — the built-in anomaly detector.',
+    analogy:'A neighbourhood forms wherever houses are built close together, in any layout — a long street, a ring road, a cul-de-sac. A lone cabin in the hills isn’t part of any neighbourhood; it’s just “remote”. DBSCAN draws neighbourhoods by closeness, and leaves the cabins standing alone.'
+  },
+  math:{equation:'core point &nbsp;⇔&nbsp; | neighbours within <span class="c">ε</span> | ≥ <span class="c">minPts</span>',
+    where:'<b>ε</b> = neighbourhood radius · <b>minPts</b> = how many neighbours make a point “dense” (rule of thumb ≈ 2 × dimensions)',
+    plain:'There’s no equation to minimise — just a rule for “crowded”. Draw a small circle of radius ε around a point; if at least minPts other points fall inside, this point is in a dense area and starts (or extends) a cluster. Chain enough dense points together and you trace out a cluster of any shape. Everything that never lands in a crowded circle is noise.',
+    inScenario:'With ε ≈ 0.55, the ordinary activity forms one dense cloud and the tight fraud ring forms another, so DBSCAN captures the whole ring shape; the scattered one-off transactions never fill their circle, so they drop out as noise — straight into Fatima’s review queue.'
+  },
+  run:{
+    intro:'Meridian’s density-clustering pipeline:',
+    steps:[
+      {title:'Collect transactions',body:'Gather a large batch of recent transactions. No fraud labels required — DBSCAN works purely from geometry.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Strip out test entries and reversals so the density picture reflects real activity.',next:'Next: scale ▸'},
+      {title:'Scale the features',body:'Standardise both risk features so the ε radius means the same thing in every direction.',next:'Next: set ε & minPts ▸'},
+      {title:'Set ε and minPts',body:'Choose the radius ε and the density threshold minPts. Too small an ε → everything is noise; too large → the ring merges into the ordinary cloud.',next:'Next: run DBSCAN ▸'},
+      {title:'Run DBSCAN',body:'Grow clusters outward from dense points, joining overlapping neighbourhoods; label the rest noise.',next:'Next: evaluate ▸'},
+      {title:'Evaluate & read the noise list',body:'Check how many clusters formed and how many points became noise. In fraud, the noise list <i>is</i> the deliverable — the anomalies to investigate.'}
+    ]
+  },
+  interaction:{type:'dbscan-flag'},
+  decision(m){return `Fatima reads two numbers together: DBSCAN carved out <b>${m.clusters} dense cluster${m.clusters===1?'':'s'}</b> and set aside <b>${m.noise} noise points</b> out of ${m.total}. She doesn’t want “high accuracy” — she wants that noise list, because in financial crime the points that fit <i>no</i> group are exactly the one-off oddities worth a look, and the dense off-centre cluster is the candidate ring. She tunes ε so the queue is as long as her team can realistically work through: tighter ε surfaces more anomalies, looser ε fewer. The silhouette (${isNaN(m.sil)?'–':m.sil.toFixed(2)}) is only a sanity check here, not the goal.`;}
+},
+/* ------------------------------------------------------------------ 3 · DBSCAN (non-linear shapes) */
+{
+  id:'moons', tag:'CLUSTERING · DBSCAN (NON-LINEAR)', accent:PAL.violet,
+  title:'Market-Regime Detection', subtitle:'Grouping trading days into “calm” and “stressed” regimes when the boundary between them is a curve, not a straight line — the case where K-Means fails.',
+  company:'Ashcroft Capital', persona:'Rohan Mehta', role:'Macro Strategist',
+  model:'dbscan', scen:'moons', eps:0.45, minPts:5,
+  featNames:['Market component 1 (norm.)','Market component 2 (norm.)'],
+  slider:[{lab:'Market component 1 (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Market component 2 (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  story:{
+    company:'Ashcroft Capital adjusts its book depending on the market “regime” — calm days behave nothing like stressed ones. But the two regimes interleave; the line between them curves.',
+    person:'Rohan labels each trading day’s regime to steer risk. He needs the two states separated even though their centres nearly coincide and the boundary bends.',
+    problem:'The regimes form two interleaving crescents. Any method built around round blobs and centre-points will slice straight through both — grouping half of each crescent together and getting it exactly wrong.',
+    help:'DBSCAN follows <b>density along the shape</b>. Because it grows clusters neighbour-to-neighbour, it can trace a curved crescent all the way round without ever assuming a round blob.',
+    layman:'Picture two interlocking bananas. If you group by “which centre are you nearest?”, you’ll split each banana down the middle. If instead you group by “who’s standing right next to you, and who’s next to them?”, you follow each banana’s curve perfectly. That neighbour-chaining is what DBSCAN does.'
+  },
+  data:{
+    intro:'Each row is one trading day, placed by two market-state components. <b>No regime label</b> — the structure must be found from the shape of the cloud.',
+    cols:['Day','Component 1','Component 2','(regime?)'],
+    rows:[['D-01','crescent A','crescent A','?'],['D-02','crescent B','crescent B','?'],['D-03','crescent A','crescent A','?'],
+          ['D-04','crescent B','crescent B','?'],['D-05','overlap','overlap','?'],['D-06','crescent B','crescent B','?']],
+    opts:{},
+    colExplain:[['Component 1 / 2','Two compressed market-state signals (think level and volatility).'],
+      ['(regime?)','Unknown. The two regimes overlap in the middle, so no straight rule can tell them apart.']],
+    rowExplain:'D-05 sits in the overlap zone where the two crescents nearly touch — the hardest case. DBSCAN still assigns it correctly because it looks at who D-05’s immediate neighbours are, not which distant centre it’s nearest to.'
+  },
+  algo:{name:'DBSCAN on non-linear shapes', viz:true, vizCap:'DBSCAN traces each crescent by following density along the curve; red ✕ marks any point too isolated to belong.',
+    plain:'Same density rule as before, but here the payoff is <b>shape</b>. DBSCAN grows a cluster by hopping from one dense point to the next, so it can wrap around a curve that a centre-based method could never respect. This is the textbook case where “nearest centre” gets it wrong and “nearest neighbours” gets it right.',
+    analogy:'Following a winding mountain trail by always stepping to the next person you can see ahead, versus cutting in a straight line to the summit and trampling everything between. DBSCAN walks the trail; K-Means cuts the straight line.'
+  },
+  math:{equation:'reachable &nbsp;⇔&nbsp; a chain of dense points, each within <span class="c">ε</span> of the next',
+    where:'<b>ε</b> = radius · a cluster = every point you can reach by hopping dense-point to dense-point without a gap bigger than ε',
+    plain:'A cluster isn’t “everything near one centre” — it’s “everything you can walk to without ever stepping more than ε”. As long as the crescent is a continuous dense chain, DBSCAN walks its whole length. The moment there’s a gap wider than ε, the walk stops and a new cluster (or noise) begins. That’s why curves are no problem.',
+    inScenario:'Each crescent is one unbroken dense chain, so DBSCAN labels it as a single regime; the thin gap between the two crescents is wider than ε, so they stay separate — giving Rohan his two market states.'
+  },
+  run:{
+    intro:'Ashcroft’s regime-detection pipeline:',
+    steps:[
+      {title:'Collect daily market states',body:'Assemble each day’s market snapshot, compressed to two state components. No regime labels — those are what we want to infer.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Drop holidays and broken feeds so the density picture is honest.',next:'Next: scale ▸'},
+      {title:'Scale the features',body:'Standardise both components so ε measures the same distance along each axis.',next:'Next: set ε & minPts ▸'},
+      {title:'Set ε and minPts',body:'Pick ε just small enough to keep the two crescents from bridging across the gap, but large enough to keep each crescent connected.',next:'Next: run DBSCAN ▸'},
+      {title:'Run DBSCAN',body:'Chain dense points along each crescent; the curved regimes emerge as separate clusters.',next:'Next: evaluate ▸'},
+      {title:'Evaluate the clustering',body:'Confirm two clusters formed and few points are noise. Eyeball it too — a metric can quietly bless a wrong split.'}
+    ]
+  },
+  interaction:{type:'dbscan-flag'},
+  decision(m){return `Rohan gets <b>${m.clusters} regime cluster${m.clusters===1?'':'s'}</b> with only <b>${m.noise} of ${m.total}</b> days left as noise — the curved crescents captured intact. He deliberately checks this against a K-Means run in his head: forced to use centres, K-Means would cut across both crescents and mislabel the overlap, sometimes while showing a <i>respectable</i> silhouette (${isNaN(m.sil)?'–':m.sil.toFixed(2)} here). The lesson he trusts: on non-linear structure, follow density, and never let a single number overrule a look at the picture.`;}
+},
+/* ------------------------------------------------------------------ 4 · PCA */
+{
+  id:'pca', tag:'DIMENSIONALITY REDUCTION · PCA', accent:PAL.blue,
+  title:'Yield-Curve Factor Compression', subtitle:'Boiling many correlated market factors down to the few directions that actually move — the backbone of every rates desk.',
+  company:'Gilt & Co.', persona:'Arjun Rao', role:'Rates Quant',
+  model:'pca', scen:'elong',
+  featNames:['Risk factor A (norm.)','Risk factor B (norm.)'],
+  slider:[{lab:'Risk factor A (standardised)',min:-3,max:3,val:1,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Risk factor B (standardised)',min:-3,max:3,val:0.6,step:0.1,fmt:v=>v.toFixed(1)}],
+  story:{
+    company:'Gilt & Co. runs a rates book exposed to hundreds of market factors — but those factors move together, not independently. Most of the “hundreds” are really a few underlying drivers in disguise.',
+    person:'Arjun stress-tests the book. Shocking hundreds of correlated factors is slow and double-counts risk; he wants the handful of true directions the market really moves in.',
+    problem:'Many columns, but they’re tangled together. Arjun needs to compress them into a few uncorrelated directions that keep almost all the variation — so he can reason about (and shock) three things instead of three hundred.',
+    help:'PCA rotates the data to new axes — <b>principal components</b> — pointing along where it varies most. Keep the top few and you keep most of the information in far fewer numbers.',
+    layman:'If everyone’s exam marks rise and fall together, you don’t need every subject’s score — one “overall ability” number captures most of it. PCA finds that one summarising direction automatically, then the next-most-useful, and so on.'
+  },
+  data:{
+    intro:'Each row is one observation on two correlated risk factors. There is no label — PCA’s job is compression, not prediction.',
+    cols:['Obs','Factor A','Factor B'],
+    rows:[['O-01','+1.8','+1.4'],['O-02','−1.2','−0.9'],['O-03','+0.9','+0.7'],
+          ['O-04','−1.7','−1.3'],['O-05','+1.3','+1.0'],['O-06','−0.8','−0.6']],
+    opts:{},
+    colExplain:[['Factor A / B','Two market risk factors that clearly move together — when A is high, B tends to be high too.'],
+      ['(no label)','PCA needs no target. It only studies how the columns co-vary.']],
+    rowExplain:'Notice A and B rise and fall together across every row. That correlation is the opening PCA exploits: if two columns always move together, one combined direction can stand in for both with almost no loss.'
+  },
+  algo:{name:'Principal Component Analysis', viz:true, vizCap:'The teal arrow (PC1) points along the direction of greatest spread; the shorter copper arrow (PC2) is what’s left over.',
+    plain:'PCA looks at how the features co-vary and finds the direction of <b>greatest spread</b> — that’s the first principal component, PC1. The next component is the biggest spread left over, at right angles to the first. Rank the components by how much variation they carry and keep only the top few; the rest is mostly noise you can drop.',
+    analogy:'Photographing a flat, tilted plate. There’s one angle that shows the plate at its widest (PC1) and a much thinner edge-on view (PC2). Keep the wide photo and you’ve kept almost the whole plate in a single flat image — that’s reducing two numbers to one.'
+  },
+  math:{equation:'<span class="c">C</span> · <span class="v">v</span> = <span class="c">λ</span> · <span class="v">v</span>',
+    where:'<b>C</b> = covariance matrix of the scaled data · <b>v</b> = a principal component (direction) · <b>λ</b> = how much variance lies along it',
+    plain:'This says: find the special directions <b>v</b> that the data’s covariance <b>C</b> only stretches, never turns. Each such direction comes with a number <b>λ</b> telling you how much the data spreads along it. Sort the directions by their λ, keep the biggest ones, and you’ve kept the most information in the fewest axes. It looks fancy, but it’s just “which way does the cloud stretch most?”',
+    inScenario:'Because Factor A and Factor B move almost in lockstep, PC1 soaks up the overwhelming majority of the variance — so Arjun can replace two correlated factors with a single number and barely lose anything.'
+  },
+  run:{
+    intro:'Gilt & Co.’s factor-compression pipeline:',
+    steps:[
+      {title:'Collect the factor history',body:'Gather historical values for all the risk factors. No labels — PCA is purely about structure.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Fix gaps and bad ticks; a few wild values can tilt the whole covariance.',next:'Next: scale ▸'},
+      {title:'Scale the factors',body:'Standardise every factor to mean 0, spread 1 — otherwise a big-units factor would fake being the main driver just because its numbers are larger.',next:'Next: compute the principal components ▸'},
+      {title:'Compute the principal components',body:'Build the covariance matrix and find its eigenvectors — the uncorrelated directions of greatest variance.',next:'Next: evaluate ▸'},
+      {title:'Evaluate (explained variance)',body:'Read how much variance each component keeps. Stop adding components once the cumulative total reaches your target (≈90%).'}
+    ]
+  },
+  interaction:{type:'pca-project'},
+  decision(m){return `Arjun reads that <b>PC1 alone carries ${(m.explained*100).toFixed(0)}%</b> of all the variation, leaving just ${((1-m.explained)*100).toFixed(0)}% for PC2. That tells him the two factors were really one driver wearing two hats — so he can stress-test along a single component instead of shocking every factor separately, and reason about the book far more clearly. The one caution he keeps in mind: rare risks (like a fraud or crisis signal) sometimes hide in the tiny leftover components, so he never discards them blindly.`;}
+},
+/* ------------------------------------------------------------------ 5 · LDA */
+{
+  id:'lda', tag:'DIMENSIONALITY REDUCTION · LDA', accent:PAL.gold,
+  title:'Default-Model Pre-processing', subtitle:'When you DO have a default/repaid label, compressing the ratios into the single axis that best separates the two — not just the one with the most spread.',
+  company:'Arca Lending', persona:'Priya Menon', role:'Credit-Risk Modeller',
+  model:'lda', scen:'elong',
+  featNames:['Risk ratio A (norm.)','Risk ratio B (norm.)'],
+  slider:[{lab:'Risk ratio A (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)},
+          {lab:'Risk ratio B (standardised)',min:-3,max:3,val:0,step:0.1,fmt:v=>v.toFixed(1)}],
+  story:{
+    company:'Arca Lending has, unusually, a clean label on past borrowers: defaulted or repaid. Priya wants to squeeze many correlated ratios into one score that a downstream model can use.',
+    person:'Priya builds the features a default model consumes. PCA would give her the direction of most spread — but the most spread isn’t always the direction that separates good borrowers from bad.',
+    problem:'The two groups stretch along the <i>same</i> diagonal, so the widest-spread direction runs <b>along</b> both groups, not across them. Priya needs the axis that pulls defaulters and repayers cleanest apart.',
+    help:'LDA uses the labels. It finds the direction that maximises the gap <b>between</b> the two class means while keeping each class <b>tight</b> — the sharpest possible separation, not the biggest spread.',
+    layman:'PCA asks “which way does the whole crowd spread most?” LDA asks a smarter question when you know the teams: “which way should I look so the two teams line up on opposite sides?” Those are often different directions — and for separation, LDA’s is the one you want.'
+  },
+  data:{
+    intro:'Here we <b>do</b> have a label (this is LDA’s requirement). Each row is a past borrower with two ratios and the known outcome.',
+    cols:['Borrower','Ratio A','Ratio B','Outcome'],
+    rows:[['B-01','−1.1','−0.7','repaid'],['B-02','+1.3','+0.8','defaulted'],['B-03','−0.9','−0.6','repaid'],
+          ['B-04','+1.6','+1.0','defaulted'],['B-05','−0.7','−0.4','repaid'],['B-06','+1.2','+0.9','defaulted']],
+    opts:{labelCol:3,posLabel:'defaulted'},
+    colExplain:[['Ratio A / B','Two correlated credit ratios that move together across borrowers.'],
+      ['Outcome','defaulted or repaid — the label LDA uses. This is what separates LDA (supervised) from PCA (unsupervised).']],
+    rowExplain:'Both ratios climb together from repayers to defaulters, so the groups stretch along a shared diagonal. PCA would chase that diagonal; LDA instead finds the axis <i>across</i> it, where the two outcomes separate most cleanly.'
+  },
+  algo:{name:'Linear Discriminant Analysis', viz:true, vizCap:'Gold arrow = PCA’s “most spread” direction; violet arrow = LDA’s “best separation” direction. When they diverge, that’s the whole point.',
+    plain:'LDA is PCA’s label-aware cousin. Instead of maximising raw spread, it maximises <b>separation</b>: it pushes the two class means as far apart as possible while keeping each class as tight as possible. With two classes it gives exactly one axis — a single separation score you can hand to the next model.',
+    analogy:'Two overlapping teams on a field wearing red and blue. PCA points along the field’s longest dimension. LDA turns until, looking down its arrow, all the reds are on the left and all the blues on the right — the viewing angle that separates the teams best, even if it isn’t the field’s longest direction.'
+  },
+  math:{equation:'maximise &nbsp; (between-class scatter) ⁄ (within-class scatter)',
+    where:'<b>between-class scatter</b> = how far apart the two class means are · <b>within-class scatter</b> = how spread-out each class is on its own',
+    plain:'LDA looks for the direction that makes the top of this fraction big (means far apart) and the bottom small (each class tight). A big ratio means: looking down this axis, the two groups barely overlap. That’s a cleaner split than PCA’s “most spread”, which ignores the labels entirely and can point straight along the overlap.',
+    inScenario:'Because the two borrower groups share a diagonal, PCA’s arrow runs along both groups (poor separation) while LDA’s arrow tilts across them — so projecting onto the LDA axis pulls defaulters and repayers apart far better.'
+  },
+  run:{
+    intro:'Arca’s pre-processing pipeline (labels available):',
+    steps:[
+      {title:'Collect labelled borrowers',body:'Pull past borrowers with their ratios and the known outcome (defaulted / repaid). LDA can’t run without labels.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove incomplete records and fix impossible ratios so the class statistics are trustworthy.',next:'Next: scale ▸'},
+      {title:'Scale the features',body:'Standardise the ratios so the separation direction isn’t distorted by raw units.',next:'Next: learn the separating axis ▸'},
+      {title:'Learn the separating axis',body:'Compute each class mean and spread, then find the direction that maximises between-class gap over within-class spread.',next:'Next: evaluate ▸'},
+      {title:'Evaluate the separation',body:'Measure how cleanly a single threshold on the LDA score splits the two classes, and compare it against PCA’s direction.'}
+    ]
+  },
+  interaction:{type:'lda-score'},
+  decision(m){return `Priya compares the two directions head-on. Along <b>LDA</b> the classes separate with a Fisher ratio of <b>${m.sep.toFixed(2)}</b> versus only <b>${m.sepPCA.toFixed(2)}</b> along PCA — and a single cut on the LDA score alone splits repayers from defaulters with about <b>${(m.splitAcc*100).toFixed(0)}%</b> accuracy. So she feeds the LDA score into the default model as a compact, powerful feature. The rule she teaches juniors: no labels and you want structure → PCA; you have labels and you want the sharpest split → LDA.`;}
+},
+/* ------------------------------------------------------------------ 6 · Association rules */
+{
+  id:'assoc', tag:'ASSOCIATION RULES · APRIORI-STYLE', accent:PAL.green,
+  title:'Cross-Sell & Next-Best-Offer', subtitle:'Mining hundreds of client portfolios for the product pairs that truly travel together — scored by lift, not by mere popularity.',
+  company:'Kaveri Financial', persona:'Nikhil Shah', role:'Relationship-Banking Lead',
+  model:'assoc', scen:'assoc', minSup:0.03, minConf:0.30,
+  featNames:['—','—'],
+  slider:[],
+  story:{
+    company:'Kaveri Financial has 600 corporate and retail clients, each holding some basket of products. No labels — just who holds what, together.',
+    person:'Nikhil sets the “next best offer” his relationship managers pitch. He wants rules like “clients with an FX hedge tend to take a rate swap” — but only the ones that reflect a real affinity, not just a popular product everyone holds.',
+    problem:'Popular products co-occur with everything. “90% of swap clients also hold a current account” sounds strong but is useless if 95% of <i>all</i> clients hold one. Nikhil needs a score that divides out popularity.',
+    help:'Association-rule mining scores every “A then B” rule by <b>support</b> (how common), <b>confidence</b> (how reliable) and <b>lift</b> (how much better than chance). Lift &gt; 1 means A and B genuinely attract each other.',
+    layman:'It’s the “customers who bought this also bought that” engine. But the trick is to ignore products that everyone buys anyway (bread, milk — or here, a current account) and surface the pairs that go together far more than luck would predict. That “more than luck” number is lift.'
+  },
+  data:{
+    intro:'Each row is one client’s basket of products — nothing more. The miner looks only at what co-occurs.',
+    cols:['Client','Products held'],
+    rows:[['P-01','Current a/c · FX hedge · Rate swap'],
+          ['P-02','Current a/c · Savings'],
+          ['P-03','Current a/c · Trade finance · Credit line'],
+          ['P-04','Savings · Credit card'],
+          ['P-05','Current a/c · FX hedge · Rate swap · Trade finance'],
+          ['P-06','Current a/c · Wealth mgmt']],
+    opts:{},
+    colExplain:[['Products held','The set of products this client holds — a “basket”. No ordering, no label, just membership.'],
+      ['(no label)','There’s nothing to predict. We’re mining co-occurrence, then scoring which pairs beat chance.']],
+    rowExplain:'P-01 and P-05 both pair an FX hedge with a rate swap — a hint of real affinity. But a current account appears almost everywhere, so any rule pointing <i>to</i> it will look confident yet add nothing. Only lift will tell the two situations apart.'
+  },
+  algo:{name:'Association-rule mining', viz:true, vizCap:'A “lift network”: each product is a node; an edge links products that co-occur more than chance. Gold edges = lift ≥ 2×; thicker = stronger.',
+    plain:'The miner counts how often each product pair co-occurs across all baskets, then scores every candidate rule with three numbers. <b>Support</b> = how common the pair is. <b>Confidence</b> = of clients with A, how many also have B. <b>Lift</b> = how much more likely B is given A, versus B’s baseline popularity. Keep rules above your support/confidence floors and rank the survivors by lift.',
+    analogy:'Noticing that people who buy tents also tend to buy sleeping bags far more than the average shopper. You don’t care that “tent buyers also buy bags” if everyone buys bags — you care when tent buyers buy them <i>much more</i> than everyone else. That “much more” is lift.'
+  },
+  math:{equation:'support = P(A and B) &nbsp;·&nbsp; confidence = P(B | A) &nbsp;·&nbsp; <span class="c">lift</span> = confidence ⁄ P(B)',
+    where:'<b>P(A and B)</b> = how often both appear · <b>P(B|A)</b> = how often B appears among A-holders · <b>P(B)</b> = B’s overall popularity',
+    plain:'Support asks “how common is this pairing at all?” — ignore rare flukes. Confidence asks “if you have A, how likely is B?” — but that’s inflated for popular B’s. Lift fixes that by dividing confidence by B’s baseline rate: above 1 means having A makes B genuinely more likely; at 1 it’s just coincidence; below 1 they actually repel. Lift is the number you trust.',
+    inScenario:'“FX hedge → rate swap” surfaces at high lift because swap-holders really do cluster among hedge clients — a genuine cross-sell pair — while any rule pointing to the near-universal current account scores near lift 1 and is dropped as uninformative.'
+  },
+  run:{
+    intro:'Kaveri’s cross-sell mining pipeline:',
+    steps:[
+      {title:'Assemble the baskets',body:'Turn each client’s holdings into a basket of products. No labels — just membership.',next:'Next: clean ▸'},
+      {title:'Clean the data',body:'Remove dormant accounts and duplicate products so co-occurrence counts are honest.',next:'Next: set the thresholds ▸'},
+      {title:'Set the thresholds',body:'Choose a minimum support (drop rare flukes) and a minimum confidence (drop unreliable rules). Lift is computed, never thresholded.',next:'Next: count co-occurrences ▸'},
+      {title:'Count how often products co-occur',body:'Tally every product and every pair across all 600 baskets — the raw material for every rule.',next:'Next: compute confidence & lift ▸'},
+      {title:'Compute confidence & lift for each rule',body:'For every surviving pair, compute confidence and divide by the consequent’s baseline popularity to get lift.',next:'Next: evaluate ▸'},
+      {title:'Evaluate: keep the high-lift rules',body:'Rank by lift and keep the pairs comfortably above 1. Remember: a rule is a hypothesis to test with a campaign, not a proven lever.'}
+    ]
+  },
+  interaction:{type:'assoc-offer'},
+  decision(m){return `Nikhil scans the <b>${m.nRules} rules</b> that clear his thresholds and goes straight to the top of the lift ranking — the strongest being <b>${m.topRule} at ${m.topLift.toFixed(1)}× lift</b>. He hands his relationship managers the high-lift pairs as next-best-offers, and pointedly ignores the high-confidence-but-low-lift rules pointing at the universal current account, which add no insight. His discipline: pitch on lift, then <i>prove</i> the lift with a small controlled campaign — association is correlation, not causation.`;}
+}
+];
+
+/* ===== Unsupervised: train + viz + result + interaction + IO + boot ===== */
+
+function trainCaseU(uc){
+  if(uc.model==='assoc'){
+    const B=genBaskets(7);
+    const {rules,cnt1,n}=mineRules(B,uc.minSup,uc.minConf);
+    return {model:'assoc',B,rules,cnt1,n};
+  }
+  const raw=SCENU[uc.scen].gen(mulberry32(7));
+  // capture mean/sd for a concrete "scaling" illustration
+  const N=raw.length,mu=[0,0],sd=[0,0];
+  raw.forEach(p=>{mu[0]+=p[0];mu[1]+=p[1];});mu[0]/=N;mu[1]/=N;
+  raw.forEach(p=>{sd[0]+=(p[0]-mu[0])**2;sd[1]+=(p[1]-mu[1])**2;});
+  sd[0]=Math.sqrt(sd[0]/N)||1;sd[1]=Math.sqrt(sd[1]/N)||1;
+  const P=standardise(raw);
+  const tc={model:uc.model,P,mu,sd,raw};
+  if(uc.model==='kmeans'){const r=kmeans(P,uc.k,7);r.sil=silhouette(P,r.lab);tc.r=r;}
+  else if(uc.model==='dbscan'){const r=dbscan(P,uc.eps,uc.minPts);r.sil=silhouette(P,r.lab);tc.r=r;}
+  else if(uc.model==='pca'){tc.pca=pca(P);}
+  else if(uc.model==='lda'){tc.pca=pca(P);tc.lda=lda(P);
+    tc.sep=projSeparation(P,tc.lda.w);tc.sepPCA=projSeparation(P,tc.pca.pc1);
+    tc.splitAcc=projSplitAccuracy(P,tc.lda.w);}
+  return tc;
+}
+
+/* ---- shared scatter scaler from data extents ---- */
+function extentScaler(cv,pts,pad){
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  let xlo=Math.min(...xs),xhi=Math.max(...xs),ylo=Math.min(...ys),yhi=Math.max(...ys);
+  const mx=(xhi-xlo)*0.08||1,my=(yhi-ylo)*0.08||1;xlo-=mx;xhi+=mx;ylo-=my;yhi+=my;
+  const W=cv.width,H=cv.height;
+  return {sx:v=>pad+(v-xlo)/(xhi-xlo||1)*(W-2*pad),sy:v=>H-pad-(v-ylo)/(yhi-ylo||1)*(H-2*pad),W,H};
+}
+function axFrame(ctx,W,H,pad,uc){
+  ctx.strokeStyle=PAL.line;ctx.lineWidth=1.3;ctx.beginPath();
+  ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.stroke();
+  ctx.fillStyle=PAL.mute;ctx.font='19px Segoe UI';ctx.textAlign='center';
+  ctx.fillText(uc.featNames[0]+' →',W/2,H-12);
+  ctx.save();ctx.translate(18,H/2);ctx.rotate(-Math.PI/2);ctx.fillText(uc.featNames[1]+' →',0,0);ctx.restore();
+}
+function drawArrow(ctx,x0,y0,x1,y1,col,lab){
+  ctx.strokeStyle=col;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  const ang=Math.atan2(y1-y0,x1-x0);ctx.beginPath();ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-16*Math.cos(ang-0.4),y1-16*Math.sin(ang-0.4));
+  ctx.lineTo(x1-16*Math.cos(ang+0.4),y1-16*Math.sin(ang+0.4));
+  ctx.closePath();ctx.fillStyle=col;ctx.fill();
+  ctx.fillStyle=col;ctx.font='bold 20px Segoe UI';ctx.textAlign='left';ctx.fillText(lab,x1+8,y1-6);
+}
+
+function drawViz(idx,tc,uc){
+  const cv=document.getElementById('viz-'+idx);if(!cv)return;const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,pad=48;ctx.clearRect(0,0,W,H);ctx.fillStyle=PAL.card;ctx.fillRect(0,0,W,H);
+  if(uc.model==='assoc'){drawAssocNet(ctx,W,H,tc);return;}
+  const {sx,sy}=extentScaler(cv,tc.P,pad);axFrame(ctx,W,H,pad,uc);
+  if(uc.model==='kmeans'){
+    tc.P.forEach((p,i)=>{ctx.fillStyle=UCL[tc.r.lab[i]%UCL.length];
+      ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();
+      ctx.strokeStyle='rgba(14,28,42,.6)';ctx.lineWidth=1;ctx.stroke();});
+    tc.r.cent.forEach((c,i)=>{const x=sx(c[0]),y=sy(c[1]),s=12;ctx.strokeStyle=UCL[i%UCL.length];ctx.lineWidth=3.5;
+      ctx.beginPath();ctx.moveTo(x-s,y-s);ctx.lineTo(x+s,y+s);ctx.moveTo(x+s,y-s);ctx.lineTo(x-s,y+s);ctx.stroke();
+      ctx.beginPath();ctx.arc(x,y,s+3,0,7);ctx.strokeStyle=PAL.ink;ctx.lineWidth=1.5;ctx.stroke();});
+  } else if(uc.model==='dbscan'){
+    tc.P.forEach((p,i)=>{const l=tc.r.lab[i];const x=sx(p[0]),y=sy(p[1]);
+      if(l<0){ctx.strokeStyle=PAL.red;ctx.lineWidth=2.4;
+        ctx.beginPath();ctx.moveTo(x-6,y-6);ctx.lineTo(x+6,y+6);ctx.moveTo(x+6,y-6);ctx.lineTo(x-6,y+6);ctx.stroke();}
+      else{ctx.fillStyle=UCL[l%UCL.length];ctx.beginPath();ctx.arc(x,y,6,0,7);ctx.fill();
+        ctx.strokeStyle='rgba(14,28,42,.6)';ctx.lineWidth=1;ctx.stroke();}});
+    // ε circle to scale, on the first point
+    if(tc.P.length){const x=sx(tc.P[0][0]),y=sy(tc.P[0][1]),rr=Math.abs(sx(uc.eps)-sx(0));
+      ctx.strokeStyle=PAL.violet;ctx.setLineDash([5,5]);ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.stroke();ctx.setLineDash([]);}
+  } else if(uc.model==='pca'){
+    tc.P.forEach(p=>{ctx.fillStyle=PAL.blue;ctx.globalAlpha=.6;ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();ctx.globalAlpha=1;});
+    const m=tc.pca.mean;
+    drawArrow(ctx,sx(m[0]),sy(m[1]),sx(m[0]+tc.pca.pc1[0]*2.4),sy(m[1]+tc.pca.pc1[1]*2.4),PAL.teal,'PC1');
+    drawArrow(ctx,sx(m[0]),sy(m[1]),sx(m[0]+tc.pca.pc2[0]*1.2),sy(m[1]+tc.pca.pc2[1]*1.2),PAL.copper,'PC2');
+  } else if(uc.model==='lda'){
+    tc.P.forEach(p=>{ctx.fillStyle=p[2]===1?PAL.copper:PAL.teal;ctx.beginPath();ctx.arc(sx(p[0]),sy(p[1]),6,0,7);ctx.fill();
+      ctx.strokeStyle='rgba(14,28,42,.6)';ctx.lineWidth=1;ctx.stroke();});
+    const m=tc.pca.mean;
+    drawArrow(ctx,sx(m[0]),sy(m[1]),sx(m[0]+tc.pca.pc1[0]*2.4),sy(m[1]+tc.pca.pc1[1]*2.4),PAL.gold,'PCA');
+    if(tc.lda)drawArrow(ctx,sx(m[0]),sy(m[1]),sx(m[0]+tc.lda.w[0]*2.4),sy(m[1]+tc.lda.w[1]*2.4),PAL.violet,'LDA');
+  }
+}
+
+function drawAssocNet(ctx,W,H,tc){
+  const K=PRODUCTS.length,cx=W/2,cy=H/2,rx=W/2-150,ry=H/2-46;
+  const pos=PRODUCTS.map((_,i)=>{const a=-Math.PI/2+i/K*2*Math.PI;return [cx+rx*Math.cos(a),cy+ry*Math.sin(a)];});
+  const seen=new Set();
+  tc.rules.forEach(r=>{const key=Math.min(r.a,r.c)+'-'+Math.max(r.a,r.c);if(seen.has(key))return;seen.add(key);
+    if(r.lift<1)return;const w=Math.min(9,(r.lift-1)*3+1);
+    ctx.strokeStyle=r.lift>=2?PAL.gold:PAL.teald;ctx.globalAlpha=Math.min(1,0.28+(r.lift-1)*0.3);ctx.lineWidth=w;
+    ctx.beginPath();ctx.moveTo(pos[r.a][0],pos[r.a][1]);ctx.lineTo(pos[r.c][0],pos[r.c][1]);ctx.stroke();ctx.globalAlpha=1;});
+  pos.forEach((pp,i)=>{ctx.fillStyle=PAL.teald;ctx.beginPath();ctx.arc(pp[0],pp[1],11,0,7);ctx.fill();
+    ctx.fillStyle=PAL.ink;ctx.font='16px Segoe UI';ctx.textAlign=pp[0]<cx?'right':'left';
+    ctx.fillText(PRODUCTS[i],pp[0]+(pp[0]<cx?-16:16),pp[1]+5);});
+}
+
+/* ---- results (label-free metrics + decision) ---- */
+function renderResultU(uc,tc,mount){
+  const card=(lab,val,col,watch,sub)=>`<div class="mcard${watch?' watch':''}"><div class="mval" style="color:${col}">${val}</div>
+    <div class="mlab">${esc(lab)}</div>${sub?`<div class="msub">${sub}</div>`:''}</div>`;
+  let cards='',explain='',m={};
+  if(uc.model==='kmeans'){
+    const r=tc.r;m={sil:r.sil,inertia:r.inertia,k:r.k,iters:r.iters,sizes:r.sizes};
+    cards=`<div class="mgrid4">
+      ${card('Silhouette',isNaN(r.sil)?'–':r.sil.toFixed(2),PAL.teal,true,'higher = tighter, cleaner groups')}
+      ${card('Inertia',r.inertia.toFixed(0),PAL.violet,false,'total within-group spread')}
+      ${card('Clusters (k)',r.k,PAL.copper,false,'you chose this')}
+      ${card('Iterations',r.iters,PAL.gold,false,'passes to settle')}</div>`;
+    explain=`<div class="metric-explain"><b>In plain words:</b> <b>Silhouette</b> runs −1 to +1 and asks, for every point, “am I closer to my own group than to the nearest other group?” Above ~0.5 is solid structure; near 0 means the groups overlap. <b>Inertia</b> (total spread to each centre) always falls as k rises, so it can never pick k by itself — use it only to spot the “elbow”. There is <i>no accuracy</i> here: with no labels, geometry is all we have.</div>`;
+  } else if(uc.model==='dbscan'){
+    const r=tc.r,total=tc.P.length;m={clusters:r.k,noise:r.noise,sil:r.sil,total,eps:uc.eps,minPts:uc.minPts};
+    cards=`<div class="mgrid">
+      ${card('Clusters found',r.k,PAL.teal,false,'DBSCAN chose this, not you')}
+      ${card('Noise / anomalies',r.noise,PAL.copper,true,'isolated points = the alert list')}
+      ${card('Silhouette',isNaN(r.sil)?'–':r.sil.toFixed(2),PAL.violet,false,'sanity check only')}</div>`;
+    explain=`<div class="metric-explain"><b>In plain words:</b> DBSCAN chooses the <b>number of clusters</b> for you from the density, so the dials you reason about are <b>ε</b> (radius, ${uc.eps.toFixed(2)}) and <b>minPts</b> (${uc.minPts}). The <b>noise count</b> isn’t a failure — those isolated points are the anomalies you were hunting. A sudden jump in noise as you shrink ε means you went too tight; clusters merging as you grow it means too loose.</div>`;
+  } else if(uc.model==='pca'){
+    const p=tc.pca;m={explained:p.explained};
+    cards=`<div class="mgrid">
+      ${card('PC1 variance',(p.explained*100).toFixed(0)+'%',PAL.teal,true,'kept in a single number')}
+      ${card('PC2 variance',((1-p.explained)*100).toFixed(0)+'%',PAL.copper,false,'the leftover')}
+      ${card('Compression',(p.explained*100).toFixed(0)+'% in 1 of 2',PAL.gold,false,'info kept vs axes used')}</div>`;
+    explain=`<div class="metric-explain"><b>In plain words:</b> <b>Explained variance</b> is how much of the total variation each new axis carries. Here PC1 alone keeps <b>${(p.explained*100).toFixed(0)}%</b> — so one number per row preserves almost the whole story, and the second axis is mostly noise you can drop. The honest caution: rare but important signals sometimes live in the small components, so don’t discard them blindly.</div>`;
+  } else if(uc.model==='lda'){
+    m={sep:tc.sep,sepPCA:tc.sepPCA,splitAcc:tc.splitAcc};
+    cards=`<div class="mgrid">
+      ${card('Separation (LDA)',tc.sep.toFixed(2),PAL.violet,true,'Fisher ratio — higher is better')}
+      ${card('Separation (PCA)',tc.sepPCA.toFixed(2),PAL.gold,false,'most-spread direction')}
+      ${card('Split accuracy',(tc.splitAcc*100).toFixed(0)+'%',PAL.teal,false,'one cut on the LDA score')}</div>`;
+    explain=`<div class="metric-explain"><b>In plain words:</b> The <b>Fisher ratio</b> measures class means-apart divided by within-class spread — bigger means the two groups barely overlap along that axis. LDA (${tc.sep.toFixed(2)}) beats PCA (${tc.sepPCA.toFixed(2)}) because PCA chases spread and ignores the labels, while LDA aims straight at separation. A single threshold on the LDA score already splits the classes about <b>${(tc.splitAcc*100).toFixed(0)}%</b> correctly.</div>`;
+  } else if(uc.model==='assoc'){
+    const rules=tc.rules,top=rules[0];
+    m={nRules:rules.length,topLift:top?top.lift:0,topRule:top?`${PRODUCTS[top.a]} → ${PRODUCTS[top.c]}`:'–'};
+    cards=`<div class="mgrid">
+      ${card('Rules found',rules.length,PAL.teal,false,'above your thresholds')}
+      ${card('Top lift',top?top.lift.toFixed(1)+'×':'–',PAL.gold,true,'strongest genuine affinity')}
+      ${card('Baskets mined',tc.n,PAL.copper,false,'client portfolios')}</div>`;
+    const rows=rules.slice(0,6).map(r=>[`${PRODUCTS[r.a]} → ${PRODUCTS[r.c]}`,(r.sup*100).toFixed(0)+'%',(r.conf*100).toFixed(0)+'%',r.lift.toFixed(1)+'×']);
+    const tbl=rows.length?dataTable(['Rule (A → B)','Support','Confidence','Lift'],rows,{}):'<p class="wp">No rules cleared the thresholds — lower them.</p>';
+    explain=`${tbl}<div class="metric-explain"><b>In plain words:</b> <b>Support</b> = how common the pairing is; <b>confidence</b> = of A-holders, how many also hold B; <b>lift</b> = confidence divided by B’s baseline popularity. <b>Lift is the one to trust</b>: above 1 means a real affinity, near 1 just reflects a popular product. High confidence with lift ≈ 1 (rules pointing at the near-universal current account) is a trap.</div>`;
+  }
+  mount.innerHTML=`<p class="wp">Run live on the synthetic data, with no labels to score against, the method produced:</p>
+    ${cards}${explain}
+    <div class="decision"><div class="decision-h" style="color:${uc.accent}">▶ How ${uc.persona.split(' ')[0]} uses this to decide</div>${uc.decision(m)}</div>`;
+}
+
+/* ---- "Try it" interactions ---- */
+function buildUnsupInteraction(uc,idx,tc){
+  const mount=document.getElementById('try-'+idx);if(!mount||!uc.interaction)return;const A=uc.accent;
+  if(uc.interaction.type==='assoc-offer'){
+    const opts=PRODUCTS.map((p,i)=>`<option value="${i}">${p}</option>`).join('');
+    mount.innerHTML=`<div class="try-inner"><div class="try-h" style="color:${A}">🎛 Try it — pick a product a client already holds</div>
+      <select class="tsel" id="tsel-${idx}">${opts}</select><div class="try-out" id="tryout-${idx}" style="margin-top:10px"></div></div>`;
+    const upd=()=>{const a=+document.getElementById('tsel-'+idx).value;
+      const cand=tc.rules.filter(r=>r.a===a).sort((x,y)=>y.lift-x.lift);
+      const best=cand[0];
+      document.getElementById('tryout-'+idx).innerHTML=best
+        ? `Best next-best-offer for a <b>${PRODUCTS[a]}</b> holder → <b style="color:${A}">${PRODUCTS[best.c]}</b> · lift <b>${best.lift.toFixed(1)}×</b>, confidence ${(best.conf*100).toFixed(0)}%. ${best.lift>=1.2?'A genuine affinity worth pitching.':'Weak — lift near 1, so this is mostly popularity, not a real link.'}`
+        : `No rule above the thresholds starts from <b>${PRODUCTS[a]}</b> — nothing reliable to cross-sell from it here.`;};
+    document.getElementById('tsel-'+idx).onchange=upd;upd();return;
+  }
+  const s1=uc.slider[0],s2=uc.slider[1];
+  const sl=(k,sp)=>`<div class="try-sl"><label>${sp.lab} <b id="sv-${k}-${idx}">${sp.fmt(sp.val)}</b></label>
+    <input type="range" id="ss-${k}-${idx}" min="${sp.min}" max="${sp.max}" step="${sp.step}" value="${sp.val}"></div>`;
+  const heads={assign:'place a new customer',['dbscan-flag']:'test a new point',['pca-project']:'compress a new point',['lda-score']:'score a new borrower'};
+  mount.innerHTML=`<div class="try-inner"><div class="try-h" style="color:${A}">🎛 Try it — ${heads[uc.interaction.type]||'a new case'}</div>
+    ${sl('a',s1)}${sl('b',s2)}<div class="try-out" id="tryout-${idx}"></div></div>`;
+  const upd=()=>{const a=+document.getElementById('ss-a-'+idx).value,b=+document.getElementById('ss-b-'+idx).value;
+    document.getElementById('sv-a-'+idx).textContent=s1.fmt(a);document.getElementById('sv-b-'+idx).textContent=s2.fmt(b);
+    let out='';const x=[a,b];
+    if(uc.interaction.type==='assign'){
+      let bd=1e9,bk=0;tc.r.cent.forEach((c,i)=>{const d=dist2(x,c);if(d<bd){bd=d;bk=i;}});
+      out=`Nearest centre → <b style="color:${UCL[bk%UCL.length]}">Segment ${bk+1}</b> (distance ${Math.sqrt(bd).toFixed(2)}). ${uc.persona.split(' ')[0]} would market to this customer as part of Segment ${bk+1}.`;
+    } else if(uc.interaction.type==='dbscan-flag'){
+      const e2=uc.eps*uc.eps;let cnt=0,near=-1;
+      tc.P.forEach((p,i)=>{if(dist2(x,p)<=e2){cnt++;if(tc.r.lab[i]>=0&&near<0)near=tc.r.lab[i];}});
+      const dense=cnt>=uc.minPts;
+      out=dense&&near>=0
+        ? `${cnt} neighbours within ε → sits inside a <b style="color:${UCL[near%UCL.length]}">dense cluster</b>. Looks like normal, grouped activity.`
+        : `only ${cnt} neighbour${cnt===1?'':'s'} within ε → <b style="color:${PAL.red}">flagged as an anomaly (noise)</b>. Straight to ${uc.persona.split(' ')[0]}’s review queue.`;
+    } else if(uc.interaction.type==='pca-project'){
+      const m=tc.pca.mean,dx=x[0]-m[0],dy=x[1]-m[1];
+      const s1v=dx*tc.pca.pc1[0]+dy*tc.pca.pc1[1],s2v=dx*tc.pca.pc2[0]+dy*tc.pca.pc2[1];
+      const recon=Math.abs(s2v); // how much is lost keeping only PC1
+      out=`Compressed to a single <b>PC1 score = ${s1v.toFixed(2)}</b> (dropping PC2 = ${s2v.toFixed(2)}). Keeping PC1 alone preserves <b>${(tc.pca.explained*100).toFixed(0)}%</b> of the info; the discarded part is ${recon.toFixed(2)} — a large value here would hint at an <i>unusual</i> point worth a look.`;
+    } else if(uc.interaction.type==='lda-score'){
+      const w=tc.lda.w,mid=((tc.lda.mA[0]+tc.lda.mB[0])/2)*w[0]+((tc.lda.mA[1]+tc.lda.mB[1])/2)*w[1];
+      const score=x[0]*w[0]+x[1]*w[1];const defScore=tc.lda.mB[0]*w[0]+tc.lda.mB[1]*w[1];
+      const towardDefault=(defScore>=mid)?(score>=mid):(score<mid);
+      out=`LDA score = <b>${score.toFixed(2)}</b> (separation line at ${mid.toFixed(2)}). → looks <b style="color:${towardDefault?PAL.copper:PAL.teal}">${towardDefault?'defaulter-like':'repayer-like'}</b>. ${uc.persona.split(' ')[0]} feeds this one number to the default model.`;
+    }
+    document.getElementById('tryout-'+idx).innerHTML=out;};
+  ['a','b'].forEach(k=>document.getElementById('ss-'+k+'-'+idx).oninput=upd);upd();
+}
+
+/* ---- INPUT→OUTPUT context for the step flow ---- */
+function unsupIOContext(uc,tc){
+  const cols=uc.data.cols, rows=uc.data.rows.slice(0,3).map(r=>r.slice());
+  const dirtyRow=rows[0].map((v,i)=>i===0?rows[0][0].replace(/\d+$/,'x'):(i>=2?v:'—'));
+  // learned artifact + metric line per model
+  let artifact='',metricLine='',nTotal=tc.P?tc.P.length:(tc.n||0);
+  if(uc.model==='kmeans'){
+    artifact=`<b>${tc.r.k} cluster centres</b> at fixed positions <span class="io-chip">sizes ${tc.r.sizes.join(' / ')}</span>`;
+    metricLine=`<span class="io-chip">Silhouette ${isNaN(tc.r.sil)?'–':tc.r.sil.toFixed(2)}</span> <span class="io-chip">Inertia ${tc.r.inertia.toFixed(0)}</span>`;
+  } else if(uc.model==='dbscan'){
+    artifact=`<b>${tc.r.k} density cluster${tc.r.k===1?'':'s'}</b> + <b>${tc.r.noise} noise points</b> (no k chosen — density decided)`;
+    metricLine=`<span class="io-chip">Clusters ${tc.r.k}</span> <span class="io-chip">Noise ${tc.r.noise}</span> <span class="io-chip">Silhouette ${isNaN(tc.r.sil)?'–':tc.r.sil.toFixed(2)}</span>`;
+  } else if(uc.model==='pca'){
+    artifact=`the <b>principal-component directions</b> <span class="io-chip">PC1 keeps ${(tc.pca.explained*100).toFixed(0)}%</span>`;
+    metricLine=`<span class="io-chip">PC1 variance ${(tc.pca.explained*100).toFixed(0)}%</span> <span class="io-chip">PC2 variance ${((1-tc.pca.explained)*100).toFixed(0)}%</span>`;
+  } else if(uc.model==='lda'){
+    artifact=`the <b>separating axis</b> w = <span class="io-chip">(${tc.lda.w[0].toFixed(2)}, ${tc.lda.w[1].toFixed(2)})</span>`;
+    metricLine=`<span class="io-chip">Separation ${tc.sep.toFixed(2)}</span> <span class="io-chip">Split acc ${(tc.splitAcc*100).toFixed(0)}%</span>`;
+  } else if(uc.model==='assoc'){
+    const top=tc.rules[0];artifact=`<b>${tc.rules.length} scored rules</b>${top?` — top: ${PRODUCTS[top.a]} → ${PRODUCTS[top.c]}`:''}`;
+    metricLine=`<span class="io-chip">Rules ${tc.rules.length}</span>${top?` <span class="io-chip">Top lift ${top.lift.toFixed(1)}×</span>`:''}`;
+    nTotal=tc.n;
+  }
+  const scaledStr=(uc.model!=='assoc'&&tc.P.length)
+    ? `${uc.featNames[0]} → <b>${tc.P[0][0].toFixed(2)}</b>, ${uc.featNames[1]} → <b>${tc.P[0][1].toFixed(2)}</b>`:'';
+  const paramOut=(()=>{
+    if(uc.model==='kmeans')return `<b>k = ${uc.k}</b> chosen (silhouette peaks here)`;
+    if(uc.model==='dbscan')return `<span class="io-chip">ε = ${uc.eps.toFixed(2)}</span><span class="io-chip">minPts = ${uc.minPts}</span> — the definition of “dense”`;
+    if(uc.model==='assoc')return `<span class="io-chip">min-support ${(uc.minSup*100).toFixed(0)}%</span><span class="io-chip">min-confidence ${(uc.minConf*100).toFixed(0)}%</span> (lift is computed, not thresholded)`;
+    return 'the setting that best reveals the structure';
+  })();
+  return {build(kind){
+    switch(kind){
+      case 'collect': return ioRow('raw records / system logs — <b>no labels, no answer key</b>',
+        'an unlabelled table:<br>'+ioMini(cols,rows));
+      case 'clean': return ioRow('the raw table — a few rows have blanks or typos<br>'+ioMini(cols.slice(0,3),[rows[0].slice(0,3),dirtyRow.slice(0,3).map(v=>`<span class="io-strike">${v}</span>`)]),
+        `<b>${nTotal}</b> clean rows kept`);
+      case 'prep': return ioRow(`raw values on different scales<br><span class="io-chip">${uc.featNames[0]}</span><span class="io-chip">${uc.featNames[1]}</span>`,
+        `each feature <b>centred to mean 0, spread 1</b>${scaledStr?`:<br>e.g. one point → ${scaledStr}`:''}`);
+      case 'setparam': return ioRow('the scaled data + a few candidate settings',paramOut);
+      case 'train': return ioRow(uc.model==='assoc'?`the <b>${nTotal}</b> baskets`:`the <b>${nTotal}</b> scaled, unlabelled points`,artifact);
+      case 'evaluate': return ioRow('the structure the method found',
+        'internal (label-free) scores:<br>'+metricLine);
+      default: return ioRow('the discovered structure',
+        uc.model==='assoc'?'a business action — a ranked <b>next-best-offer</b> list':
+        (uc.model==='kmeans'?'named segments to target':
+        (uc.model==='dbscan'?'a <b>ranked anomaly / cluster</b> list to act on':
+        (uc.model==='pca'?'a compact set of drivers to model & stress-test':'a compact score handed to the next model'))));
+    }
+  }};
+}
+
+/* ---- boot ---- */
+const UBOOT={};
+function uActivate(idx){
+  document.querySelectorAll('.tabbtn').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  document.querySelectorAll('.uc-pane').forEach((p,i)=>p.classList.toggle('on',i===idx));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(!UBOOT[idx]){UBOOT[idx]=true;const uc=UNSUP_CASES[idx];
+    initReveal('pane-'+idx);
+    try{const tc=trainCaseU(uc);
+      fillPipelineIO(uc,idx,unsupIOContext(uc,tc));
+      drawViz(idx,tc,uc);
+      renderResultU(uc,tc,document.getElementById('result-'+idx));
+      buildUnsupInteraction(uc,idx,tc);
+    }catch(e){console.error('case',idx,e);
+      const r=document.getElementById('result-'+idx);if(r)r.innerHTML='<div class="loading">error: '+e.message+'</div>';}
+  }
+}
+function boot(){
+  const tabbar=document.getElementById('tabbar'),panes=document.getElementById('panes');
+  UNSUP_CASES.forEach((uc,i)=>{
+    const b=document.createElement('button');b.className='tabbtn';b.innerHTML=`<span class="tabnum">${i+1}</span>${uc.title}`;
+    b.onclick=()=>uActivate(i);tabbar.appendChild(b);
+    const pane=document.createElement('div');pane.className='uc-pane';pane.id='pane-'+i;pane.innerHTML=renderUseCase(uc,i);
+    panes.appendChild(pane);
+  });
+  uActivate(0);
+}
+document.addEventListener('DOMContentLoaded',boot);
+
+</script>
+</body></html>
