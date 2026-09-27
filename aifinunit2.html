@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsupervised Learning for Finance — Interactive Unit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#FAF8F3;
+  --paper-2:#F2EEE3;
+  --surface:#FFFFFF;
+  --ink:#1A2332;
+  --ink-mute:#5A6878;
+  --ink-soft:#8A95A3;
+  --rule:#E2DCCB;
+  --rule-soft:#EEE9DC;
+  --teal:#2C5F5D;
+  --teal-deep:#1F4847;
+  --copper:#C9711E;
+  --copper-soft:#E89554;
+  --gold:#B8943A;
+  --green:#5C8A4A;
+  --red:#B84A4A;
+  --violet:#6B4A8A;
+  --blue:#3A6FA8;
+  --shadow: 0 1px 2px rgba(26,35,50,.04), 0 8px 24px rgba(26,35,50,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--teal);text-decoration:none;border-bottom:1px solid currentColor}
+h1,h2,h3,h4{font-family:'IBM Plex Serif',serif;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+code,kbd,.mono{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);font-weight:500}
+
+/* ============ MASTHEAD ============ */
+.masthead{
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  padding:20px 40px;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(8px);
+  background:rgba(250,248,243,.92);
+}
+.masthead-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:baseline;gap:14px;min-width:0;flex:1}
+.brand-mark{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-weight:500;
+  font-size:15px;color:var(--ink);line-height:1.3;
+}
+.brand-mark::before{content:"§ ";color:var(--copper);font-style:normal}
+.course-code{
+  font-family:'IBM Plex Mono',monospace;
+  font-style:normal;font-weight:600;
+  font-size:11.5px;letter-spacing:.12em;
+  color:var(--copper);
+  background:var(--paper-warm);
+  padding:2px 7px;border-radius:2px;
+  margin-right:4px;
+  vertical-align:1px;
+}
+.brand-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-mute);letter-spacing:.12em;text-transform:uppercase}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{
+  padding:8px 14px;font-size:13px;color:var(--ink-mute);
+  background:transparent;border:1px solid transparent;border-radius:6px;
+  cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;
+  transition:all .15s ease;
+}
+.nav-tab:hover{color:var(--ink);background:var(--paper-2)}
+.nav-tab.active{color:var(--ink);background:var(--surface);border-color:var(--rule);box-shadow:var(--shadow)}
+
+/* ============ HERO ============ */
+.hero{
+  max-width:1400px;margin:0 auto;
+  padding:64px 40px 40px;
+  display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:end;
+  border-bottom:1px solid var(--rule);
+}
+.hero-headline{
+  font-family:'IBM Plex Serif',serif;font-weight:400;
+  font-size:clamp(36px,5vw,64px);line-height:1.02;letter-spacing:-.02em;color:var(--ink);
+}
+.hero-headline em{font-style:italic;color:var(--copper)}
+.hero-headline .underset{
+  display:block;font-size:.42em;color:var(--ink-mute);font-style:normal;
+  margin-top:18px;letter-spacing:-.01em;font-weight:400;
+}
+.hero-meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-mute);line-height:1.9}
+.hero-meta .row{display:flex;justify-content:space-between;border-bottom:1px dotted var(--rule);padding:6px 0}
+.hero-meta .row:last-child{border-bottom:none}
+.hero-meta .k{color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.hero-meta .v{color:var(--ink);font-weight:500}
+
+/* ============ AGENDA STRIP ============ */
+.agenda{
+  max-width:1400px;margin:0 auto;
+  padding:32px 40px;
+  border-bottom:1px solid var(--rule);
+}
+.agenda-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0}
+.agenda-cell{
+  padding:18px 16px 18px 0;border-right:1px solid var(--rule);
+  font-family:'IBM Plex Mono',monospace;
+}
+.agenda-cell:last-child{border-right:none}
+.agenda-cell .time{font-size:11px;color:var(--copper);letter-spacing:.08em;font-weight:500}
+.agenda-cell .title{
+  font-family:'IBM Plex Serif',serif;font-size:15px;font-weight:500;
+  color:var(--ink);margin-top:8px;line-height:1.3;
+}
+.agenda-cell .desc{font-family:'Inter',sans-serif;font-size:11.5px;color:var(--ink-mute);margin-top:6px;line-height:1.5}
+
+/* ============ MAIN ============ */
+main{max-width:1400px;margin:0 auto;padding:0 40px}
+.view{display:none}
+.view.active{display:block}
+
+/* ============ FINANCE DOMAINS ============ */
+.domains-wrap{max-width:1400px;margin:0 auto;padding:56px 40px 72px}
+.domains-head{max-width:840px;margin-bottom:40px}
+.domains-title{font-size:clamp(30px,4vw,46px);line-height:1.05;letter-spacing:-.02em;margin-top:14px}
+.domains-lede{font-size:17px;color:var(--ink-mute);margin-top:16px;line-height:1.6}
+.domains-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px}
+.domain-card{
+  background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  padding:26px 28px 24px;box-shadow:var(--shadow);
+  border-top:3px solid var(--teal);
+}
+.domain-card.c-copper{border-top-color:var(--copper)}
+.domain-card.c-blue{border-top-color:var(--blue)}
+.domain-card.c-violet{border-top-color:var(--violet)}
+.domain-card .dc-no{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;
+  color:var(--ink-soft);font-weight:500;
+}
+.domain-card h3{
+  font-family:'IBM Plex Serif',serif;font-size:23px;font-weight:500;
+  letter-spacing:-.01em;margin:6px 0 6px;color:var(--ink);
+}
+.domain-card .dc-sub{
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);
+  font-style:italic;line-height:1.5;margin-bottom:16px;
+  padding-bottom:14px;border-bottom:1px solid var(--rule-soft);
+}
+.domain-item{padding:12px 0;border-bottom:1px dotted var(--rule)}
+.domain-item:last-child{border-bottom:none;padding-bottom:2px}
+.domain-item .di-name{
+  font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;color:var(--teal-deep);
+  display:block;margin-bottom:4px;
+}
+.domain-item .di-desc{
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);line-height:1.5;
+}
+.domain-item .di-labs{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+.domain-item .di-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.02em;
+  color:var(--teal);background:#E8F0EF;border:1px solid #D3E2E0;
+  padding:3px 8px;border-radius:2px;cursor:pointer;transition:all .15s ease;
+  white-space:nowrap;
+}
+.domain-item .di-tag::before{content:"▷ ";color:var(--copper)}
+.domain-item .di-tag:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.domain-item .di-tag:hover::before{color:#FFD9B0}
+@media(max-width:860px){.domains-grid{grid-template-columns:1fr}}
+
+/* ============ QUIZ ============ */
+.quiz-wrap{max-width:1000px;margin:0 auto;padding:56px 40px 80px}
+.quiz-head{margin-bottom:8px}
+.quiz-title{font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.02em;margin-top:14px}
+.quiz-lede{font-size:16px;color:var(--ink-mute);margin-top:14px;line-height:1.6;max-width:760px}
+.quiz-bar{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  margin-top:22px;padding:16px 20px;background:var(--surface);
+  border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);
+}
+.quiz-timer{
+  font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;
+  color:var(--teal-deep);letter-spacing:.04em;min-width:120px;
+}
+.quiz-timer.warn{color:var(--copper)}
+.quiz-timer.done{color:var(--red)}
+.quiz-bar-btns{display:flex;gap:8px}
+.quiz-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.03em;margin-left:auto;line-height:1.6}
+.quiz-part{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--copper);font-weight:600;
+  margin:38px 0 4px;padding-top:16px;border-top:2px solid var(--copper);
+}
+.q-item{padding:20px 0;border-bottom:1px solid var(--rule-soft)}
+.q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:12px}
+.q-num{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--copper);
+  flex-shrink:0;padding-top:1px;
+}
+.q-text{font-family:'IBM Plex Serif',serif;font-size:16.5px;line-height:1.4;color:var(--ink)}
+.q-opts{display:flex;flex-direction:column;gap:7px;margin-left:34px}
+.q-opt{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:9px 12px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--paper);cursor:pointer;transition:all .12s ease;
+}
+.q-opt:hover{border-color:var(--teal);background:#fff}
+.q-opt input{margin-top:3px;flex-shrink:0;accent-color:var(--teal)}
+.q-letter{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;width:14px}
+.q-otext{font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);line-height:1.45}
+.q-opt.correct{border-color:var(--green);background:#EEF5EA}
+.q-opt.correct .q-letter{color:var(--green)}
+.q-opt.wrong{border-color:var(--red);background:#FBEEEE}
+.q-opt.wrong .q-letter{color:var(--red)}
+.q-mark{margin:9px 0 0 34px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.02em;display:none}
+.q-mark.ok{color:var(--green);display:block}
+.q-mark.bad{color:var(--red);display:block}
+.q-mark.none{color:var(--ink-soft);display:block}
+.quiz-actions{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+.quiz-note{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:10px}
+.quiz-wrap .btn:disabled{opacity:.5;cursor:not-allowed}
+#quiz-questions.locked .q-opt{cursor:default}
+#quiz-questions.locked .q-opt:hover{border-color:var(--rule);background:var(--paper)}
+#quiz-questions.locked .q-opt.correct,#quiz-questions.locked .q-opt.correct:hover{border-color:var(--green);background:#EEF5EA}
+#quiz-questions.locked .q-opt.wrong,#quiz-questions.locked .q-opt.wrong:hover{border-color:var(--red);background:#FBEEEE}
+.quiz-score{
+  margin-top:20px;padding:18px 22px;border-radius:4px;
+  background:var(--teal);color:#fff;
+  font-family:'IBM Plex Mono',monospace;
+}
+.quiz-score .big{font-size:28px;font-weight:600;letter-spacing:.02em}
+.quiz-score .sub{font-size:12px;opacity:.85;margin-top:4px}
+.answer-sheet{
+  margin-top:30px;padding:28px 30px;border-radius:4px;
+  background:#FBF6EC;border:1px solid #E7D6B6;border-top:3px solid var(--gold);
+}
+.answer-sheet .as-head{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E7D6B6}
+.answer-sheet .as-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;background:var(--gold);padding:3px 9px;border-radius:2px;font-weight:600;
+}
+.answer-sheet .as-head h3{font-family:'IBM Plex Serif',serif;font-size:24px;font-weight:500;margin:10px 0 6px;color:var(--ink)}
+.answer-sheet .as-head p{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);line-height:1.5}
+.as-row{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:11px 0;border-bottom:1px dotted var(--rule)}
+.as-row:last-child{border-bottom:none}
+.as-qn{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--copper)}
+.as-ans{font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);line-height:1.45}
+.as-ans .as-key{font-weight:600;color:var(--teal-deep)}
+.as-why{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink-mute);line-height:1.5;margin-top:4px}
+@media(max-width:860px){.quiz-wrap{padding:40px 20px 60px}.q-opts,.q-mark{margin-left:0}}
+
+/* ============ NOTES ============ */
+.module{padding:56px 0;border-bottom:1px solid var(--rule)}
+.module:last-child{border-bottom:none}
+.module-head{display:grid;grid-template-columns:120px 1fr;gap:32px;margin-bottom:32px;align-items:start}
+.module-no{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--copper);
+  border-top:2px solid var(--copper);padding-top:8px;
+}
+.module-no .roman{
+  display:block;font-family:'IBM Plex Serif',serif;font-style:italic;
+  font-size:42px;color:var(--ink);margin-top:6px;letter-spacing:-.02em;font-weight:400;
+}
+.module-title{font-size:32px;line-height:1.1;letter-spacing:-.015em}
+.module-lede{font-size:17px;color:var(--ink-mute);margin-top:16px;max-width:680px;line-height:1.6}
+
+.body-grid{display:grid;grid-template-columns:120px 1fr;gap:32px}
+.side-note{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  line-height:1.7;padding-top:4px;
+}
+.side-note .pin{color:var(--copper);font-weight:500;display:block;letter-spacing:.1em;font-size:10px}
+
+.prose{max-width:780px;color:var(--ink);font-size:16px}
+.prose p{margin-bottom:14px}
+.prose h3{font-size:22px;margin:32px 0 12px;letter-spacing:-.01em}
+.prose h4{font-size:16px;margin:20px 0 8px;color:var(--teal-deep);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0}
+.prose ul,.prose ol{margin:8px 0 16px 0;padding-left:0;list-style:none}
+.prose ul li,.prose ol li{padding:6px 0 6px 28px;position:relative;line-height:1.55}
+.prose ul li::before{
+  content:"·";position:absolute;left:8px;top:0;
+  color:var(--copper);font-size:24px;line-height:1.2;
+}
+.prose ol{counter-reset:item}
+.prose ol li{counter-increment:item}
+.prose ol li::before{
+  content:counter(item,decimal-leading-zero);position:absolute;left:0;top:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--copper);font-weight:500;letter-spacing:.05em;
+}
+.prose strong{font-weight:600;color:var(--teal-deep)}
+.prose code{background:var(--paper-2);padding:1px 6px;border-radius:3px;font-size:.92em;color:var(--ink)}
+
+/* Callout */
+.callout{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--copper);
+  padding:18px 22px;margin:20px 0;border-radius:2px;
+}
+.callout .lbl{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--copper);font-weight:500;margin-bottom:6px;
+}
+.callout p{margin:0;font-size:15px;color:var(--ink)}
+.callout.finance{border-left-color:var(--teal)}
+.callout.finance .lbl{color:var(--teal)}
+.callout.warn{border-left-color:var(--red)}
+.callout.warn .lbl{color:var(--red)}
+
+/* Concept table */
+.cmp-table{
+  width:100%;border-collapse:collapse;margin:18px 0;
+  font-size:14px;background:var(--surface);
+  border:1px solid var(--rule);
+}
+.cmp-table th,.cmp-table td{
+  text-align:left;padding:12px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top;
+}
+.cmp-table th{
+  background:var(--paper-2);font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);font-weight:500;
+}
+.cmp-table tr:last-child td{border-bottom:none}
+.cmp-table td .mono{font-size:12px;color:var(--ink-mute)}
+
+/* Formula card */
+.formula{
+  background:var(--ink);color:#F4EFE2;padding:22px 26px;
+  font-family:'IBM Plex Mono',monospace;font-size:15px;
+  border-radius:4px;margin:18px 0;line-height:1.7;
+  border-left:3px solid var(--copper);
+}
+.formula .var{color:var(--copper-soft)}
+.formula .op{color:#9BB5C0}
+.formula .cmt{color:#6B7888;font-style:italic;font-size:13px;display:block;margin-top:6px}
+
+/* Pull quote */
+.pullquote{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-weight:400;
+  font-size:24px;line-height:1.4;color:var(--ink);
+  padding:24px 0 24px 28px;border-left:2px solid var(--copper);
+  margin:28px 0;max-width:620px;letter-spacing:-.005em;
+}
+.pullquote-attr{font-style:normal;font-size:12px;color:var(--ink-mute);font-family:'IBM Plex Mono',monospace;display:block;margin-top:14px;letter-spacing:.05em}
+
+/* ============ LAB ============ */
+.lab-wrap{padding:40px 0 80px}
+.lab-head{margin-bottom:24px;display:grid;grid-template-columns:120px 1fr auto;gap:32px;align-items:end}
+.lab-title{font-size:28px;letter-spacing:-.015em}
+.lab-sub{color:var(--ink-mute);font-size:14px;margin-top:6px;max-width:560px}
+.lab-controls{display:flex;gap:10px;align-items:center}
+
+.btn{
+  font-family:'Inter',sans-serif;font-weight:500;font-size:13px;
+  padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+  border-radius:4px;cursor:pointer;transition:all .15s ease;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{background:var(--teal-deep);border-color:var(--teal-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{background:var(--paper-2);color:var(--ink)}
+.btn.copper{background:var(--copper);border-color:var(--copper)}
+.btn.copper:hover{background:#A55C16;border-color:#A55C16}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.lab-board{
+  display:grid;grid-template-columns:280px 1fr;gap:24px;
+  align-items:start;
+}
+
+/* Node palette */
+.palette{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:16px;position:sticky;top:88px;max-height:calc(100vh - 110px);overflow-y:auto;
+}
+.palette-head{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;font-weight:500;
+}
+.palette-group{margin-bottom:18px}
+.palette-group-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--copper);
+  letter-spacing:.1em;text-transform:uppercase;font-weight:500;
+  padding:6px 0;border-bottom:1px solid var(--rule-soft);margin-bottom:8px;
+}
+.node-card{
+  background:var(--paper);border:1px solid var(--rule);border-radius:4px;
+  padding:9px 11px;margin-bottom:6px;cursor:grab;
+  font-size:12.5px;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+  transition:all .12s ease;user-select:none;
+  border-left-width:3px;
+}
+.node-card:hover{background:var(--surface);transform:translateX(2px)}
+.node-card:active{cursor:grabbing}
+.node-card.dragging{opacity:.4}
+.node-card .ico{
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--ink-mute);flex-shrink:0;
+}
+.node-card .nm{font-weight:500}
+.node-card .tag{
+  margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  color:var(--ink-soft);letter-spacing:.05em;
+}
+
+/* Type colors */
+.node-card[data-type="data"],.slot[data-accept="data"] .slot-filled{border-left-color:var(--blue)}
+.node-card[data-type="clean"],.slot[data-accept="clean"] .slot-filled{border-left-color:var(--gold)}
+.node-card[data-type="feat"],.slot[data-accept="feat"] .slot-filled{border-left-color:var(--violet)}
+.node-card[data-type="split"],.slot[data-accept="split"] .slot-filled{border-left-color:var(--ink-mute)}
+.node-card[data-type="model"],.slot[data-accept="model"] .slot-filled{border-left-color:var(--copper)}
+.node-card[data-type="eval"],.slot[data-accept="eval"] .slot-filled{border-left-color:var(--green)}
+
+/* Canvas */
+.canvas{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:24px;min-height:600px;
+}
+.pipeline{display:flex;flex-direction:column;gap:14px}
+.stage{display:grid;grid-template-columns:80px 1fr;gap:14px;align-items:start}
+.stage-label{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  padding-top:14px;line-height:1.5;font-weight:500;
+}
+.stage-label .num{display:block;font-family:'IBM Plex Serif',serif;font-style:italic;font-size:18px;color:var(--copper);letter-spacing:0;font-weight:400}
+
+.slot-group{display:flex;flex-direction:column;gap:6px}
+
+.slot{
+  border:1.5px dashed var(--rule);border-radius:6px;
+  padding:14px;min-height:48px;background:var(--paper);
+  transition:all .15s ease;font-size:12.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.slot.drag-over{border-color:var(--copper);background:#FFF6EB;border-style:solid}
+.slot .placeholder{color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em}
+.slot-filled{
+  background:var(--surface);border-left:3px solid var(--rule);
+  border-radius:3px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;width:100%;
+  font-size:13px;
+}
+.slot-filled .nm{font-weight:500;color:var(--ink)}
+.slot-filled .params{
+  display:flex;gap:8px;align-items:center;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--ink-mute);
+}
+.slot-filled .params select,.slot-filled .params input{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:3px;
+  padding:3px 6px;color:var(--ink);
+}
+.slot-filled .remove{
+  margin-left:auto;background:transparent;border:none;cursor:pointer;
+  color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:13px;
+  padding:2px 6px;border-radius:3px;
+}
+.slot-filled .remove:hover{background:var(--paper-2);color:var(--red)}
+
+.add-clean{
+  background:transparent;border:1px dashed var(--rule);
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);
+  letter-spacing:.08em;padding:6px;border-radius:4px;cursor:pointer;
+  text-transform:uppercase;
+}
+.add-clean:hover{color:var(--copper);border-color:var(--copper)}
+
+.connector{
+  display:flex;justify-content:center;color:var(--ink-soft);font-size:14px;
+  padding:2px 0;font-family:'IBM Plex Mono',monospace;
+}
+
+/* Results */
+.results{
+  margin-top:24px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:24px;
+}
+.results-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;
+  padding-bottom:14px;border-bottom:1px solid var(--rule);
+}
+.results-title{font-family:'IBM Plex Serif',serif;font-size:18px;font-weight:500}
+.results-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-mute)}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.metric{
+  background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;
+  padding:14px 16px;
+}
+.metric .k{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);font-weight:500;
+}
+.metric .v{
+  font-family:'IBM Plex Serif',serif;font-size:28px;font-weight:400;
+  color:var(--ink);margin-top:4px;letter-spacing:-.015em;
+}
+.metric .v.good{color:var(--green)}
+.metric .v.bad{color:var(--red)}
+.metric .sub{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-mute);margin-top:4px}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;padding:14px}
+.chart-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;font-weight:500;
+}
+.chart-canvas-wrap{position:relative;height:240px}
+
+.log{
+  background:var(--ink);color:#D4D0C0;font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;padding:14px 16px;border-radius:4px;margin-top:20px;
+  max-height:180px;overflow-y:auto;line-height:1.7;
+}
+.log .ts{color:#6B7888}
+.log .ok{color:#8FBE6D}
+.log .err{color:#E07B7B}
+.log .warn{color:#D9B05A}
+
+.empty-state{
+  padding:80px 40px;text-align:center;color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.05em;
+}
+.empty-state .big{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-size:24px;
+  color:var(--ink-mute);display:block;margin-bottom:8px;letter-spacing:-.01em;
+}
+
+.dataset-preview{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;
+  padding:12px;margin-top:12px;max-height:160px;overflow:auto;
+}
+.dataset-preview table{border-collapse:collapse;width:100%}
+.dataset-preview th{
+  text-align:left;padding:4px 10px;color:var(--copper);
+  font-weight:500;border-bottom:1px solid var(--rule);
+  letter-spacing:.05em;
+}
+.dataset-preview td{padding:3px 10px;color:var(--ink-mute)}
+
+/* Confusion matrix */
+.confusion{
+  display:grid;grid-template-columns:60px 80px 80px;gap:0;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  border:1px solid var(--rule);margin:8px 0;
+}
+.confusion .cell{padding:10px 12px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);text-align:center}
+.confusion .hd{background:var(--paper-2);font-size:10px;letter-spacing:.05em;color:var(--ink-mute);font-weight:500}
+.confusion .num{font-family:'IBM Plex Serif',serif;font-size:18px;color:var(--ink);font-weight:400}
+
+footer{
+  border-top:1px solid var(--rule);padding:30px 40px;text-align:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  letter-spacing:.05em;margin-top:60px;
+}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:30px}
+  .agenda-grid{grid-template-columns:repeat(2,1fr)}
+  .agenda-cell{border-right:none;border-bottom:1px solid var(--rule)}
+  .body-grid,.module-head{grid-template-columns:1fr;gap:14px}
+  .lab-board{grid-template-columns:1fr}
+  .palette{position:static;max-height:none}
+  .charts{grid-template-columns:1fr}
+  .masthead-inner{flex-direction:column;align-items:flex-start;gap:12px}
+  .brand-mark{font-size:13.5px}
+  .nav-tabs{width:100%;overflow-x:auto}
+}
+
+/* ============ SVG FIGURES ============ */
+.svg-fig{
+  margin:28px 0 18px 0;
+  padding:22px 18px 14px 18px;
+  background:#FFFEFB;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--teal);
+  border-radius:2px;
+}
+.svg-fig svg{display:block;width:100%;height:auto;max-width:100%}
+.svg-fig.tight{padding:16px 14px 10px}
+.fig-cap{
+  font-family:'IBM Plex Serif',serif;
+  font-style:italic;
+  font-size:13.5px;
+  color:var(--ink-mute);
+  margin-top:10px;
+  padding-top:8px;
+  border-top:1px dashed var(--rule);
+  line-height:1.55;
+}
+.fig-cap b{font-style:normal;color:var(--ink);font-weight:600}
+.fig-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.18em;
+  color:var(--copper);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+/* ============ DATASET PREVIEW MODAL ============ */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(26,35,50,0.55);
+  display:none;
+  align-items:center;justify-content:center;
+  z-index:1000;
+  padding:20px;
+  backdrop-filter:blur(2px);
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-radius:3px;
+  width:100%;max-width:1100px;
+  max-height:90vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 30px 60px rgba(0,0,0,0.25);
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;
+  border-bottom:1px solid var(--rule);
+  background:var(--paper-warm);
+}
+.modal-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:22px;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.01em;
+}
+.modal-title .mono-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;font-weight:400;
+  color:var(--copper);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  display:block;margin-bottom:4px;
+}
+.modal-close{
+  background:transparent;border:1px solid var(--rule);
+  width:34px;height:34px;border-radius:50%;
+  font-size:18px;color:var(--ink-mute);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.modal-body{padding:0;overflow:hidden;flex:1;display:flex;flex-direction:column}
+.ds-tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--rule);
+  background:#FFFEFB;
+  padding:0 24px;
+  overflow-x:auto;
+  flex-shrink:0;
+}
+.ds-tab{
+  padding:14px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--ink-mute);
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s;
+}
+.ds-tab:hover{color:var(--ink)}
+.ds-tab.active{color:var(--teal);border-bottom-color:var(--copper);font-weight:600}
+.ds-tab .tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  background:var(--rule);
+  color:var(--ink-mute);
+  padding:2px 5px;
+  border-radius:2px;
+  margin-left:6px;
+  letter-spacing:.05em;
+}
+.ds-panel{
+  padding:22px 24px;
+  overflow-y:auto;
+  flex:1;
+  display:none;
+}
+.ds-panel.active{display:block}
+.ds-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px 24px;
+  margin-bottom:18px;
+  padding-bottom:16px;
+  border-bottom:1px dashed var(--rule);
+}
+.ds-meta .field{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--copper);
+  margin-bottom:4px;
+}
+.ds-meta .val{
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+  line-height:1.5;
+}
+.ds-meta .val.mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+.ds-summary{
+  display:flex;gap:18px;flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.ds-summary .chip{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  padding:4px 10px;
+  background:var(--paper-warm);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  color:var(--ink-soft);
+}
+.ds-summary .chip b{color:var(--teal);font-weight:600}
+.ds-summary .chip.warn b{color:var(--copper)}
+.ds-table-wrap{
+  border:1px solid var(--rule);
+  border-radius:2px;
+  overflow:auto;
+  max-height:420px;
+  background:#FFFEFB;
+}
+.ds-table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+}
+.ds-table thead th{
+  position:sticky;top:0;
+  background:var(--ink);
+  color:var(--paper);
+  padding:9px 12px;
+  text-align:left;
+  font-weight:500;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,0.08);
+}
+.ds-table thead th.target{background:var(--teal)}
+.ds-table tbody td{
+  padding:6px 12px;
+  border-bottom:1px solid var(--rule);
+  border-right:1px solid var(--rule);
+  color:var(--ink-soft);
+  white-space:nowrap;
+}
+.ds-table tbody tr:hover{background:var(--paper-warm)}
+.ds-table tbody td.target{color:var(--teal);font-weight:600}
+.ds-table tbody td.null{color:var(--copper);font-style:italic}
+.ds-table tbody td.num{text-align:right}
+.ds-foot{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  color:var(--ink-mute);
+  margin-top:10px;
+  letter-spacing:.04em;
+}
+.ds-actions{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--rule-soft);
+}
+.ds-actions .ds-dl-note{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+  color:var(--ink-soft);letter-spacing:.03em;line-height:1.4;
+}
+.ds-actions .ds-dl-note .mono{color:var(--teal);}
+.modal-head-actions{display:flex;align-items:center;gap:12px;}
+.ds-foot .copper{color:var(--copper);font-weight:600}
+@media (max-width:680px){
+  .ds-meta{grid-template-columns:1fr}
+  .modal{max-height:96vh}
+}
+
+/* ============ LAB GUIDE (explainer panel) ============ */
+.lab-guide{
+  background:#FFFEFB;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--copper);
+  border-radius:2px;
+  margin:24px 0 18px 0;
+  overflow:hidden;
+}
+.lab-guide summary{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 22px;
+  cursor:pointer;
+  user-select:none;
+  list-style:none;
+  background:var(--paper-warm);
+  border-bottom:1px solid var(--rule);
+  transition:background .15s;
+}
+.lab-guide summary::-webkit-details-marker{display:none}
+.lab-guide summary:hover{background:#F4EEDB}
+.lab-guide .guide-icon{font-size:16px}
+.lab-guide .guide-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:16px;font-weight:600;
+  color:var(--ink);letter-spacing:-.005em;flex:1;
+}
+.lab-guide .guide-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--ink-mute);
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.lab-guide .guide-toggle{
+  color:var(--copper);font-size:14px;
+  transition:transform .2s;
+}
+.lab-guide[open] .guide-toggle{transform:rotate(180deg)}
+.lab-guide:not([open]){border-left-width:3px}
+.guide-body{padding:0}
+.guide-tabs{
+  display:flex;
+  border-bottom:1px solid var(--rule);
+  background:#FFFCF5;
+  padding:0 22px;
+  overflow-x:auto;
+}
+.guide-tab{
+  padding:12px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--ink-mute);
+  background:transparent;border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.guide-tab:hover{color:var(--ink)}
+.guide-tab.active{color:var(--teal);border-bottom-color:var(--copper);font-weight:600}
+.guide-panel{display:none;padding:20px 24px 22px}
+.guide-panel.active{display:block}
+
+.guide-panel h5{
+  font-family:'IBM Plex Serif',serif;
+  font-size:14.5px;font-weight:600;
+  color:var(--ink);
+  margin:0 0 6px 0;
+  letter-spacing:-.005em;
+}
+.guide-panel .op-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:14px 22px;
+  margin-bottom:8px;
+}
+.guide-panel .op{
+  padding:11px 14px;
+  background:var(--paper-warm);
+  border:1px solid var(--rule);
+  border-left:2px solid var(--teal);
+  border-radius:2px;
+}
+.guide-panel .op.warn{border-left-color:var(--copper)}
+.guide-panel .op .nm{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;font-weight:600;
+  color:var(--teal);
+  display:block;margin-bottom:4px;
+  letter-spacing:.02em;
+}
+.guide-panel .op.warn .nm{color:var(--copper)}
+.guide-panel .op .dsc{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;color:var(--ink-soft);
+  line-height:1.55;
+}
+.guide-panel .op .dsc b{color:var(--ink);font-weight:600}
+.guide-panel .op .when{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;color:var(--ink-mute);
+  margin-top:5px;letter-spacing:.02em;
+}
+.guide-panel .op .when b{color:var(--copper);font-weight:600}
+.guide-panel p{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;color:var(--ink-soft);
+  line-height:1.6;margin:0 0 10px 0;
+}
+.guide-panel .recipe{
+  padding:12px 16px;
+  background:linear-gradient(to right, #FFFCF5, #FFFEFB);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  margin-bottom:10px;
+}
+.guide-panel .recipe .ds-name{
+  font-family:'IBM Plex Serif',serif;
+  font-size:14px;font-weight:600;
+  color:var(--ink);
+  display:block;margin-bottom:6px;
+}
+.guide-panel .recipe .pipe{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;color:var(--teal);
+  background:#E8F0EF;
+  padding:6px 10px;border-radius:2px;
+  display:inline-block;margin-bottom:6px;
+}
+.guide-panel .recipe .why{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;color:var(--ink-soft);
+  line-height:1.55;
+}
+.guide-panel .recipe .bizcase{
+  margin-top:10px;
+  padding:11px 13px;
+  background:#FBF4EA;
+  border:1px solid #EAD9BE;
+  border-left:2px solid var(--copper);
+  border-radius:2px;
+}
+.guide-panel .recipe .bizcase .biz-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--copper);font-weight:600;
+  display:block;margin-bottom:7px;
+}
+.guide-panel .recipe .bizcase .brow{
+  font-family:'Inter',sans-serif;
+  font-size:12px;color:var(--ink-mute);line-height:1.5;
+  margin:0 0 5px 0;
+}
+.guide-panel .recipe .bizcase .brow:last-child{margin-bottom:0}
+.guide-panel .recipe .bizcase .brow b{color:var(--teal-deep);font-weight:600}
+.guide-panel .recipe .bizcase .brow .metric{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+  background:#E8F0EF;color:var(--teal);padding:1px 6px;border-radius:2px;
+  white-space:nowrap;
+}
+.guide-panel .recipe .bizcase .persona{
+  display:flex;gap:10px;align-items:center;
+  margin-bottom:9px;padding-bottom:9px;
+  border-bottom:1px dashed #EAD9BE;
+}
+.guide-panel .recipe .bizcase .persona .pface{
+  width:34px;height:34px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:12px;
+  color:#FFFDF8;letter-spacing:.02em;
+}
+.guide-panel .recipe .bizcase .persona .pname{
+  font-family:'IBM Plex Serif',serif;font-size:13px;font-weight:600;
+  color:var(--ink);line-height:1.15;
+}
+.guide-panel .recipe .bizcase .persona .prole{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--ink-soft);letter-spacing:.03em;margin-top:2px;
+}
+.guide-panel .recipe .bizcase .brow.persona-line{
+  font-style:italic;color:var(--ink-soft);
+}
+.guide-panel .order-line{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  background:var(--ink);color:var(--paper);
+  padding:10px 16px;border-radius:2px;
+  margin:10px 0 14px 0;
+  letter-spacing:.02em;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+.guide-panel .order-line .step{color:var(--copper);font-weight:600}
+.guide-panel .order-line .arr{color:var(--ink-mute);opacity:.6}
+
+/* ============ BUSINESS INTERPRETATION (post-run) ============ */
+.biz-interp{
+  margin-top:24px;
+  background:linear-gradient(to bottom, #FFFEFB, #FAF8F3);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--teal);
+  border-radius:2px;
+  overflow:hidden;
+}
+.biz-interp .biz-head{
+  padding:12px 22px;
+  background:var(--teal);color:var(--paper);
+  display:flex;align-items:center;gap:10px;
+}
+.biz-interp .biz-head .biz-icon{font-size:14px}
+.biz-interp .biz-head .biz-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:15px;font-weight:600;letter-spacing:-.005em;flex:1;
+}
+.biz-interp .biz-head .biz-meta{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:.15em;opacity:.7;
+}
+.biz-interp .biz-body{padding:18px 22px}
+.biz-row{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:18px;
+  padding:12px 0;
+  border-bottom:1px dashed var(--rule);
+}
+.biz-row:last-child{border-bottom:none}
+.biz-row .biz-key{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.biz-row .biz-key .value{
+  display:block;
+  font-family:'IBM Plex Serif',serif;
+  font-size:18px;font-weight:600;
+  margin-top:3px;
+  letter-spacing:-.01em;
+  text-transform:none;
+}
+.biz-row .biz-key.good .value{color:var(--teal)}
+.biz-row .biz-key.warn .value{color:var(--copper)}
+.biz-row .biz-key.bad  .value{color:#B84A4A}
+.biz-row .biz-key.neutral .value{color:var(--ink)}
+.biz-row .biz-text{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;color:var(--ink-soft);
+  line-height:1.6;
+}
+.biz-row .biz-text b{color:var(--ink);font-weight:600}
+.biz-row .biz-text .copper{color:var(--copper);font-weight:600}
+.biz-row .biz-text .teal{color:var(--teal);font-weight:600}
+.biz-bottom{
+  margin-top:14px;padding:14px 18px;
+  background:var(--ink);color:var(--paper);
+  border-radius:2px;
+  font-family:'IBM Plex Serif',serif;
+  font-size:13.5px;line-height:1.6;
+  font-style:italic;
+}
+.biz-bottom .lbl{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:.2em;font-style:normal;
+  color:var(--copper);text-transform:uppercase;
+  margin-bottom:6px;
+}
+.biz-bottom b{font-style:normal;color:var(--paper);font-weight:600}
+@media (max-width:680px){
+  .biz-row{grid-template-columns:1fr;gap:6px}
+}
+</style>
+<style>
+/* ---- aifinunit2 lab + extras ---- */
+.ulab{background:var(--surface);border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);padding:20px 22px;margin-top:8px}
+.ulab-controls{display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;padding-bottom:18px;border-bottom:1px solid var(--rule-soft)}
+.ulab-field{display:flex;flex-direction:column;gap:5px}
+.ulab-field label{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);font-weight:600}
+.ulab-field select,.ulab-field input,#uds-params input,#uds-params select{
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--paper);
+  border:1px solid var(--rule);border-radius:3px;padding:7px 9px}
+#uds-params{display:flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink-mute)}
+.ulab-actions{display:flex;gap:10px;margin-left:auto}
+.ulab-out{display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:18px}
+@media(max-width:820px){.ulab-out{grid-template-columns:1fr}.ulab-actions{margin-left:0}}
+.uout-side{display:flex;flex-direction:column;gap:14px}
+.uout-metrics{display:flex;flex-wrap:wrap;gap:8px}
+.umetric{display:flex;flex-direction:column;background:var(--paper-2);border:1px solid var(--rule);border-radius:3px;padding:7px 11px;min-width:78px}
+.umetric .uk{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+.umetric .uv{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--ink)}
+.umetric.good{border-color:#BcdCc0;background:#EAF3EA}.umetric.good .uv{color:var(--green)}
+.umetric.warn{border-color:#EAD9BE;background:#FBF4EA}.umetric.warn .uv{color:var(--copper)}
+.ulog{background:var(--ink);border-radius:4px;padding:12px 14px;max-height:250px;overflow:auto}
+.ulog-line{font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;color:#C9D3DD;margin-bottom:2px}
+.ulog-line b{color:#FFF}
+.ulog-line.ustep{color:#9FB4C4}
+.ulog-line.uok{color:#8FCf8A}
+.ulog-line.uerr{color:#E89AA0}
+.ulog-line.uwarn{color:#E4B86A}
+.uout-main{min-width:0}
+.uchart-wrap{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:12px;height:340px}
+#uds-chart2-wrap{height:200px;margin-top:14px}
+.urules{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.urules-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--copper);font-weight:600;margin-top:14px}
+.urules th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:6px 8px}
+.urules td{padding:6px 8px;border-bottom:1px solid var(--rule-soft);color:var(--ink-mute);font-family:'Inter',sans-serif}
+.urules td.lift-hi{color:var(--green);font-weight:600}
+.urules td.lift-lo{color:var(--red)}
+.uhint{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.02em;margin-top:6px}
+.algo-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);background:#E8F0EF;border-radius:3px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+.family-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper)}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <span class="brand-mark"><span class="course-code">TM2065</span> Application of Machine Learning and Artificial Intelligence in Finance</span>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-target="sec-intro">Overview</button>
+      <button class="nav-tab" data-target="sec-notes">Reading material</button>
+      <button class="nav-tab" data-target="sec-lab">Interactive lab</button>
+      <button class="nav-tab" data-target="sec-recipes">Pipeline recipes</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="sec-intro">
+  <h1 class="hero-headline">
+    Learning without an answer key — <em>unsupervised</em> machine learning, told through finance.
+    <span class="underset">Six algorithms, six business stories. No labels, no ground truth — only structure the data reveals when you let it group, compress, and connect itself. Every one runs live in your browser.</span>
+  </h1>
+  <div class="hero-meta">
+    <div class="row"><span class="k">Companion to</span><span class="v">Unit 1 · Supervised learning</span></div>
+    <div class="row"><span class="k">Algorithms</span><span class="v">K-Means · Hierarchical · DBSCAN · PCA · LDA · Apriori</span></div>
+    <div class="row"><span class="k">Data</span><span class="v">Unlabelled, finance-flavoured, synthetic</span></div>
+    <div class="row"><span class="k">Evaluation</span><span class="v">Internal only — geometry, not an answer key</span></div>
+    <div class="row"><span class="k">Stack</span><span class="v">Browser-native, no install</span></div>
+    <div class="row"><span class="k">Export</span><span class="v">Every dataset downloads as Excel</span></div>
+  </div>
+</section>
+
+<!-- ============ AGENDA ============ -->
+<section class="agenda">
+  <div class="agenda-grid">
+    <div class="agenda-cell"><div class="time">Clustering</div><div class="title">K-Means</div><div class="desc">Partition customers into k behavioural segments.</div></div>
+    <div class="agenda-cell"><div class="time">Clustering</div><div class="title">Hierarchical</div><div class="desc">Merge merchants into a tree of nested groups.</div></div>
+    <div class="agenda-cell"><div class="time">Clustering</div><div class="title">DBSCAN</div><div class="desc">Isolate transactions that fit no dense region.</div></div>
+    <div class="agenda-cell"><div class="time">Dim. reduction</div><div class="title">PCA</div><div class="desc">Compress correlated returns into factors.</div></div>
+    <div class="agenda-cell"><div class="time">Dim. reduction</div><div class="title">LDA</div><div class="desc">Project credit bands for cleanest separation.</div></div>
+    <div class="agenda-cell"><div class="time">Association</div><div class="title">Apriori</div><div class="desc">Find which products are bought together.</div></div>
+  </div>
+</section>
+
+<main>
+
+<!-- =================================================================== -->
+<!-- ============================ NOTES ================================ -->
+<!-- =================================================================== -->
+<section class="view" id="sec-notes">
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">I.</span></div>
+      <div>
+        <h2 class="module-title">What makes learning <em>unsupervised</em></h2>
+        <p class="module-lede">In Unit 1 every row came with an answer — the loan defaulted or it didn't. Here the answer column is gone. The algorithm must find structure with nothing to check itself against.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">THE SHIFT</span>
+        Supervised learning maps inputs to a known output. Unsupervised learning has inputs only — it asks "what is the shape of this data?"
+      </aside>
+      <div class="prose">
+        <h3>No labels, no answer key</h3>
+        <p>A <strong>label</strong> is the thing you're trying to predict — the default flag, the price, the fraud tag. Supervised models learn by comparing their guess to that label. Unsupervised models never see one. So they can't be "right" or "wrong" in the same way; instead they surface <em>structure</em> — natural groupings, hidden dimensions, co-occurring items — that a human then interprets and names.</p>
+        <p>This changes three things at once. There is <strong>no train/test split</strong> in the usual sense, because there's no answer to hold out. There is <strong>no accuracy or AUC</strong>, because those need a truth column. And the human is back in the loop at the end: the algorithm says "here are three groups," and the decision-maker decides what those groups <em>mean</em>.</p>
+
+        <h3>Three jobs unsupervised learning does</h3>
+        <p><strong>Clustering</strong> puts similar rows together — customers who behave alike, merchants with the same risk profile, transactions that look normal (and the few that don't). <strong>Dimensionality reduction</strong> squeezes many correlated columns into a few informative ones — turning eight correlated return series into two market factors. <strong>Association-rule mining</strong> finds items that travel together — the products a customer tends to hold at the same time.</p>
+
+        <div class="callout finance">
+          <div class="lbl">Why finance leans on it</div>
+          <p>Most financial data arrives unlabelled. Nobody has hand-tagged every customer's "true segment" or every transaction's "true anomaly." Unsupervised methods work with what you have — the raw behaviour — which is exactly why they power segmentation, risk factor models, anomaly screens and cross-sell engines.</p>
+        </div>
+
+        <h3>How you grade a model with no answer key</h3>
+        <p>Every metric here is <strong>internal</strong> — computed from the geometry of the result, not from a truth column:</p>
+        <p><strong>Silhouette</strong> (−1 to 1) asks, for each point, "am I closer to my own group than to the nearest other group?" Near 1 = tight, well-separated clusters. <strong>Inertia</strong> is the total squared distance of points to their cluster centre — lower is tighter, and its "elbow" as k grows hints at the right number of clusters. <strong>Davies–Bouldin</strong> compares within-cluster spread to between-cluster distance — lower is better. For dimensionality reduction, <strong>explained variance</strong> says how much of the data's spread your few components kept. For association rules, <strong>support, confidence and lift</strong> measure how common, how reliable, and how surprising a pattern is.</p>
+
+        <div class="fig-cap" style="margin-top:14px"><b>The mindset to carry into the lab:</b> the algorithm proposes structure; you dispose of it. A cluster is only useful once a human looks at it and says "ah — these are our dormant high-net-worth customers."</div>
+      </div>
+    </div>
+  </article>
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">II.</span></div>
+      <div>
+        <h2 class="module-title">Clustering — grouping by similarity <span class="family-tag">three ways</span></h2>
+        <p class="module-lede">Clustering answers one question — "which rows belong together?" — but the three algorithms disagree on what "together" means, and the disagreement is the lesson.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">A NOTE</span>
+        All three need features on a comparable scale. Standardize first, or the largest-magnitude column silently decides every grouping.
+      </aside>
+      <div class="prose">
+
+        <h3>1 · K-Means — k centres, nearest wins</h3>
+        <p>You tell K-Means how many groups you want (<em>k</em>). It drops k centre-points at random, assigns every row to its nearest centre, moves each centre to the average of its members, and repeats until nothing moves. Fast, simple, and the default first reach — but you must choose k, and it assumes clusters are roughly round and similar-sized.</p>
+        <div class="formula">
+          <span class="op">minimise</span> &nbsp; <span class="var">Σ</span> ‖ xᵢ − <span class="var">c</span>(xᵢ) ‖²
+          <span class="cmt">Add up how far every point sits from its own cluster centre, squared, and make that total (the "inertia") as small as possible. Each round: assign points to the nearest centre, then slide each centre to the middle of its points.</span>
+        </div>
+        <p><strong>Finance use:</strong> customer and portfolio segmentation, where you want a fixed number of clean buckets to act on. <em>Explained like you're in 6th class:</em> drop k flags on a playground, send every kid to the nearest flag, move each flag to the middle of its group, repeat until the flags stop moving.</p>
+
+        <h3>2 · Hierarchical — build a family tree</h3>
+        <p>Start with every row as its own tiny cluster. Repeatedly glue the two closest clusters together, and keep going until everything is one big cluster. The record of merges is a <strong>dendrogram</strong> — a tree you can "cut" at any height to get however many clusters you want. You don't pre-commit to k, and you get the nested structure for free; the cost is speed on large data.</p>
+        <div class="formula">
+          <span class="var">d</span>(A, B) <span class="op">=</span> <span class="op">average</span> distance between points of A and points of B
+          <span class="cmt">"Linkage" is just how you measure the gap between two groups: the average pair distance (average linkage), the farthest pair (complete), or the closest pair (single). Merge the two groups with the smallest gap, then recompute.</span>
+        </div>
+        <p><strong>Finance use:</strong> merchant/branch tiering and asset grouping, where the <em>nesting</em> matters — sub-segments inside segments. <em>6th-class version:</em> keep holding hands with your nearest neighbour until the whole class is one chain; the order you joined up tells you who's most alike.</p>
+
+        <h3>3 · DBSCAN — follow the density, flag the loners</h3>
+        <p>DBSCAN doesn't need k. It grows a cluster wherever points are packed densely (at least <em>minPts</em> neighbours within radius <em>eps</em>), walks outward through the dense region, and stops at the edges. Anything not reachable from a dense core is labelled <strong>noise</strong>. That noise label is the feature: it finds the outliers you didn't know to look for.</p>
+        <div class="formula">
+          point is <span class="var">core</span> if &nbsp; |{ p : ‖p − point‖ ≤ <span class="var">eps</span> }| ≥ <span class="var">minPts</span>
+          <span class="cmt">A point is a "core" if it has at least minPts neighbours inside radius eps. Clusters are chains of overlapping cores; points reachable from a core join it; everything else is noise.</span>
+        </div>
+        <p><strong>Finance use:</strong> anomaly and novel-fraud detection, where the interesting rows are precisely the ones that fit no group. <em>6th-class version:</em> a group is any crowd standing close together; anyone standing alone in a field is not in a group — they're the odd one out worth a second look.</p>
+
+        <div class="callout">
+          <div class="lbl">Which clustering, when</div>
+          <p><b>K-Means</b> when you want a fixed number of tidy buckets and clusters are blob-like. <b>Hierarchical</b> when you want to <i>see</i> the nesting and choose k after looking. <b>DBSCAN</b> when clusters are odd-shaped or, more often, when the point is to catch the outliers.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">III.</span></div>
+      <div>
+        <h2 class="module-title">Dimensionality reduction — fewer columns, same story</h2>
+        <p class="module-lede">When columns are highly correlated, most of them are saying the same thing twice. Dimensionality reduction rewrites the data in a smaller set of columns that keep the meaning.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">A NOTE</span>
+        PCA ignores labels; LDA uses them. That single difference is why PCA is unsupervised and LDA sits on the border.
+      </aside>
+      <div class="prose">
+
+        <h3>4 · PCA — the directions of greatest variance</h3>
+        <p>Imagine eight correlated return series. They mostly move together — when the market rises, most rise. PCA finds the single direction along which the data varies the most (the first <strong>principal component</strong>), then the next-most-varying direction at right angles to it, and so on. Keep the first two or three and you've compressed eight columns into a handful that still capture most of the movement.</p>
+        <div class="formula">
+          <span class="var">C</span> <span class="op">=</span> covariance(X) &nbsp;→&nbsp; eigenvectors of <span class="var">C</span> = the new axes
+          <span class="cmt">Build the covariance matrix (how every pair of features moves together). Its eigenvectors point along the directions of greatest spread; each eigenvalue says how much variance lies along its direction. Keep the biggest few.</span>
+        </div>
+        <p><strong>Finance use:</strong> risk factor models, yield-curve compression (level/slope/curvature fall straight out of PCA), and de-noising before another model. <em>6th-class version:</em> if everyone's height and arm-span rise together, you barely need both — one "size" number carries almost the whole story. PCA finds that "size" number for you.</p>
+
+        <h3>5 · LDA — the projection that separates known groups</h3>
+        <p>Linear Discriminant Analysis has the same output as PCA — a few new axes — but a different goal. Where PCA maximises overall spread ignoring any labels, LDA <em>uses</em> group labels and finds the projection that pushes the group means as far apart as possible while keeping each group tight. It's the one technique in this unit that needs a label, which is why it's the bridge from unsupervised to supervised.</p>
+        <div class="formula">
+          <span class="op">maximise</span> &nbsp; between-group spread ÷ within-group spread
+          <span class="cmt">Find the direction w that makes the group averages far apart (big numerator) while each group stays compact along it (small denominator). Solve it as the top eigenvectors of Sᵥᵥ⁻¹Sᵦ — within-group scatter inverted, times between-group scatter.</span>
+        </div>
+        <p><strong>Finance use:</strong> visualising and sharpening pre-defined segments — risk bands, rating classes — and as a feature-compression step ahead of a classifier. <em>6th-class version:</em> PCA finds the angle that best shows how spread out the whole class is; LDA finds the angle that best shows the boys standing apart from the girls.</p>
+
+        <div class="callout finance">
+          <div class="lbl">PCA vs LDA in one line</div>
+          <p>PCA asks "which directions vary most?" (no labels). LDA asks "which directions best separate <i>these known groups</i>?" (labels required). Same shape of answer, opposite question.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">IV.</span></div>
+      <div>
+        <h2 class="module-title">Association rules — what goes with what</h2>
+        <p class="module-lede">The last family isn't about geometry at all. It's about co-occurrence: which things show up together often enough, and reliably enough, to act on.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">A NOTE</span>
+        Confidence can lie. A rule can be 90% confident and still worthless if the outcome is 90% common anyway. Lift is the honest metric.
+      </aside>
+      <div class="prose">
+
+        <h3>6 · Apriori — frequent itemsets, then rules</h3>
+        <p>Each customer holds a <em>basket</em> of products. Apriori first finds the itemsets that appear in at least a minimum fraction of baskets (their <strong>support</strong>), using a clever shortcut: if an item is rare, any pair containing it is at least as rare, so you never bother counting it. From the frequent sets it forms rules like "has a credit card → also has insurance," and scores each one.</p>
+        <div class="formula">
+          <span class="var">support</span> = P(A and B) &nbsp;·&nbsp; <span class="var">confidence</span> = P(B | A) &nbsp;·&nbsp; <span class="var">lift</span> = confidence ÷ P(B)
+          <span class="cmt">Support = how often the combo shows up. Confidence = of the people with A, how many also have B. Lift = how much more likely B is when A is present, versus B's baseline — lift &gt; 1 means a real pull, lift = 1 means coincidence.</span>
+        </div>
+        <p><strong>Finance use:</strong> next-best-offer and cross-sell engines, product-bundling, and spotting which services anchor a relationship. <em>6th-class version:</em> if almost everyone who buys bread also buys butter — and butter isn't something everyone buys anyway — then bread genuinely "pulls" butter. Put them near each other.</p>
+
+        <div class="callout">
+          <div class="lbl">Reading a rule</div>
+          <p>High <b>support</b> = common enough to matter. High <b>confidence</b> = reliable when the trigger is present. High <b>lift</b> = genuinely surprising, not just two popular things co-occurring. A great cross-sell rule scores well on all three.</p>
+        </div>
+
+        <h3>Now go to the lab</h3>
+        <p>The lab lets you run all six live. Pick a dataset, choose an algorithm, set its one or two knobs, and hit run. Read the internal metrics the way the decision-maker would — there's no answer key, only the structure the data gives up.</p>
+      </div>
+    </div>
+  </article>
+
+</section>
+<!-- ============ END NOTES ============ -->
+
+<!-- =================================================================== -->
+<!-- ============================ LAB ================================== -->
+<!-- =================================================================== -->
+<section class="view" id="sec-lab">
+  <div class="lab-wrap">
+    <div class="lab-head">
+      <div class="module-no">LAB<span class="roman">•</span></div>
+      <div>
+        <h2 class="lab-title">Run an unsupervised algorithm</h2>
+        <p class="lab-sub">Pick a dataset, choose an algorithm, set its knobs, and run it live. Switching algorithm auto-selects a fitting dataset — but you can mix and match. Every result is scored by internal metrics only.</p>
+      </div>
+      <div class="lab-controls">
+        <button class="btn ghost" data-upreview>📊 Preview datasets</button>
+        <button class="btn ghost" data-udownload>⬇ Download data (Excel)</button>
+      </div>
+    </div>
+
+    <div class="ulab">
+      <div class="ulab-controls">
+        <div class="ulab-field">
+          <label>Algorithm</label>
+          <select id="uds-algo">
+            <option value="kmeans">K-Means (clustering)</option>
+            <option value="hier">Hierarchical (clustering)</option>
+            <option value="dbscan">DBSCAN (clustering / anomaly)</option>
+            <option value="pca">PCA (dimensionality reduction)</option>
+            <option value="lda">LDA (grouped projection)</option>
+            <option value="apriori">Apriori (association rules)</option>
+          </select>
+        </div>
+        <div class="ulab-field">
+          <label>Dataset</label>
+          <select id="uds-dataset">
+            <option value="segments">Retail · customer segments</option>
+            <option value="merchants">Acquiring · merchant profiles</option>
+            <option value="anomalies">Payments · transaction stream</option>
+            <option value="returns">Markets · asset returns</option>
+            <option value="creditband">Credit · risk-band separation</option>
+            <option value="basket">Cross-sell · product baskets</option>
+          </select>
+        </div>
+        <div class="ulab-field">
+          <label>Preprocess</label>
+          <select id="uds-scale">
+            <option value="standardize">standardize (z-score)</option>
+            <option value="minmax">min–max</option>
+            <option value="none">none</option>
+          </select>
+        </div>
+        <div class="ulab-field">
+          <label>Parameters</label>
+          <div id="uds-params"></div>
+        </div>
+        <div class="ulab-actions">
+          <button class="btn ghost" id="uds-reset">Reset</button>
+          <button class="btn copper" id="uds-run">▷ Run</button>
+        </div>
+      </div>
+
+      <div class="ulab-out">
+        <div class="uout-side">
+          <div class="uout-metrics" id="uds-metrics"></div>
+          <div class="ulog" id="uds-log"></div>
+          <div class="uhint">Tip: run the same dataset with two algorithms and compare the silhouette — that comparison is the whole point.</div>
+        </div>
+        <div class="uout-main">
+          <div class="uchart-wrap"><canvas id="uds-chart"></canvas></div>
+          <div class="uchart-wrap" id="uds-chart2-wrap" style="display:none"><canvas id="uds-chart2"></canvas></div>
+          <div id="uds-rules"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- ========================== RECIPES ================================ -->
+<!-- =================================================================== -->
+<section class="view" id="sec-recipes">
+  <div class="lab-wrap">
+    <div class="lab-head">
+      <div class="module-no">USE<span class="roman">✳</span></div>
+      <div>
+        <h2 class="lab-title">Pipeline recipes — one business story per algorithm</h2>
+        <p class="lab-sub">Each recipe names the company and the decision-maker, the unlabelled data, the label-free way to read the result, and the decision it drives. Meet the person before you meet the maths.</p>
+      </div>
+    </div>
+
+    <details class="lab-guide" open>
+      <summary>
+        <span class="guide-icon">📖</span>
+        <span class="guide-title">Six recipes — who needs this, and why</span>
+        <span class="guide-sub">read alongside the lab</span>
+        <span class="guide-toggle">▾</span>
+      </summary>
+      <div class="guide-body">
+        <div class="guide-panel active">
+
+          <div class="recipe">
+            <span class="ds-name">Customer segments — K-Means<span class="algo-badge">clustering</span></span>
+            <span class="pipe">Retail customer segments → standardize → K-Means (k=3) → silhouette / inertia</span>
+            <div class="why"><b>Why:</b> there is no "segment" column — the groups have to be discovered. Standardize first (income in thousands would otherwise dwarf a 1–10 digital score). K-Means gives a fixed number of clean buckets marketing can actually staff campaigns against; read the silhouette to judge whether three is the right number, then try k=4.</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--teal)">MI</div>
+                <div class="pmeta"><div class="pname">Meera Iyer</div><div class="prole">Head of Retail Marketing · Meridian Retail Bank</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Owns the campaign budget and needs a small number of segments she can name, staff, and message differently.</p>
+              <p class="brow"><b>Scenario:</b> Meridian wants to move from one-size-fits-all mailers to targeted journeys, but no one has ever defined the customer segments.</p>
+              <p class="brow"><b>The data:</b> 270 customers — age, income, average balance, monthly transactions, a digital-engagement score, tenure. No labels.</p>
+              <p class="brow"><b>Evaluate:</b> <span class="metric">silhouette</span> for separation and <span class="metric">inertia</span>’s elbow to sanity-check the number of segments.</p>
+              <p class="brow"><b>Decision:</b> Each cluster becomes a named journey — “young-digital,” “affluent-dormant,” “mass-market” — with its own offer and channel; a poor silhouette sends her back to try a different k before spending a rupee.</p>
+            </div>
+          </div>
+
+          <div class="recipe">
+            <span class="ds-name">Merchant tiers — Hierarchical<span class="algo-badge">clustering</span></span>
+            <span class="pipe">Merchant profiles → standardize → Hierarchical (k=3, average linkage) → silhouette</span>
+            <div class="why"><b>Why:</b> the acquirer wants to <em>see</em> the nesting — big-ticket in-store vs e-commerce vs high-refund — not commit to k up front. Hierarchical builds the whole tree; you cut it where the business logic sits. Average linkage resists being dragged around by a single odd merchant the way single linkage would.</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--copper)">RD</div>
+                <div class="pmeta"><div class="pname">Rohan Das</div><div class="prole">Network Strategy Lead · Vantage Acquiring</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Sets merchant pricing and monitoring tiers and wants the tiers to fall out of behaviour, not out of a sales rep’s hunch.</p>
+              <p class="brow"><b>Scenario:</b> Vantage prices every merchant the same today; Rohan suspects there are natural tiers that deserve different rates and fraud scrutiny.</p>
+              <p class="brow"><b>The data:</b> 210 merchants — average ticket, monthly volume, chargeback rate, online share, refund rate. No pre-set tiers.</p>
+              <p class="brow"><b>Evaluate:</b> <span class="metric">silhouette</span> at the chosen cut, plus a look at where the tree merges to justify the number of tiers.</p>
+              <p class="brow"><b>Decision:</b> Each branch becomes a pricing-and-monitoring tier; the high-chargeback/high-refund cluster gets tighter limits, the stable big-ticket cluster earns a better rate.</p>
+            </div>
+          </div>
+
+          <div class="recipe">
+            <span class="ds-name">Transaction anomalies — DBSCAN<span class="algo-badge">anomaly</span></span>
+            <span class="pipe">Transaction stream → standardize → DBSCAN (eps=1.2, minPts=5) → noise count / silhouette</span>
+            <div class="why"><b>Why:</b> the useful rows are the ones that belong to no dense group. DBSCAN needs no k and hands you a <em>noise</em> label for free — those are the review candidates. Scaling is essential because it works in distance; tune eps down to flag more, up to flag fewer. Unlike a supervised model it needs no fraud labels to point at the strange.</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--red)">FS</div>
+                <div class="pmeta"><div class="pname">Farah Sheikh</div><div class="prole">Financial-Crime Analyst · Crescent Bank</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Hunts patterns no one has labelled yet and needs a screen that flags “weird” before anyone can name the typology.</p>
+              <p class="brow"><b>Scenario:</b> Crescent’s supervised fraud model only catches known patterns; Farah wants a label-free net for the novel ones.</p>
+              <p class="brow"><b>The data:</b> 260 transactions — log amount, hour, 5-minute velocity, foreign ratio, failed ratio. No fraud labels.</p>
+              <p class="brow"><b>Evaluate:</b> the <span class="metric">noise count</span> (how many get flagged) and <span class="metric">silhouette</span> of the dense clusters, tuned via eps.</p>
+              <p class="brow"><b>Decision:</b> Noise-labelled transactions go to a human queue; eps becomes the dial that trades catch-rate against how many ordinary-but-unusual transactions she’s willing to review.</p>
+            </div>
+          </div>
+
+          <div class="recipe">
+            <span class="ds-name">Return factors — PCA<span class="algo-badge">dim. reduction</span></span>
+            <span class="pipe">Asset daily returns → standardize → PCA (2 components) → explained variance / scree</span>
+            <div class="why"><b>Why:</b> eight instruments, but they mostly move on one or two shared drivers. PCA rewrites them as factors; the scree plot shows how few you actually need. Standardize so a naturally volatile series doesn’t hijack the first component. The first component here is essentially “the market.”</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--blue)">AK</div>
+                <div class="pmeta"><div class="pname">Ananya Kapoor</div><div class="prole">Portfolio Risk Manager · Northwind Asset Mgmt</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Reports portfolio risk and wants to explain it with a couple of intuitive factors instead of eight tangled correlations.</p>
+              <p class="brow"><b>Scenario:</b> Northwind’s risk report lists eight correlated exposures that rise and fall together; the board wants the drivers, not the noise.</p>
+              <p class="brow"><b>The data:</b> 250 trading days × 8 instruments’ daily returns. No labels — just co-movement.</p>
+              <p class="brow"><b>Evaluate:</b> <span class="metric">explained variance</span> per component and the cumulative share kept by the first two (the scree elbow).</p>
+              <p class="brow"><b>Decision:</b> Risk is re-expressed as exposure to a market factor and a sector factor; hedging and limits are set against those, and the compressed factors feed cleaner downstream models.</p>
+            </div>
+          </div>
+
+          <div class="recipe">
+            <span class="ds-name">Risk-band separation — LDA<span class="algo-badge">dim. reduction</span></span>
+            <span class="pipe">Credit risk-band data → standardize → LDA (by risk_band) → between/within share</span>
+            <div class="why"><b>Why:</b> the bands A/B/C already exist — LDA finds the 2-D view that separates them most cleanly, unlike PCA which would ignore the bands. It’s the one recipe here that uses a label, which is exactly why it bridges to supervised learning. Clean separation means the features already carry the band signal.</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--violet)">KM</div>
+                <div class="pmeta"><div class="pname">Karan Malhotra</div><div class="prole">Credit Analytics Lead · Arca Lending</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Defends the internal risk bands to auditors and wants a picture that shows the bands are genuinely distinct.</p>
+              <p class="brow"><b>Scenario:</b> Arca’s A/B/C bands were set years ago; Karan needs to show they still separate on today’s borrower features — and find where they blur.</p>
+              <p class="brow"><b>The data:</b> 240 borrowers — DTI, utilization, delinquencies, income, credit age — each tagged with its risk band.</p>
+              <p class="brow"><b>Evaluate:</b> the <span class="metric">between÷within share</span> along LD1–LD2 and how cleanly the coloured bands separate on the projection.</p>
+              <p class="brow"><b>Decision:</b> Sharp separation validates the bands and the features behind them; overlapping bands flag where the cut-offs need re-drawing or a new feature is needed.</p>
+            </div>
+          </div>
+
+          <div class="recipe">
+            <span class="ds-name">Cross-sell baskets — Apriori<span class="algo-badge">association</span></span>
+            <span class="pipe">Product baskets → (no scaling) → Apriori (support≥15%, confidence≥50%) → rules by lift</span>
+            <div class="why"><b>Why:</b> categorical holdings, not numbers — no scaling, no distance. Apriori finds product combinations common enough to matter and reliable enough to act on, then ranks them by <em>lift</em> so you don’t mistake two individually-popular products for a real pattern. The highest-lift rule is the strongest next-best-offer.</div>
+            <div class="bizcase">
+              <span class="biz-label">Business use case</span>
+              <div class="persona"><div class="pface" style="background:var(--green)">PB</div>
+                <div class="pmeta"><div class="pname">Priya Bhatt</div><div class="prole">Cross-Sell Product Manager · Meridian Retail Bank</div></div></div>
+              <p class="brow persona-line"><b>The person:</b> Runs the next-best-offer engine and needs evidence for which product to pitch to whom, not a gut feeling.</p>
+              <p class="brow"><b>Scenario:</b> Meridian’s relationship managers pitch products at random; Priya wants data-backed pairings to raise products-per-customer.</p>
+              <p class="brow"><b>The data:</b> 320 customer baskets across seven products (savings, card, loan, insurance, mutual fund, demat, home loan).</p>
+              <p class="brow"><b>Evaluate:</b> <span class="metric">support</span>, <span class="metric">confidence</span> and above all <span class="metric">lift</span> — a rule needs all three to be worth wiring into the engine.</p>
+              <p class="brow"><b>Decision:</b> High-lift rules become automated offers — mutual-fund holders get a demat nudge, card holders an insurance cross-sell — and low-lift coincidences are ignored.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ DATASET MODAL ============ -->
+<div class="modal-backdrop" id="uds-modal" role="dialog" aria-modal="true" aria-labelledby="uds-modal-title">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="mono-sub">Unsupervised data · raw preview</span>
+        <span id="uds-modal-title">Unlabelled datasets</span>
+      </div>
+      <div class="modal-head-actions">
+        <button class="btn ghost" id="uds-modal-dl">⬇ Download all (Excel)</button>
+        <button class="modal-close" id="uds-modal-close" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="ds-tabs" id="uds-tabs"></div>
+      <div id="uds-panels"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Companion unit for TM2065 · Application of Machine Learning and Artificial Intelligence in Finance · unsupervised learning · K-Means, hierarchical &amp; DBSCAN clustering, PCA, LDA, and Apriori association-rule mining — each implemented from scratch and run live in your browser on synthetic, unlabelled data. Company names and personas are fictitious. Open in a modern browser.
+</footer>
+<script>
+// RNG helpers
+function mulberry32(seed){return function(){let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+/* =====================================================================
+   UNSUPERVISED ALGORITHMS — implemented from scratch
+   All operate on X = array of numeric rows (array of arrays).
+   ===================================================================== */
+
+/* ---- linear-algebra helpers ---- */
+function colMeans(X){const n=X.length,d=X[0].length,m=Array(d).fill(0);
+  for(const r of X)for(let j=0;j<d;j++)m[j]+=r[j];return m.map(v=>v/n);}
+function colStds(X,m){const n=X.length,d=X[0].length,s=Array(d).fill(0);
+  for(const r of X)for(let j=0;j<d;j++)s[j]+=(r[j]-m[j])**2;
+  return s.map(v=>Math.sqrt(v/n)||1);}
+function standardize(X){const m=colMeans(X),s=colStds(X,m);
+  return X.map(r=>r.map((v,j)=>(v-m[j])/s[j]));}
+function euclid(a,b){let s=0;for(let i=0;i<a.length;i++)s+=(a[i]-b[i])**2;return Math.sqrt(s);}
+
+/* covariance matrix (d×d) of centered data */
+function covMatrix(X){const n=X.length,d=X[0].length,m=colMeans(X);
+  const C=Array.from({length:d},()=>Array(d).fill(0));
+  for(const r of X){for(let i=0;i<d;i++){const di=r[i]-m[i];
+    for(let j=0;j<d;j++)C[i][j]+=di*(r[j]-m[j]);}}
+  for(let i=0;i<d;i++)for(let j=0;j<d;j++)C[i][j]/=(n-1||1);
+  return C;}
+
+/* Jacobi eigenvalue algorithm for a symmetric matrix.
+   Returns {values:[...], vectors:[[...],...]} with vectors as COLUMNS. */
+function jacobiEigen(Ain){
+  const n=Ain.length;const A=Ain.map(r=>r.slice());
+  const V=Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));
+  for(let sweep=0;sweep<100;sweep++){
+    // largest off-diagonal
+    let p=0,q=1,off=0;
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){if(Math.abs(A[i][j])>off){off=Math.abs(A[i][j]);p=i;q=j;}}
+    if(off<1e-10)break;
+    const app=A[p][p],aqq=A[q][q],apq=A[p][q];
+    const phi=0.5*Math.atan2(2*apq,aqq-app);
+    const c=Math.cos(phi),s=Math.sin(phi);
+    for(let i=0;i<n;i++){const aip=A[i][p],aiq=A[i][q];
+      A[i][p]=c*aip-s*aiq;A[i][q]=s*aip+c*aiq;}
+    for(let i=0;i<n;i++){const api=A[p][i],aqi=A[q][i];
+      A[p][i]=c*api-s*aqi;A[q][i]=s*api+c*aqi;}
+    for(let i=0;i<n;i++){const vip=V[i][p],viq=V[i][q];
+      V[i][p]=c*vip-s*viq;V[i][q]=s*vip+c*viq;}
+  }
+  const values=A.map((r,i)=>r[i]);
+  // sort descending
+  const idx=values.map((v,i)=>i).sort((a,b)=>values[b]-values[a]);
+  return {values:idx.map(i=>values[i]),
+          vectors:idx.map(i=>V.map(row=>row[i]))}; // vectors[k] = k-th eigenvector
+}
+
+/* ---- PCA ---- */
+function pca(X,k=2){
+  const m=colMeans(X);const Xc=X.map(r=>r.map((v,j)=>v-m[j]));
+  const C=covMatrix(X);const {values,vectors}=jacobiEigen(C);
+  const total=values.reduce((a,b)=>a+Math.max(0,b),0)||1;
+  const explained=values.map(v=>Math.max(0,v)/total);
+  const comps=vectors.slice(0,k);
+  const proj=Xc.map(r=>comps.map(vec=>r.reduce((s,v,j)=>s+v*vec[j],0)));
+  return {proj, explained, values, components:comps, mean:m};
+}
+
+/* ---- K-Means (Lloyd) ---- */
+function kmeans(X,k=3,iters=100,seed=42){
+  let s=seed;const rnd=()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};
+  const n=X.length,d=X[0].length;
+  // k-means++ init
+  const cent=[X[Math.floor(rnd()*n)].slice()];
+  while(cent.length<k){
+    const dist=X.map(r=>Math.min(...cent.map(c=>euclid(r,c)**2)));
+    const tot=dist.reduce((a,b)=>a+b,0)||1;let t=rnd()*tot,i=0;
+    while(t>0&&i<n){t-=dist[i];i++;}cent.push(X[Math.max(0,i-1)].slice());
+  }
+  let assign=Array(n).fill(0);
+  for(let it=0;it<iters;it++){
+    let changed=false;
+    for(let i=0;i<n;i++){let best=0,bd=Infinity;
+      for(let c=0;c<k;c++){const dd=euclid(X[i],cent[c]);if(dd<bd){bd=dd;best=c;}}
+      if(assign[i]!==best){assign[i]=best;changed=true;}}
+    const sum=Array.from({length:k},()=>Array(d).fill(0)),cnt=Array(k).fill(0);
+    for(let i=0;i<n;i++){cnt[assign[i]]++;for(let j=0;j<d;j++)sum[assign[i]][j]+=X[i][j];}
+    for(let c=0;c<k;c++)if(cnt[c])for(let j=0;j<d;j++)cent[c][j]=sum[c][j]/cnt[c];
+    if(!changed&&it>0)break;
+  }
+  let inertia=0;for(let i=0;i<n;i++)inertia+=euclid(X[i],cent[assign[i]])**2;
+  return {assign,centroids:cent,inertia,k};
+}
+
+/* ---- Agglomerative hierarchical (average linkage), cut at k ---- */
+function hierarchical(X,k=3,linkage='average'){
+  const n=X.length;
+  let clusters=X.map((_,i)=>[i]);
+  // pairwise point distances
+  const D=Array.from({length:n},()=>Array(n).fill(0));
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const dd=euclid(X[i],X[j]);D[i][j]=D[j][i]=dd;}
+  const cdist=(a,b)=>{let vals=[];for(const i of a)for(const j of b)vals.push(D[i][j]);
+    if(linkage==='complete')return Math.max(...vals);
+    if(linkage==='single')return Math.min(...vals);
+    return vals.reduce((s,v)=>s+v,0)/vals.length; // average
+  };
+  const merges=[];
+  while(clusters.length>k){
+    let bi=0,bj=1,bd=Infinity;
+    for(let i=0;i<clusters.length;i++)for(let j=i+1;j<clusters.length;j++){
+      const dd=cdist(clusters[i],clusters[j]);if(dd<bd){bd=dd;bi=i;bj=j;}}
+    merges.push(bd);
+    clusters[bi]=clusters[bi].concat(clusters[bj]);clusters.splice(bj,1);
+  }
+  const assign=Array(n).fill(0);
+  clusters.forEach((c,ci)=>c.forEach(i=>assign[i]=ci));
+  return {assign,k:clusters.length,merges};
+}
+
+/* ---- DBSCAN ---- */
+function dbscan(X,eps=1.0,minPts=5){
+  const n=X.length,assign=Array(n).fill(-2);// -2 unvisited, -1 noise, >=0 cluster
+  const neigh=i=>{const out=[];for(let j=0;j<n;j++)if(euclid(X[i],X[j])<=eps)out.push(j);return out;};
+  let cid=-1;
+  for(let i=0;i<n;i++){
+    if(assign[i]!==-2)continue;
+    const N=neigh(i);
+    if(N.length<minPts){assign[i]=-1;continue;}
+    cid++;assign[i]=cid;
+    const queue=N.filter(j=>j!==i);
+    for(let qi=0;qi<queue.length;qi++){const j=queue[qi];
+      if(assign[j]===-1)assign[j]=cid;
+      if(assign[j]!==-2)continue;
+      assign[j]=cid;const Nj=neigh(j);
+      if(Nj.length>=minPts)for(const x of Nj)if(!queue.includes(x))queue.push(x);
+    }
+  }
+  const noise=assign.filter(a=>a===-1).length;
+  const nClusters=cid+1;
+  return {assign,nClusters,noise};
+}
+
+/* ---- Silhouette (mean over points); clusters labelled >=0; ignore noise -1 ---- */
+function silhouette(X,assign){
+  const idx=assign.map((a,i)=>({a,i})).filter(o=>o.a>=0);
+  if(new Set(idx.map(o=>o.a)).size<2)return 0;
+  const byC={};idx.forEach(o=>{(byC[o.a]=byC[o.a]||[]).push(o.i);});
+  let tot=0;
+  for(const {a,i} of idx){
+    const same=byC[a];
+    const ai=same.length>1?same.filter(j=>j!==i).reduce((s,j)=>s+euclid(X[i],X[j]),0)/(same.length-1):0;
+    let bi=Infinity;
+    for(const c in byC){if(+c===a)continue;const arr=byC[c];
+      const d=arr.reduce((s,j)=>s+euclid(X[i],X[j]),0)/arr.length;if(d<bi)bi=d;}
+    const sVal=(bi-ai)/Math.max(ai,bi||1)||0;tot+=sVal;
+  }
+  return tot/idx.length;
+}
+
+/* ---- Davies–Bouldin index (lower is better) ---- */
+function daviesBouldin(X,assign,centroids){
+  const ks=[...new Set(assign.filter(a=>a>=0))].sort((a,b)=>a-b);
+  if(ks.length<2)return 0;
+  const centroidFor=k=>{const pts=X.filter((_,i)=>assign[i]===k);
+    const d=X[0].length,m=Array(d).fill(0);pts.forEach(p=>p.forEach((v,j)=>m[j]+=v));return m.map(v=>v/(pts.length||1));};
+  // index by actual cluster id so a provided centroid array stays aligned
+  const cent=ks.map(k=>(centroids&&centroids[k])?centroids[k]:centroidFor(k));
+  const S=ks.map((k,ci)=>{const pts=X.filter((_,i)=>assign[i]===k);
+    return pts.reduce((s,p)=>s+euclid(p,cent[ci]),0)/(pts.length||1);});
+  let db=0;
+  for(let i=0;i<ks.length;i++){let mx=0;
+    for(let j=0;j<ks.length;j++){if(i===j)continue;
+      const r=(S[i]+S[j])/(euclid(cent[i],cent[j])||1e-9);if(r>mx)mx=r;}
+    db+=mx;}
+  return db/ks.length;
+}
+
+/* ---- LDA (Fisher) — needs group labels y (array of category strings/ints).
+   Returns 2D projection onto top discriminants of Sw^-1 Sb. ---- */
+function lda(X,y,k=2){
+  const n=X.length,d=X[0].length;
+  const groups={};y.forEach((g,i)=>{(groups[g]=groups[g]||[]).push(i);});
+  const overall=colMeans(X);
+  const Sw=Array.from({length:d},()=>Array(d).fill(0));
+  const Sb=Array.from({length:d},()=>Array(d).fill(0));
+  for(const g in groups){
+    const ids=groups[g],Xg=ids.map(i=>X[i]);const mg=colMeans(Xg);
+    for(const r of Xg){for(let i=0;i<d;i++){const di=r[i]-mg[i];
+      for(let j=0;j<d;j++)Sw[i][j]+=di*(r[j]-mg[j]);}}
+    const diff=mg.map((v,i)=>v-overall[i]);const nk=ids.length;
+    for(let i=0;i<d;i++)for(let j=0;j<d;j++)Sb[i][j]+=nk*diff[i]*diff[j];
+  }
+  // regularize Sw then invert
+  for(let i=0;i<d;i++)Sw[i][i]+=1e-3;
+  const SwInv=invertMat(Sw);
+  const M=matmul(SwInv,Sb); // not symmetric in general
+  // symmetrize for Jacobi (M ~ Sw^-1 Sb; use (M+Mᵀ)/2 as a robust approx for teaching)
+  const Msym=M.map((r,i)=>r.map((v,j)=>(v+M[j][i])/2));
+  const {values,vectors}=jacobiEigen(Msym);
+  const total=values.reduce((a,b)=>a+Math.max(0,b),0)||1;
+  const explained=values.map(v=>Math.max(0,v)/total);
+  const comps=vectors.slice(0,k);
+  const proj=X.map(r=>comps.map(vec=>r.reduce((s,v,j)=>s+v*vec[j],0)));
+  return {proj,explained,groups:Object.keys(groups)};
+}
+function invertMat(A){const n=A.length;const M=A.map((r,i)=>[...r,...Array(n).fill(0).map((_,j)=>i===j?1:0)]);
+  for(let col=0;col<n;col++){let piv=col;for(let r=col+1;r<n;r++)if(Math.abs(M[r][col])>Math.abs(M[piv][col]))piv=r;
+    [M[col],M[piv]]=[M[piv],M[col]];const pv=M[col][col]||1e-9;
+    for(let j=0;j<2*n;j++)M[col][j]/=pv;
+    for(let r=0;r<n;r++){if(r===col)continue;const f=M[r][col];for(let j=0;j<2*n;j++)M[r][j]-=f*M[col][j];}}
+  return M.map(r=>r.slice(n));}
+function matmul(A,B){const r=A.length,c=B[0].length,k=B.length;
+  const C=Array.from({length:r},()=>Array(c).fill(0));
+  for(let i=0;i<r;i++)for(let j=0;j<c;j++){let s=0;for(let z=0;z<k;z++)s+=A[i][z]*B[z][j];C[i][j]=s;}return C;}
+
+/* ---- Apriori association rules ----
+   transactions: array of arrays of item strings.
+   Returns {itemsets:[{items,support}], rules:[{ant,con,support,confidence,lift}]} */
+function apriori(transactions,minSup=0.15,minConf=0.5){
+  const n=transactions.length;
+  const tsets=transactions.map(t=>new Set(t));
+  const count=cand=>{let c=0;for(const t of tsets){let all=true;for(const it of cand)if(!t.has(it)){all=false;break;}if(all)c++;}return c;};
+  // L1
+  const items=[...new Set(transactions.flat())];
+  let freq=[];
+  let L=items.map(it=>[it]).filter(c=>count(c)/n>=minSup);
+  const allFreq=[];
+  L.forEach(c=>allFreq.push({items:c,support:count(c)/n}));
+  let kk=2;
+  while(L.length&&kk<=4){
+    // generate candidates by joining
+    const cand=[];
+    for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){
+      const a=L[i],b=L[j];
+      if(a.slice(0,kk-2).join(',')===b.slice(0,kk-2).join(',')){
+        const merged=[...new Set([...a,...b])].sort();
+        if(merged.length===kk&&!cand.some(c=>c.join(',')===merged.join(',')))cand.push(merged);
+      }
+    }
+    const newL=cand.filter(c=>count(c)/n>=minSup);
+    newL.forEach(c=>allFreq.push({items:c,support:count(c)/n}));
+    L=newL;kk++;
+  }
+  // rules from itemsets of size>=2
+  const rules=[];
+  const supOf=set=>count(set)/n;
+  for(const fs of allFreq){
+    if(fs.items.length<2)continue;
+    const items2=fs.items;
+    // all non-empty proper subsets as antecedents (limit to keep it light)
+    const subsets=nonEmptySubsets(items2).filter(s=>s.length<items2.length);
+    for(const ant of subsets){
+      const con=items2.filter(x=>!ant.includes(x));
+      const conf=fs.support/supOf(ant);
+      if(conf>=minConf){
+        const lift=conf/supOf(con);
+        rules.push({ant,con,support:fs.support,confidence:conf,lift});
+      }
+    }
+  }
+  rules.sort((a,b)=>b.lift-a.lift);
+  allFreq.sort((a,b)=>b.support-a.support);
+  return {itemsets:allFreq,rules};
+}
+function nonEmptySubsets(arr){const out=[];const n=arr.length;
+  for(let mask=1;mask<(1<<n);mask++){const s=[];for(let i=0;i<n;i++)if(mask&(1<<i))s.push(arr[i]);out.push(s);}return out;}
+
+/* =====================================================================
+   UNSUPERVISED DATASETS (unlabelled finance data)
+   ===================================================================== */
+function rowsMatrix(rows,features){return rows.map(r=>features.map(f=>r[f]));}
+
+const DATASETS_U = {
+  segments:{
+    label:'Retail banking · customer segments',
+    desc:'Unlabelled retail customers. No "segment" column exists — the algorithm must discover the groups from behaviour alone.',
+    kind:'cluster', algoHint:'kmeans',
+    features:['age','income_k','avg_balance_k','txns_month','digital_score','tenure_yrs'],
+    generate(){
+      const rng=mulberry32(11),rows=[];
+      const blobs=[
+        {age:26,inc:6,bal:0.4,tx:38,dig:8.5,ten:2},   // young digital
+        {age:52,inc:22,bal:9,tx:9,dig:3.5,ten:18},    // affluent savers
+        {age:38,inc:11,bal:2,tx:18,dig:6,ten:8}       // mass market
+      ];
+      for(let i=0;i<270;i++){
+        const b=blobs[i%3];
+        rows.push({
+          age:Math.round(Math.max(18,b.age+gauss(rng)*6)),
+          income_k:+Math.max(2,b.inc+gauss(rng)*3).toFixed(1),
+          avg_balance_k:+Math.max(0.05,b.bal+gauss(rng)*Math.max(0.4,b.bal*0.4)).toFixed(2),
+          txns_month:Math.round(Math.max(1,b.tx+gauss(rng)*6)),
+          digital_score:+Math.max(1,Math.min(10,b.dig+gauss(rng)*1.3)).toFixed(1),
+          tenure_yrs:Math.round(Math.max(0,b.ten+gauss(rng)*3))
+        });
+      }
+      return rows;
+    }
+  },
+  merchants:{
+    label:'Acquiring · merchant profiles',
+    desc:'Merchants a payments acquirer serves. Group them by behaviour to tailor pricing and monitoring — no pre-set merchant tiers.',
+    kind:'cluster', algoHint:'hier',
+    features:['avg_ticket','monthly_volume_k','chargeback_rate','online_share','refund_rate'],
+    generate(){
+      const rng=mulberry32(23),rows=[];
+      const blobs=[
+        {tk:45,vol:60,cb:0.4,on:0.9,rf:1.2},   // e-commerce
+        {tk:1200,vol:220,cb:0.15,on:0.1,rf:0.4}, // big-ticket in-store
+        {tk:22,vol:15,cb:1.8,on:0.6,rf:3.5}      // high-risk / high-refund
+      ];
+      for(let i=0;i<210;i++){
+        const b=blobs[i%3];
+        rows.push({
+          avg_ticket:+Math.max(3,b.tk*(1+gauss(rng)*0.25)).toFixed(0),
+          monthly_volume_k:+Math.max(1,b.vol*(1+gauss(rng)*0.3)).toFixed(1),
+          chargeback_rate:+Math.max(0.01,b.cb+gauss(rng)*0.3).toFixed(2),
+          online_share:+Math.max(0,Math.min(1,b.on+gauss(rng)*0.12)).toFixed(2),
+          refund_rate:+Math.max(0.05,b.rf+gauss(rng)*0.8).toFixed(2)
+        });
+      }
+      return rows;
+    }
+  },
+  anomalies:{
+    label:'Payments · transaction stream',
+    desc:'A live transaction feed with no fraud labels. Most activity is ordinary; the goal is to isolate the handful that do not fit any dense region.',
+    kind:'cluster', algoHint:'dbscan',
+    features:['amount_log','hour','velocity_5m','foreign_ratio','failed_ratio'],
+    generate(){
+      const rng=mulberry32(31),rows=[];
+      for(let i=0;i<260;i++){
+        const anomaly=rng()<0.08;
+        if(!anomaly){
+          rows.push({
+            amount_log:+ (Math.log(20+Math.exp(rng()*3)*30)).toFixed(3),
+            hour:Math.round(9+gauss(rng)*3),
+            velocity_5m:Math.round(Math.max(0,1+Math.abs(gauss(rng)))),
+            foreign_ratio:+Math.max(0,Math.min(1,0.05+Math.abs(gauss(rng))*0.05)).toFixed(2),
+            failed_ratio:+Math.max(0,Math.min(1,0.03+Math.abs(gauss(rng))*0.04)).toFixed(2)
+          });
+        } else {
+          rows.push({
+            amount_log:+ (Math.log(3000+rng()*9000)).toFixed(3),
+            hour:Math.round(rng()<0.5?2+rng()*3:23),
+            velocity_5m:Math.round(8+rng()*20),
+            foreign_ratio:+Math.max(0,Math.min(1,0.6+rng()*0.4)).toFixed(2),
+            failed_ratio:+Math.max(0,Math.min(1,0.4+rng()*0.5)).toFixed(2)
+          });
+        }
+      }
+      return rows;
+    }
+  },
+  returns:{
+    label:'Markets · asset daily returns',
+    desc:'Daily % returns for eight instruments. Highly correlated columns hide a few underlying drivers — PCA compresses them into factors.',
+    kind:'dimred', algoHint:'pca',
+    features:['bank_a','bank_b','it_a','it_b','energy_a','energy_b','gold','tbill'],
+    generate(){
+      const rng=mulberry32(47),rows=[];
+      for(let i=0;i<250;i++){
+        const mkt=gauss(rng)*1.1;          // market factor (dominant)
+        const fin=gauss(rng)*0.55, tech=gauss(rng)*0.55, en=gauss(rng)*0.55;
+        const n=()=>gauss(rng)*0.15;
+        rows.push({
+          bank_a:+(0.9*mkt+0.8*fin+n()).toFixed(3),
+          bank_b:+(0.85*mkt+0.75*fin+n()).toFixed(3),
+          it_a:+(0.8*mkt+0.9*tech+n()).toFixed(3),
+          it_b:+(0.78*mkt+0.85*tech+n()).toFixed(3),
+          energy_a:+(0.7*mkt+0.9*en+n()).toFixed(3),
+          energy_b:+(0.68*mkt+0.88*en+n()).toFixed(3),
+          gold:+(-0.4*mkt+gauss(rng)*0.35).toFixed(3),
+          tbill:+(0.1*mkt+gauss(rng)*0.12).toFixed(3)
+        });
+      }
+      return rows;
+    }
+  },
+  creditband:{
+    label:'Credit · risk-band separation',
+    desc:'Borrowers already tagged with an internal risk band (A/B/C). LDA finds the projection that separates the bands as cleanly as possible.',
+    kind:'dimred_lda', algoHint:'lda', group:'risk_band',
+    features:['dti','utilization','delinquencies','income_k','credit_age_yrs'],
+    generate(){
+      const rng=mulberry32(53),rows=[];
+      const bands=[
+        {g:'A',dti:0.18,ut:0.15,dq:0.1,inc:18,age:12},
+        {g:'B',dti:0.34,ut:0.45,dq:0.8,inc:11,age:7},
+        {g:'C',dti:0.52,ut:0.78,dq:2.4,inc:6,age:3}
+      ];
+      for(let i=0;i<240;i++){
+        const b=bands[i%3];
+        rows.push({
+          dti:+Math.max(0.05,b.dti+gauss(rng)*0.06).toFixed(3),
+          utilization:+Math.max(0,Math.min(1,b.ut+gauss(rng)*0.1)).toFixed(3),
+          delinquencies:Math.max(0,Math.round(b.dq+gauss(rng)*0.8)),
+          income_k:+Math.max(2,b.inc+gauss(rng)*3).toFixed(1),
+          credit_age_yrs:Math.max(0,Math.round(b.age+gauss(rng)*2)),
+          risk_band:b.g
+        });
+      }
+      return rows;
+    }
+  },
+  basket:{
+    label:'Cross-sell · product baskets',
+    desc:'Each customer holds a set of products. Association-rule mining finds which products travel together, to power the next-best-offer.',
+    kind:'assoc', algoHint:'apriori',
+    items:['savings','credit_card','personal_loan','insurance','mutual_fund','demat','home_loan'],
+    generateTx(){
+      const rng=mulberry32(61),tx=[];
+      for(let i=0;i<320;i++){
+        const t=['savings'];
+        if(rng()<0.55)t.push('credit_card');
+        if(t.includes('credit_card')&&rng()<0.55)t.push('insurance');   // card → insurance
+        if(rng()<0.30)t.push('mutual_fund');
+        if(t.includes('mutual_fund')&&rng()<0.75)t.push('demat');       // mutual_fund → demat
+        if(rng()<0.22)t.push('personal_loan');
+        if(rng()<0.14){t.push('home_loan');if(rng()<0.6)t.push('insurance');} // home_loan → insurance
+        tx.push([...new Set(t)]);
+      }
+      return tx;
+    },
+    generate(){ // one-hot table for preview / Excel
+      const tx=this.generateTx();
+      return tx.map(t=>{const o={};this.items.forEach(it=>o[it]=t.includes(it)?1:0);return o;});
+    }
+  }
+};
+
+const LAB_U_ORDER=['segments','merchants','anomalies','returns','creditband','basket'];
+
+/* =====================================================================
+   PREPROCESS
+   ===================================================================== */
+function applyScale(X,mode){
+  if(mode==='standardize')return standardize(X);
+  if(mode==='minmax'){
+    const d=X[0].length,mn=Array(d).fill(Infinity),mx=Array(d).fill(-Infinity);
+    X.forEach(r=>r.forEach((v,j)=>{if(v<mn[j])mn[j]=v;if(v>mx[j])mx[j]=v;}));
+    return X.map(r=>r.map((v,j)=>(v-mn[j])/((mx[j]-mn[j])||1)));
+  }
+  return X.map(r=>r.slice());
+}
+
+/* =====================================================================
+   LAB ENGINE
+   ===================================================================== */
+const U_ALGOS={
+  kmeans:{name:'K-Means',family:'cluster'},
+  hier:{name:'Hierarchical (agglomerative)',family:'cluster'},
+  dbscan:{name:'DBSCAN density',family:'cluster'},
+  pca:{name:'PCA',family:'dimred'},
+  lda:{name:'LDA (Fisher)',family:'dimred_lda'},
+  apriori:{name:'Apriori association rules',family:'assoc'}
+};
+const CLUSTER_COLORS=['#2C5F5D','#C9711E','#3A6FA8','#6B4A8A','#5C8A4A','#B8943A','#B84A4A','#8A95A3'];
+
+let uChart=null,uChart2=null;
+function destroyUCharts(){if(uChart){uChart.destroy();uChart=null;}if(uChart2){uChart2.destroy();uChart2=null;}}
+
+function uParamsFor(algo){
+  if(algo==='kmeans')return `k = <input type="number" id="p-k" min="2" max="8" value="3" style="width:52px">`;
+  if(algo==='hier')return `k = <input type="number" id="p-k" min="2" max="8" value="3" style="width:52px"> &nbsp; linkage <select id="p-link"><option value="average">average</option><option value="complete">complete</option><option value="single">single</option></select>`;
+  if(algo==='dbscan')return `eps = <input type="number" id="p-eps" min="0.1" max="4" step="0.1" value="1.2" style="width:60px"> &nbsp; minPts = <input type="number" id="p-min" min="2" max="15" value="5" style="width:52px">`;
+  if(algo==='pca')return `components = <input type="number" id="p-c" min="2" max="6" value="2" style="width:52px"> <span class="mono" style="color:var(--ink-soft)">· projection uses PC1 & PC2</span>`;
+  if(algo==='lda')return `<span class="mono" style="color:var(--ink-soft)">projects onto the top-2 discriminants of the risk-band groups</span>`;
+  if(algo==='apriori')return `min support = <input type="number" id="p-sup" min="0.05" max="0.8" step="0.05" value="0.15" style="width:60px"> &nbsp; min confidence = <input type="number" id="p-conf" min="0.1" max="1" step="0.05" value="0.5" style="width:60px">`;
+  return '';
+}
+
+function ulog(msg,cls){const el=document.getElementById('uds-log');
+  const p=document.createElement('div');p.className='ulog-line'+(cls?(' '+cls):'');p.innerHTML=msg;el.appendChild(p);el.scrollTop=el.scrollHeight;}
+function uclear(){document.getElementById('uds-log').innerHTML='';document.getElementById('uds-metrics').innerHTML='';
+  document.getElementById('uds-rules').innerHTML='';
+  document.getElementById('uds-chart2-wrap').style.display='none';
+  destroyUCharts();}
+function umetric(label,val,good){document.getElementById('uds-metrics').insertAdjacentHTML('beforeend',
+  `<span class="umetric ${good||''}"><span class="uk">${label}</span><span class="uv">${val}</span></span>`);}
+
+/* project a matrix to 2D via PCA (for clustering scatter when d>2) */
+function to2D(X){if(X[0].length===2)return X.map(r=>[r[0],r[1]]);
+  const p=pca(X,2);return p.proj;}
+
+function scatterByGroup(coords,labels,title,xl,yl,centroids2d,nameFn){
+  const groups=[...new Set(labels)].sort((a,b)=>(''+a).localeCompare(''+b,undefined,{numeric:true}));
+  const datasets=groups.map((g,gi)=>{
+    const isNoise=(g===-1);
+    const label = nameFn ? nameFn(g) : (isNoise?'noise':('cluster '+g));
+    return {label,
+      data:coords.filter((_,i)=>labels[i]===g).map(c=>({x:c[0],y:c[1]})),
+      backgroundColor:isNoise?'#B84A4A':CLUSTER_COLORS[gi%CLUSTER_COLORS.length],
+      pointRadius:isNoise?4:3,pointStyle:isNoise?'crossRot':'circle'};
+  });
+  if(centroids2d)datasets.push({label:'centroids',data:centroids2d.map(c=>({x:c[0],y:c[1]})),
+    backgroundColor:'#1A2332',pointRadius:8,pointStyle:'rectRot'});
+  const ctx=document.getElementById('uds-chart');
+  uChart=new Chart(ctx,{type:'scatter',data:{datasets},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:datasets.length>1,position:'bottom',labels:{boxWidth:10,font:{size:11}}},title:{display:!!title,text:title,font:{size:12}}},
+    scales:{x:{title:{display:!!xl,text:xl}},y:{title:{display:!!yl,text:yl}}}}});
+}
+
+function runUnsup(){
+  uclear();
+  const key=document.getElementById('uds-dataset').value;
+  const algo=document.getElementById('uds-algo').value;
+  const scale=document.getElementById('uds-scale').value;
+  const ds=DATASETS_U[key];
+  const fam=U_ALGOS[algo].family;
+
+  // family/dataset guardrails
+  if(algo==='apriori'&&ds.kind!=='assoc'){ulog('Apriori needs a basket (transactions) dataset. Switch to <b>Cross-sell · product baskets</b>.','uerr');return;}
+  if(ds.kind==='assoc'&&algo!=='apriori'){ulog('This basket dataset has no numeric feature space. Use <b>Apriori</b> on it.','uerr');return;}
+  if(algo==='lda'&&ds.kind!=='dimred_lda'){ulog('LDA needs a dataset with a group label. Switch to <b>Credit · risk-band separation</b>.','uerr');return;}
+
+  ulog('① Loaded <b>'+ds.label+'</b>.','ustep');
+
+  if(algo==='apriori'){
+    const tx=ds.generateTx();
+    const sup=parseFloat(document.getElementById('p-sup').value)||0.15;
+    const conf=parseFloat(document.getElementById('p-conf').value)||0.5;
+    ulog('② '+tx.length+' customer baskets over '+ds.items.length+' products. No scaling — data is categorical.','ustep');
+    ulog('③ Counting frequent itemsets (support ≥ '+(sup*100).toFixed(0)+'%), then rules (confidence ≥ '+(conf*100).toFixed(0)+'%)…','ustep');
+    const {itemsets,rules}=apriori(tx,sup,conf);
+    umetric('baskets',tx.length);umetric('frequent itemsets',itemsets.length);
+    umetric('rules found',rules.length,rules.length?'good':'warn');
+    if(rules.length){const best=rules[0];umetric('top lift',best.lift.toFixed(2),'good');}
+    ulog('④ Ranking rules by <b>lift</b> — how much more often the pair co-occurs than chance.','ustep');
+    // rules table
+    let html='<div class="urules-title">Association rules · sorted by lift</div><table class="urules"><thead><tr><th>If a customer has…</th><th>…they also hold</th><th>support</th><th>confidence</th><th>lift</th></tr></thead><tbody>';
+    rules.slice(0,12).forEach(r=>{html+=`<tr><td>${r.ant.join(', ')}</td><td>${r.con.join(', ')}</td><td>${(r.support*100).toFixed(0)}%</td><td>${(r.confidence*100).toFixed(0)}%</td><td class="${r.lift>=1.5?'lift-hi':(r.lift<1?'lift-lo':'')}">${r.lift.toFixed(2)}</td></tr>`;});
+    html+='</tbody></table>';
+    if(!rules.length)html='<div class="urules-title">No rules cleared the thresholds — lower min support or confidence.</div>';
+    document.getElementById('uds-rules').innerHTML=html;
+    // chart: top rules by lift
+    const top=rules.slice(0,8);
+    if(top.length){const ctx=document.getElementById('uds-chart');
+      uChart=new Chart(ctx,{type:'bar',data:{labels:top.map(r=>r.ant.join('+')+' → '+r.con.join('+')),
+        datasets:[{label:'lift',data:top.map(r=>r.lift),backgroundColor:'#C9711E'}]},
+        options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Top rules by lift',font:{size:12}}},
+        scales:{x:{title:{display:true,text:'lift (×chance)'}}}}});}
+    ulog('✓ Done — read the highest-lift rule as the strongest cross-sell signal.','uok');
+    return;
+  }
+
+  // numeric families
+  let X=rowsMatrix(ds.generate(),ds.features);
+  ulog('② '+X.length+' rows × '+ds.features.length+' features'+(algo==='lda'?' (+ risk-band label)':'')+'.','ustep');
+  const Xs=applyScale(X,scale);
+  ulog('③ Preprocess: <b>'+(scale==='none'?'none':scale)+'</b>'+(scale==='none'&&fam!=='assoc'?' — distance-based methods usually need standardize':'')+'.','ustep');
+
+  if(fam==='cluster'){
+    let res,coords,labels,cent2d=null;
+    if(algo==='kmeans'){
+      const k=parseInt(document.getElementById('p-k').value)||3;
+      ulog('④ K-Means placing '+k+' centroids, then iterating assign → move until stable…','ustep');
+      res=kmeans(Xs,k);labels=res.assign;
+      const proj=to2D(Xs);coords=proj;
+      // project centroids into same 2D space: rerun pca on Xs to get comps, then project centroids
+      if(Xs[0].length>2){const p=pca(Xs,2);const m=p.mean;
+        cent2d=res.centroids.map(c=>p.components.map(vec=>c.reduce((s,v,j)=>s+ (v-m[j])*vec[j],0)));}
+      else cent2d=res.centroids.map(c=>[c[0],c[1]]);
+      umetric('clusters',k);umetric('inertia',res.inertia.toFixed(1));
+    } else if(algo==='hier'){
+      const k=parseInt(document.getElementById('p-k').value)||3;const link=document.getElementById('p-link').value;
+      ulog('④ Hierarchical: every point starts alone; merge the closest pair ('+link+' linkage) until '+k+' clusters remain…','ustep');
+      res=hierarchical(Xs,k,link);labels=res.assign;coords=to2D(Xs);
+      umetric('clusters',res.k);
+    } else {
+      const eps=parseFloat(document.getElementById('p-eps').value)||1.2;const mp=parseInt(document.getElementById('p-min').value)||5;
+      ulog('④ DBSCAN: grow clusters through dense neighbourhoods (eps='+eps+', minPts='+mp+'); points in no dense region become noise…','ustep');
+      res=dbscan(Xs,eps,mp);labels=res.assign;coords=to2D(Xs);
+      umetric('clusters',res.nClusters,res.nClusters>=2?'good':'');umetric('noise pts',res.noise,res.noise?'warn':'');
+    }
+    const distinct=[...new Set(labels.filter(a=>a>=0))].length;
+    if(distinct>=2){
+      const sil=silhouette(Xs,labels);
+      const db=daviesBouldin(Xs,labels,algo==='kmeans'?res.centroids:null);
+      umetric('silhouette',sil.toFixed(3),sil>0.5?'good':(sil>0.25?'':'warn'));
+      if(db)umetric('Davies–Bouldin',db.toFixed(3),db<1?'good':'warn');
+      ulog('⑤ Internal evaluation only — no answer key. Silhouette near 1 = tight, well-separated groups.','ustep');
+    } else {
+      ulog('⑤ Only one dense cluster formed — separation scores need ≥2 clusters. Here the <b>noise count</b> is the signal: those are the outliers that fit nothing.','ustep');
+    }
+    scatterByGroup(coords,labels, U_ALGOS[algo].name+' · '+(Xs[0].length>2?'projected to 2D (PCA)':'feature space'),
+      Xs[0].length>2?'component 1':ds.features[0], Xs[0].length>2?'component 2':ds.features[1], cent2d);
+    ulog('✓ Done — each colour is a discovered group; the decision-maker names them after the fact.','uok');
+    return;
+  }
+
+  if(fam==='dimred'){ // PCA
+    const c=parseInt(document.getElementById('p-c').value)||2;
+    ulog('④ PCA: centre the data, then find the directions of greatest variance (the eigenvectors of the covariance matrix)…','ustep');
+    const p=pca(Xs,Math.max(2,c));
+    const cum=p.explained.slice(0,c).reduce((a,b)=>a+b,0);
+    umetric('features in',ds.features.length);umetric('components kept',c);
+    umetric('PC1 variance',(p.explained[0]*100).toFixed(1)+'%');
+    umetric('cum. variance ('+c+')',(cum*100).toFixed(1)+'%',cum>0.8?'good':'warn');
+    ulog('⑤ '+c+' components retain <b>'+(cum*100).toFixed(1)+'%</b> of the variance — that is the compression payoff.','ustep');
+    // scree
+    document.getElementById('uds-chart2-wrap').style.display='block';
+    const ctx2=document.getElementById('uds-chart2');
+    uChart2=new Chart(ctx2,{type:'bar',data:{labels:p.explained.slice(0,ds.features.length).map((_,i)=>'PC'+(i+1)),
+      datasets:[{label:'explained variance',data:p.explained.slice(0,ds.features.length).map(v=>+(v*100).toFixed(1)),backgroundColor:'#3A6FA8'}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'Scree — variance per component (%)',font:{size:12}}},scales:{y:{title:{display:true,text:'% variance'}}}}});
+    // projection scatter (no groups → single colour)
+    scatterByGroup(p.proj.map(r=>[r[0],r[1]]),p.proj.map(()=>0),'Projection onto PC1 × PC2','PC1','PC2',null,()=>'trading days');
+    ulog('✓ Done — the scree plot shows where extra components stop paying off.','uok');
+    return;
+  }
+
+  if(fam==='dimred_lda'){
+    const y=ds.generate().map(r=>r[ds.group]);
+    ulog('④ LDA: using the risk-band labels, find the projection that pushes the band means apart while keeping each band tight…','ustep');
+    const l=lda(Xs,y,2);
+    umetric('groups',l.groups.length);
+    umetric('LD1 share',(l.explained[0]*100).toFixed(1)+'%','good');
+    umetric('LD1+LD2',((l.explained[0]+l.explained[1])*100).toFixed(1)+'%','good');
+    ulog('⑤ Unlike PCA (which ignores labels), LDA maximises <b>between-group ÷ within-group</b> spread — the bridge to supervised learning.','ustep');
+    scatterByGroup(l.proj.map(r=>[r[0],r[1]]),y,'LDA projection · coloured by risk band','LD1','LD2',null,g=>'band '+g);
+    ulog('✓ Done — clean separation here means these features already carry the band signal.','uok');
+    return;
+  }
+}
+
+/* algorithm ↔ dataset auto-pairing for convenience */
+function uSyncDataset(){
+  const algo=document.getElementById('uds-algo').value;
+  const sel=document.getElementById('uds-dataset');
+  const fam=U_ALGOS[algo].family;
+  const want=Object.keys(DATASETS_U).find(k=>{
+    const kind=DATASETS_U[k].kind;
+    if(algo==='apriori')return kind==='assoc';
+    if(algo==='lda')return kind==='dimred_lda';
+    if(algo==='pca')return kind==='dimred';
+    return kind==='cluster'&&DATASETS_U[k].algoHint===algo;
+  });
+  if(want)sel.value=want;
+  document.getElementById('uds-params').innerHTML=uParamsFor(algo);
+  // scaling default: none for apriori, standardize otherwise
+  document.getElementById('uds-scale').value = (algo==='apriori')?'none':'standardize';
+}
+
+/* =====================================================================
+   XLSX EXPORT — dependency-free .xlsx writer (real Excel files, offline)
+   Builds the OpenXML parts and packs them into a STORE (uncompressed) zip
+   with correct CRC32s. No external library required.
+   ===================================================================== */
+const _CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function _crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=_CRC[(c^b[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function _bytes(s){return new TextEncoder().encode(s);}
+function _xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _xnum(v){return Number.isInteger(v)?v:Math.round(v*1e6)/1e6;}
+function _colRef(n){let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;}
+
+/* Column order: features first, then target, then anything left over */
+function _datasetColumns(ds,rows){
+  const all=new Set();rows.forEach(r=>Object.keys(r).forEach(k=>all.add(k)));
+  const ordered=[];
+  (ds.features||[]).forEach(f=>{if(all.has(f)){ordered.push(f);all.delete(f);}});
+  if(ds.target&&all.has(ds.target)){ordered.push(ds.target);all.delete(ds.target);}
+  all.forEach(k=>ordered.push(k));
+  return ordered;
+}
+/* Excel sheet-name rules: ≤31 chars, no []:*?/\, must be unique */
+function _sheetName(name,used){
+  let s=String(name).replace(/[\\\/\?\*\[\]:]/g,' ').replace(/\s+/g,' ').trim().slice(0,28)||'Sheet';
+  let base=s,i=2;while(used.has(s.toLowerCase())){s=(base.slice(0,25)+' '+i).slice(0,31);i++;}
+  used.add(s.toLowerCase());return s;
+}
+function _sheetXML(cols,rows){
+  let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  x+='<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  x+='<row r="1">';
+  cols.forEach((c,ci)=>{x+=`<c r="${_colRef(ci)}1" t="inlineStr" s="1"><is><t xml:space="preserve">${_xesc(c)}</t></is></c>`;});
+  x+='</row>';
+  rows.forEach((r,ri)=>{
+    const rn=ri+2;x+=`<row r="${rn}">`;
+    cols.forEach((c,ci)=>{
+      const ref=_colRef(ci)+rn,v=r[c];
+      if(v===null||v===undefined||(typeof v==='number'&&isNaN(v)))return; // leave blank
+      if(typeof v==='number')x+=`<c r="${ref}"><v>${_xnum(v)}</v></c>`;
+      else x+=`<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${_xesc(v)}</t></is></c>`;
+    });
+    x+='</row>';
+  });
+  x+='</sheetData></worksheet>';return x;
+}
+function _zipStore(files){
+  const u16=n=>[n&0xFF,(n>>8)&0xFF];
+  const u32=n=>[n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>>24)&0xFF];
+  const parts=[],central=[];let offset=0;
+  files.forEach(f=>{
+    const nb=_bytes(f.path),data=f.data,crc=_crc32(data);
+    const local=[].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0));
+    parts.push(new Uint8Array(local),nb,data);
+    const cen=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset));
+    central.push(new Uint8Array(cen),nb);
+    offset+=local.length+nb.length+data.length;
+  });
+  const cenSize=central.reduce((a,b)=>a+b.length,0),cenStart=offset;
+  const end=[].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),
+    u32(cenSize),u32(cenStart),u16(0));
+  const all=[...parts,...central,new Uint8Array(end)];
+  const total=all.reduce((a,b)=>a+b.length,0),out=new Uint8Array(total);let p=0;
+  all.forEach(c=>{out.set(c,p);p+=c.length;});
+  return out;
+}
+function _makeXlsx(sheets){
+  const files=[],push=(path,str)=>files.push({path,data:_bytes(str)});
+  let ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
+  sheets.forEach((s,i)=>{ct+=`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;});
+  ct+='</Types>';push('[Content_Types].xml',ct);
+  push('_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+  let wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>';
+  sheets.forEach((s,i)=>{wb+=`<sheet name="${_xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`;});
+  wb+='</sheets></workbook>';push('xl/workbook.xml',wb);
+  let wr='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+  sheets.forEach((s,i)=>{wr+=`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`;});
+  wr+='<Relationship Id="rIdS" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  push('xl/_rels/workbook.xml.rels',wr);
+  push('xl/styles.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+  sheets.forEach((s,i)=>{push(`xl/worksheets/sheet${i+1}.xml`,_sheetXML(s.cols,s.rows));});
+  return _zipStore(files);
+}
+function _download(bytes,filename){
+  const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},120);
+}
+/* =====================================================================
+   DATASET PREVIEW + EXCEL DOWNLOAD (unsupervised datasets)
+   ===================================================================== */
+function _fmtU(v){
+  if(v===null||v===undefined||(typeof v==='number'&&isNaN(v)))return {t:'null',c:'null'};
+  if(typeof v==='number'){const a=Math.abs(v);
+    if(a!==0&&(a<0.01||a>=100000))return {t:v.toExponential(2),c:'num'};
+    return {t:(Number.isInteger(v)?v:(+v.toFixed(3))).toString(),c:'num'};}
+  return {t:String(v),c:'str'};
+}
+function _columnsU(ds,rows){
+  const all=new Set();rows.forEach(r=>Object.keys(r).forEach(k=>all.add(k)));
+  const ordered=[];(ds.features||[]).forEach(f=>{if(all.has(f)){ordered.push(f);all.delete(f);}});
+  if(ds.group&&all.has(ds.group)){ordered.push(ds.group);all.delete(ds.group);}
+  all.forEach(k=>ordered.push(k));return ordered;
+}
+function downloadDatasetXlsxU(key){
+  const ds=DATASETS_U[key];if(!ds)return;
+  const rows=ds.generate(),cols=_columnsU(ds,rows),used=new Set();
+  _download(_makeXlsx([{name:_sheetName(ds.label||key,used),cols,rows}]), key+'.xlsx');
+}
+function downloadAllXlsxU(){
+  const used=new Set();
+  const sheets=LAB_U_ORDER.map(key=>{const ds=DATASETS_U[key],rows=ds.generate();
+    return {name:_sheetName(ds.label,used),cols:_columnsU(ds,rows),rows};});
+  _download(_makeXlsx(sheets),'unsupervised_datasets.xlsx');
+}
+
+function buildPanelU(ds,key){
+  const rows=ds.generate(),cols=_columnsU(ds,rows),n=rows.length,previewN=Math.min(22,n);
+  let t='<table class="ds-table"><thead><tr>';
+  cols.forEach(c=>{t+=`<th class="${c===ds.group?'target':''}">${c}${c===ds.group?' ◆':''}</th>`;});
+  t+='</tr></thead><tbody>';
+  for(let i=0;i<previewN;i++){t+='<tr>';cols.forEach(c=>{const f=_fmtU(rows[i][c]);t+=`<td class="${f.c}${c===ds.group?' target':''}">${f.t}</td>`;});t+='</tr>';}
+  t+='</tbody></table>';
+  const kindLabel={cluster:'clustering · unlabelled',dimred:'dimensionality reduction',dimred_lda:'dimensionality reduction · grouped',assoc:'association rules · basket'}[ds.kind]||ds.kind;
+  return `
+    <div class="ds-meta">
+      <div><div class="field">Type</div><div class="val">${kindLabel}</div></div>
+      <div><div class="field">Suggested algorithm</div><div class="val mono">${U_ALGOS[ds.algoHint]?U_ALGOS[ds.algoHint].name:'—'}</div></div>
+      <div style="grid-column:1/-1"><div class="field">Brief</div><div class="val">${ds.desc}</div></div>
+      <div style="grid-column:1/-1"><div class="field">${ds.kind==='assoc'?'Products':'Features'}</div><div class="val mono">${(ds.features||ds.items||[]).join(', ')}</div></div>
+    </div>
+    <div class="ds-summary">
+      <span class="chip"><b>${n}</b> rows</span>
+      <span class="chip"><b>${cols.length}</b> columns</span>
+      <span class="chip">${ds.group?('grouped by <b>'+ds.group+'</b> ◆'):(ds.kind==='assoc'?'one-hot product flags':'no labels')}</span>
+    </div>
+    <div class="ds-table-wrap">${t}</div>
+    <div class="ds-actions">
+      <button class="btn ghost ds-dl-btn" data-dl-key="${key}">⬇ Download this dataset (Excel)</button>
+      <span class="ds-dl-note">full ${n} rows · <span class="mono">.xlsx</span>${ds.kind==='assoc'?' · products as 0/1 flags':''}</span>
+    </div>
+    <div class="ds-foot">showing first <span class="copper">${previewN}</span> of <span class="copper">${n}</span> rows · unsupervised = <span class="copper">no target column</span>${ds.group?' · ◆ = grouping label used only by LDA':''}</div>`;
+}
+
+function openUModal(){
+  const modal=document.getElementById('uds-modal');
+  const tabsEl=document.getElementById('uds-tabs'),panelsEl=document.getElementById('uds-panels');
+  tabsEl.innerHTML='';panelsEl.innerHTML='';
+  LAB_U_ORDER.forEach((key,i)=>{
+    const ds=DATASETS_U[key];
+    const tab=document.createElement('button');tab.className='ds-tab'+(i===0?' active':'');
+    tab.innerHTML=`${ds.label.split('·').pop().trim()}<span class="tag">${ds.algoHint}</span>`;
+    tab.addEventListener('click',()=>{tabsEl.querySelectorAll('.ds-tab').forEach(t=>t.classList.remove('active'));
+      panelsEl.querySelectorAll('.ds-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');panelsEl.children[i].classList.add('active');});
+    tabsEl.appendChild(tab);
+    const panel=document.createElement('div');panel.className='ds-panel'+(i===0?' active':'');
+    panel.innerHTML=buildPanelU(ds,key);panelsEl.appendChild(panel);
+  });
+  modal.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeUModal(){document.getElementById('uds-modal').classList.remove('open');document.body.style.overflow='';}
+
+/* =====================================================================
+   WIRING
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded',()=>{
+  // nav tabs
+  document.querySelectorAll('.nav-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      const id=tab.dataset.target;
+      document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active',t===tab));
+      const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+  // lab controls
+  const algoSel=document.getElementById('uds-algo');
+  if(algoSel){
+    algoSel.addEventListener('change',uSyncDataset);
+    uSyncDataset(); // initial params
+    document.getElementById('uds-run').addEventListener('click',runUnsup);
+    document.getElementById('uds-reset').addEventListener('click',uclear);
+  }
+  // preview + download
+  const pv=document.querySelector('[data-upreview]');if(pv)pv.addEventListener('click',openUModal);
+  const dl=document.querySelector('[data-udownload]');if(dl)dl.addEventListener('click',downloadAllXlsxU);
+  const dlAll=document.getElementById('uds-modal-dl');if(dlAll)dlAll.addEventListener('click',downloadAllXlsxU);
+  const closeB=document.getElementById('uds-modal-close');if(closeB)closeB.addEventListener('click',closeUModal);
+  const modal=document.getElementById('uds-modal');if(modal)modal.addEventListener('click',e=>{if(e.target.id==='uds-modal')closeUModal();});
+  const panels=document.getElementById('uds-panels');if(panels)panels.addEventListener('click',e=>{const b=e.target.closest('.ds-dl-btn');if(b)downloadDatasetXlsxU(b.dataset.dlKey);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal&&modal.classList.contains('open'))closeUModal();});
+});
+</script>
+</body>
+</html>
