@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predicting Currency Exchange Rates — ML Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --paper:#FAF8F3;
+  --paper-2:#F2EEE3;
+  --surface:#FFFFFF;
+  --ink:#1A2332;
+  --ink-mute:#5A6878;
+  --ink-soft:#8A95A3;
+  --rule:#E2DCCB;
+  --rule-soft:#EEE9DC;
+  --teal:#2C5F5D;
+  --teal-deep:#1F4847;
+  --copper:#C9711E;
+  --copper-soft:#E89554;
+  --gold:#B8943A;
+  --green:#5C8A4A;
+  --red:#B84A4A;
+  --violet:#6B4A8A;
+  --blue:#3A6FA8;
+  --shadow: 0 1px 2px rgba(26,35,50,.04), 0 8px 24px rgba(26,35,50,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--teal);text-decoration:none;border-bottom:1px solid currentColor}
+h1,h2,h3,h4{font-family:'IBM Plex Serif',serif;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+code,kbd,.mono{font-family:'IBM Plex Mono',monospace}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);font-weight:500}
+
+/* ============ MASTHEAD ============ */
+.masthead{
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  padding:20px 40px;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(8px);
+  background:rgba(250,248,243,.92);
+}
+.masthead-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:baseline;gap:14px;min-width:0;flex:1}
+.brand-mark{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-weight:500;
+  font-size:15px;color:var(--ink);line-height:1.3;
+}
+.brand-mark::before{content:"§ ";color:var(--copper);font-style:normal}
+.course-code{
+  font-family:'IBM Plex Mono',monospace;
+  font-style:normal;font-weight:600;
+  font-size:11.5px;letter-spacing:.12em;
+  color:var(--copper);
+  background:var(--paper-warm);
+  padding:2px 7px;border-radius:2px;
+  margin-right:4px;
+  vertical-align:1px;
+}
+.brand-sub{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-mute);letter-spacing:.12em;text-transform:uppercase}
+.nav-tabs{display:flex;gap:4px}
+.nav-tab{
+  padding:8px 14px;font-size:13px;color:var(--ink-mute);
+  background:transparent;border:1px solid transparent;border-radius:6px;
+  cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;
+  transition:all .15s ease;
+}
+.nav-tab:hover{color:var(--ink);background:var(--paper-2)}
+.nav-tab.active{color:var(--ink);background:var(--surface);border-color:var(--rule);box-shadow:var(--shadow)}
+
+/* ============ HERO ============ */
+.hero{
+  max-width:1400px;margin:0 auto;
+  padding:64px 40px 40px;
+  display:grid;grid-template-columns:1.4fr 1fr;gap:60px;align-items:end;
+  border-bottom:1px solid var(--rule);
+}
+.hero-headline{
+  font-family:'IBM Plex Serif',serif;font-weight:400;
+  font-size:clamp(36px,5vw,64px);line-height:1.02;letter-spacing:-.02em;color:var(--ink);
+}
+.hero-headline em{font-style:italic;color:var(--copper)}
+.hero-headline .underset{
+  display:block;font-size:.42em;color:var(--ink-mute);font-style:normal;
+  margin-top:18px;letter-spacing:-.01em;font-weight:400;
+}
+.hero-meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-mute);line-height:1.9}
+.hero-meta .row{display:flex;justify-content:space-between;border-bottom:1px dotted var(--rule);padding:6px 0}
+.hero-meta .row:last-child{border-bottom:none}
+.hero-meta .k{color:var(--ink-soft);letter-spacing:.08em;text-transform:uppercase;font-size:10px}
+.hero-meta .v{color:var(--ink);font-weight:500}
+
+/* ============ AGENDA STRIP ============ */
+.agenda{
+  max-width:1400px;margin:0 auto;
+  padding:32px 40px;
+  border-bottom:1px solid var(--rule);
+}
+.agenda-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0}
+.agenda-cell{
+  padding:18px 16px 18px 0;border-right:1px solid var(--rule);
+  font-family:'IBM Plex Mono',monospace;
+}
+.agenda-cell:last-child{border-right:none}
+.agenda-cell .time{font-size:11px;color:var(--copper);letter-spacing:.08em;font-weight:500}
+.agenda-cell .title{
+  font-family:'IBM Plex Serif',serif;font-size:15px;font-weight:500;
+  color:var(--ink);margin-top:8px;line-height:1.3;
+}
+.agenda-cell .desc{font-family:'Inter',sans-serif;font-size:11.5px;color:var(--ink-mute);margin-top:6px;line-height:1.5}
+
+/* ============ MAIN ============ */
+main{max-width:1400px;margin:0 auto;padding:0 40px}
+.view{display:none}
+.view.active{display:block}
+
+/* ============ FINANCE DOMAINS ============ */
+.domains-wrap{max-width:1400px;margin:0 auto;padding:56px 40px 72px}
+.domains-head{max-width:840px;margin-bottom:40px}
+.domains-title{font-size:clamp(30px,4vw,46px);line-height:1.05;letter-spacing:-.02em;margin-top:14px}
+.domains-lede{font-size:17px;color:var(--ink-mute);margin-top:16px;line-height:1.6}
+.domains-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:26px}
+.domain-card{
+  background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  padding:26px 28px 24px;box-shadow:var(--shadow);
+  border-top:3px solid var(--teal);
+}
+.domain-card.c-copper{border-top-color:var(--copper)}
+.domain-card.c-blue{border-top-color:var(--blue)}
+.domain-card.c-violet{border-top-color:var(--violet)}
+.domain-card .dc-no{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.18em;
+  color:var(--ink-soft);font-weight:500;
+}
+.domain-card h3{
+  font-family:'IBM Plex Serif',serif;font-size:23px;font-weight:500;
+  letter-spacing:-.01em;margin:6px 0 6px;color:var(--ink);
+}
+.domain-card .dc-sub{
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);
+  font-style:italic;line-height:1.5;margin-bottom:16px;
+  padding-bottom:14px;border-bottom:1px solid var(--rule-soft);
+}
+.domain-item{padding:12px 0;border-bottom:1px dotted var(--rule)}
+.domain-item:last-child{border-bottom:none;padding-bottom:2px}
+.domain-item .di-name{
+  font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;color:var(--teal-deep);
+  display:block;margin-bottom:4px;
+}
+.domain-item .di-desc{
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);line-height:1.5;
+}
+.domain-item .di-labs{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+.domain-item .di-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.02em;
+  color:var(--teal);background:#E8F0EF;border:1px solid #D3E2E0;
+  padding:3px 8px;border-radius:2px;cursor:pointer;transition:all .15s ease;
+  white-space:nowrap;
+}
+.domain-item .di-tag::before{content:"▷ ";color:var(--copper)}
+.domain-item .di-tag:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.domain-item .di-tag:hover::before{color:#FFD9B0}
+@media(max-width:860px){.domains-grid{grid-template-columns:1fr}}
+
+/* ============ QUIZ ============ */
+.quiz-wrap{max-width:1000px;margin:0 auto;padding:56px 40px 80px}
+.quiz-head{margin-bottom:8px}
+.quiz-title{font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.02em;margin-top:14px}
+.quiz-lede{font-size:16px;color:var(--ink-mute);margin-top:14px;line-height:1.6;max-width:760px}
+.quiz-bar{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  margin-top:22px;padding:16px 20px;background:var(--surface);
+  border:1px solid var(--rule);border-radius:4px;box-shadow:var(--shadow);
+}
+.quiz-timer{
+  font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;
+  color:var(--teal-deep);letter-spacing:.04em;min-width:120px;
+}
+.quiz-timer.warn{color:var(--copper)}
+.quiz-timer.done{color:var(--red)}
+.quiz-bar-btns{display:flex;gap:8px}
+.quiz-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.03em;margin-left:auto;line-height:1.6}
+.quiz-part{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--copper);font-weight:600;
+  margin:38px 0 4px;padding-top:16px;border-top:2px solid var(--copper);
+}
+.q-item{padding:20px 0;border-bottom:1px solid var(--rule-soft)}
+.q-head{display:flex;gap:12px;align-items:baseline;margin-bottom:12px}
+.q-num{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--copper);
+  flex-shrink:0;padding-top:1px;
+}
+.q-text{font-family:'IBM Plex Serif',serif;font-size:16.5px;line-height:1.4;color:var(--ink)}
+.q-opts{display:flex;flex-direction:column;gap:7px;margin-left:34px}
+.q-opt{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:9px 12px;border:1px solid var(--rule);border-radius:3px;
+  background:var(--paper);cursor:pointer;transition:all .12s ease;
+}
+.q-opt:hover{border-color:var(--teal);background:#fff}
+.q-opt input{margin-top:3px;flex-shrink:0;accent-color:var(--teal)}
+.q-letter{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--ink-soft);flex-shrink:0;width:14px}
+.q-otext{font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);line-height:1.45}
+.q-opt.correct{border-color:var(--green);background:#EEF5EA}
+.q-opt.correct .q-letter{color:var(--green)}
+.q-opt.wrong{border-color:var(--red);background:#FBEEEE}
+.q-opt.wrong .q-letter{color:var(--red)}
+.q-mark{margin:9px 0 0 34px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.02em;display:none}
+.q-mark.ok{color:var(--green);display:block}
+.q-mark.bad{color:var(--red);display:block}
+.q-mark.none{color:var(--ink-soft);display:block}
+.quiz-actions{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+.quiz-note{font-family:'Inter',sans-serif;font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:10px}
+.quiz-wrap .btn:disabled{opacity:.5;cursor:not-allowed}
+#quiz-questions.locked .q-opt{cursor:default}
+#quiz-questions.locked .q-opt:hover{border-color:var(--rule);background:var(--paper)}
+#quiz-questions.locked .q-opt.correct,#quiz-questions.locked .q-opt.correct:hover{border-color:var(--green);background:#EEF5EA}
+#quiz-questions.locked .q-opt.wrong,#quiz-questions.locked .q-opt.wrong:hover{border-color:var(--red);background:#FBEEEE}
+.quiz-score{
+  margin-top:20px;padding:18px 22px;border-radius:4px;
+  background:var(--teal);color:#fff;
+  font-family:'IBM Plex Mono',monospace;
+}
+.quiz-score .big{font-size:28px;font-weight:600;letter-spacing:.02em}
+.quiz-score .sub{font-size:12px;opacity:.85;margin-top:4px}
+.answer-sheet{
+  margin-top:30px;padding:28px 30px;border-radius:4px;
+  background:#FBF6EC;border:1px solid #E7D6B6;border-top:3px solid var(--gold);
+}
+.answer-sheet .as-head{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E7D6B6}
+.answer-sheet .as-badge{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;background:var(--gold);padding:3px 9px;border-radius:2px;font-weight:600;
+}
+.answer-sheet .as-head h3{font-family:'IBM Plex Serif',serif;font-size:24px;font-weight:500;margin:10px 0 6px;color:var(--ink)}
+.answer-sheet .as-head p{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mute);line-height:1.5}
+.as-row{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:11px 0;border-bottom:1px dotted var(--rule)}
+.as-row:last-child{border-bottom:none}
+.as-qn{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--copper)}
+.as-ans{font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);line-height:1.45}
+.as-ans .as-key{font-weight:600;color:var(--teal-deep)}
+.as-why{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink-mute);line-height:1.5;margin-top:4px}
+@media(max-width:860px){.quiz-wrap{padding:40px 20px 60px}.q-opts,.q-mark{margin-left:0}}
+
+/* ============ NOTES ============ */
+.module{padding:56px 0;border-bottom:1px solid var(--rule)}
+.module:last-child{border-bottom:none}
+.module-head{display:grid;grid-template-columns:120px 1fr;gap:32px;margin-bottom:32px;align-items:start}
+.module-no{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.15em;color:var(--copper);
+  border-top:2px solid var(--copper);padding-top:8px;
+}
+.module-no .roman{
+  display:block;font-family:'IBM Plex Serif',serif;font-style:italic;
+  font-size:42px;color:var(--ink);margin-top:6px;letter-spacing:-.02em;font-weight:400;
+}
+.module-title{font-size:32px;line-height:1.1;letter-spacing:-.015em}
+.module-lede{font-size:17px;color:var(--ink-mute);margin-top:16px;max-width:680px;line-height:1.6}
+
+.body-grid{display:grid;grid-template-columns:120px 1fr;gap:32px}
+.side-note{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  line-height:1.7;padding-top:4px;
+}
+.side-note .pin{color:var(--copper);font-weight:500;display:block;letter-spacing:.1em;font-size:10px}
+
+.prose{max-width:780px;color:var(--ink);font-size:16px}
+.prose p{margin-bottom:14px}
+.prose h3{font-size:22px;margin:32px 0 12px;letter-spacing:-.01em}
+.prose h4{font-size:16px;margin:20px 0 8px;color:var(--teal-deep);font-family:'Inter',sans-serif;font-weight:600;letter-spacing:0}
+.prose ul,.prose ol{margin:8px 0 16px 0;padding-left:0;list-style:none}
+.prose ul li,.prose ol li{padding:6px 0 6px 28px;position:relative;line-height:1.55}
+.prose ul li::before{
+  content:"·";position:absolute;left:8px;top:0;
+  color:var(--copper);font-size:24px;line-height:1.2;
+}
+.prose ol{counter-reset:item}
+.prose ol li{counter-increment:item}
+.prose ol li::before{
+  content:counter(item,decimal-leading-zero);position:absolute;left:0;top:6px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--copper);font-weight:500;letter-spacing:.05em;
+}
+.prose strong{font-weight:600;color:var(--teal-deep)}
+.prose code{background:var(--paper-2);padding:1px 6px;border-radius:3px;font-size:.92em;color:var(--ink)}
+
+/* Callout */
+.callout{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--copper);
+  padding:18px 22px;margin:20px 0;border-radius:2px;
+}
+.callout .lbl{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--copper);font-weight:500;margin-bottom:6px;
+}
+.callout p{margin:0;font-size:15px;color:var(--ink)}
+.callout.finance{border-left-color:var(--teal)}
+.callout.finance .lbl{color:var(--teal)}
+.callout.warn{border-left-color:var(--red)}
+.callout.warn .lbl{color:var(--red)}
+
+/* Concept table */
+.cmp-table{
+  width:100%;border-collapse:collapse;margin:18px 0;
+  font-size:14px;background:var(--surface);
+  border:1px solid var(--rule);
+}
+.cmp-table th,.cmp-table td{
+  text-align:left;padding:12px 16px;border-bottom:1px solid var(--rule-soft);vertical-align:top;
+}
+.cmp-table th{
+  background:var(--paper-2);font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mute);font-weight:500;
+}
+.cmp-table tr:last-child td{border-bottom:none}
+.cmp-table td .mono{font-size:12px;color:var(--ink-mute)}
+
+/* Formula card */
+.formula{
+  background:var(--ink);color:#F4EFE2;padding:22px 26px;
+  font-family:'IBM Plex Mono',monospace;font-size:15px;
+  border-radius:4px;margin:18px 0;line-height:1.7;
+  border-left:3px solid var(--copper);
+}
+.formula .var{color:var(--copper-soft)}
+.formula .op{color:#9BB5C0}
+.formula .cmt{color:#6B7888;font-style:italic;font-size:13px;display:block;margin-top:6px}
+
+/* Pull quote */
+.pullquote{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-weight:400;
+  font-size:24px;line-height:1.4;color:var(--ink);
+  padding:24px 0 24px 28px;border-left:2px solid var(--copper);
+  margin:28px 0;max-width:620px;letter-spacing:-.005em;
+}
+.pullquote-attr{font-style:normal;font-size:12px;color:var(--ink-mute);font-family:'IBM Plex Mono',monospace;display:block;margin-top:14px;letter-spacing:.05em}
+
+/* ============ LAB ============ */
+.lab-wrap{padding:40px 0 80px}
+.lab-head{margin-bottom:24px;display:grid;grid-template-columns:120px 1fr auto;gap:32px;align-items:end}
+.lab-title{font-size:28px;letter-spacing:-.015em}
+.lab-sub{color:var(--ink-mute);font-size:14px;margin-top:6px;max-width:560px}
+.lab-controls{display:flex;gap:10px;align-items:center}
+
+.btn{
+  font-family:'Inter',sans-serif;font-weight:500;font-size:13px;
+  padding:9px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+  border-radius:4px;cursor:pointer;transition:all .15s ease;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{background:var(--teal-deep);border-color:var(--teal-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn.ghost:hover{background:var(--paper-2);color:var(--ink)}
+.btn.copper{background:var(--copper);border-color:var(--copper)}
+.btn.copper:hover{background:#A55C16;border-color:#A55C16}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.lab-board{
+  display:grid;grid-template-columns:280px 1fr;gap:24px;
+  align-items:start;
+}
+
+/* Node palette */
+.palette{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:16px;position:sticky;top:88px;max-height:calc(100vh - 110px);overflow-y:auto;
+}
+.palette-head{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;font-weight:500;
+}
+.palette-group{margin-bottom:18px}
+.palette-group-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--copper);
+  letter-spacing:.1em;text-transform:uppercase;font-weight:500;
+  padding:6px 0;border-bottom:1px solid var(--rule-soft);margin-bottom:8px;
+}
+.node-card{
+  background:var(--paper);border:1px solid var(--rule);border-radius:4px;
+  padding:9px 11px;margin-bottom:6px;cursor:grab;
+  font-size:12.5px;color:var(--ink);
+  display:flex;align-items:center;gap:8px;
+  transition:all .12s ease;user-select:none;
+  border-left-width:3px;
+}
+.node-card:hover{background:var(--surface);transform:translateX(2px)}
+.node-card:active{cursor:grabbing}
+.node-card.dragging{opacity:.4}
+.node-card .ico{
+  width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;
+  color:var(--ink-mute);flex-shrink:0;
+}
+.node-card .nm{font-weight:500}
+.node-card .tag{
+  margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  color:var(--ink-soft);letter-spacing:.05em;
+}
+
+/* Type colors */
+.node-card[data-type="data"],.slot[data-accept="data"] .slot-filled{border-left-color:var(--blue)}
+.node-card[data-type="clean"],.slot[data-accept="clean"] .slot-filled{border-left-color:var(--gold)}
+.node-card[data-type="feat"],.slot[data-accept="feat"] .slot-filled{border-left-color:var(--violet)}
+.node-card[data-type="split"],.slot[data-accept="split"] .slot-filled{border-left-color:var(--ink-mute)}
+.node-card[data-type="model"],.slot[data-accept="model"] .slot-filled{border-left-color:var(--copper)}
+.node-card[data-type="eval"],.slot[data-accept="eval"] .slot-filled{border-left-color:var(--green)}
+
+/* Canvas */
+.canvas{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:24px;min-height:600px;
+}
+.pipeline{display:flex;flex-direction:column;gap:14px}
+.stage{display:grid;grid-template-columns:80px 1fr;gap:14px;align-items:start}
+.stage-label{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);
+  padding-top:14px;line-height:1.5;font-weight:500;
+}
+.stage-label .num{display:block;font-family:'IBM Plex Serif',serif;font-style:italic;font-size:18px;color:var(--copper);letter-spacing:0;font-weight:400}
+
+.slot-group{display:flex;flex-direction:column;gap:6px}
+
+.slot{
+  border:1.5px dashed var(--rule);border-radius:6px;
+  padding:14px;min-height:48px;background:var(--paper);
+  transition:all .15s ease;font-size:12.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.slot.drag-over{border-color:var(--copper);background:#FFF6EB;border-style:solid}
+.slot .placeholder{color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em}
+.slot-filled{
+  background:var(--surface);border-left:3px solid var(--rule);
+  border-radius:3px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;width:100%;
+  font-size:13px;
+}
+.slot-filled .nm{font-weight:500;color:var(--ink)}
+.slot-filled .params{
+  display:flex;gap:8px;align-items:center;font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--ink-mute);
+}
+.slot-filled .params select,.slot-filled .params input{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  background:var(--paper);border:1px solid var(--rule);border-radius:3px;
+  padding:3px 6px;color:var(--ink);
+}
+.slot-filled .remove{
+  margin-left:auto;background:transparent;border:none;cursor:pointer;
+  color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:13px;
+  padding:2px 6px;border-radius:3px;
+}
+.slot-filled .remove:hover{background:var(--paper-2);color:var(--red)}
+
+.add-clean{
+  background:transparent;border:1px dashed var(--rule);
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);
+  letter-spacing:.08em;padding:6px;border-radius:4px;cursor:pointer;
+  text-transform:uppercase;
+}
+.add-clean:hover{color:var(--copper);border-color:var(--copper)}
+
+.connector{
+  display:flex;justify-content:center;color:var(--ink-soft);font-size:14px;
+  padding:2px 0;font-family:'IBM Plex Mono',monospace;
+}
+
+/* Results */
+.results{
+  margin-top:24px;background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:24px;
+}
+.results-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;
+  padding-bottom:14px;border-bottom:1px solid var(--rule);
+}
+.results-title{font-family:'IBM Plex Serif',serif;font-size:18px;font-weight:500}
+.results-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-mute)}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px}
+.metric{
+  background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;
+  padding:14px 16px;
+}
+.metric .k{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-soft);font-weight:500;
+}
+.metric .v{
+  font-family:'IBM Plex Serif',serif;font-size:28px;font-weight:400;
+  color:var(--ink);margin-top:4px;letter-spacing:-.015em;
+}
+.metric .v.good{color:var(--green)}
+.metric .v.bad{color:var(--red)}
+.metric .sub{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-mute);margin-top:4px}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.chart-box{background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;padding:14px}
+.chart-title{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-mute);margin-bottom:8px;font-weight:500;
+}
+.chart-canvas-wrap{position:relative;height:240px}
+
+.log{
+  background:var(--ink);color:#D4D0C0;font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;padding:14px 16px;border-radius:4px;margin-top:20px;
+  max-height:180px;overflow-y:auto;line-height:1.7;
+}
+.log .ts{color:#6B7888}
+.log .ok{color:#8FBE6D}
+.log .err{color:#E07B7B}
+.log .warn{color:#D9B05A}
+
+.empty-state{
+  padding:80px 40px;text-align:center;color:var(--ink-soft);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.05em;
+}
+.empty-state .big{
+  font-family:'IBM Plex Serif',serif;font-style:italic;font-size:24px;
+  color:var(--ink-mute);display:block;margin-bottom:8px;letter-spacing:-.01em;
+}
+
+.dataset-preview{
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  background:var(--paper);border:1px solid var(--rule-soft);border-radius:4px;
+  padding:12px;margin-top:12px;max-height:160px;overflow:auto;
+}
+.dataset-preview table{border-collapse:collapse;width:100%}
+.dataset-preview th{
+  text-align:left;padding:4px 10px;color:var(--copper);
+  font-weight:500;border-bottom:1px solid var(--rule);
+  letter-spacing:.05em;
+}
+.dataset-preview td{padding:3px 10px;color:var(--ink-mute)}
+
+/* Confusion matrix */
+.confusion{
+  display:grid;grid-template-columns:60px 80px 80px;gap:0;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  border:1px solid var(--rule);margin:8px 0;
+}
+.confusion .cell{padding:10px 12px;border-right:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);text-align:center}
+.confusion .hd{background:var(--paper-2);font-size:10px;letter-spacing:.05em;color:var(--ink-mute);font-weight:500}
+.confusion .num{font-family:'IBM Plex Serif',serif;font-size:18px;color:var(--ink);font-weight:400}
+
+footer{
+  border-top:1px solid var(--rule);padding:30px 40px;text-align:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);
+  letter-spacing:.05em;margin-top:60px;
+}
+
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr;gap:30px}
+  .agenda-grid{grid-template-columns:repeat(2,1fr)}
+  .agenda-cell{border-right:none;border-bottom:1px solid var(--rule)}
+  .body-grid,.module-head{grid-template-columns:1fr;gap:14px}
+  .lab-board{grid-template-columns:1fr}
+  .palette{position:static;max-height:none}
+  .charts{grid-template-columns:1fr}
+  .masthead-inner{flex-direction:column;align-items:flex-start;gap:12px}
+  .brand-mark{font-size:13.5px}
+  .nav-tabs{width:100%;overflow-x:auto}
+}
+
+/* ============ SVG FIGURES ============ */
+.svg-fig{
+  margin:28px 0 18px 0;
+  padding:22px 18px 14px 18px;
+  background:#FFFEFB;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--teal);
+  border-radius:2px;
+}
+.svg-fig svg{display:block;width:100%;height:auto;max-width:100%}
+.svg-fig.tight{padding:16px 14px 10px}
+.fig-cap{
+  font-family:'IBM Plex Serif',serif;
+  font-style:italic;
+  font-size:13.5px;
+  color:var(--ink-mute);
+  margin-top:10px;
+  padding-top:8px;
+  border-top:1px dashed var(--rule);
+  line-height:1.55;
+}
+.fig-cap b{font-style:normal;color:var(--ink);font-weight:600}
+.fig-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.18em;
+  color:var(--copper);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+
+/* ============ DATASET PREVIEW MODAL ============ */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(26,35,50,0.55);
+  display:none;
+  align-items:center;justify-content:center;
+  z-index:1000;
+  padding:20px;
+  backdrop-filter:blur(2px);
+}
+.modal-backdrop.open{display:flex}
+.modal{
+  background:var(--paper);
+  border:1px solid var(--ink);
+  border-radius:3px;
+  width:100%;max-width:1100px;
+  max-height:90vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 30px 60px rgba(0,0,0,0.25);
+}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;
+  border-bottom:1px solid var(--rule);
+  background:var(--paper-warm);
+}
+.modal-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:22px;font-weight:600;
+  color:var(--ink);
+  letter-spacing:-.01em;
+}
+.modal-title .mono-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;font-weight:400;
+  color:var(--copper);
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  display:block;margin-bottom:4px;
+}
+.modal-close{
+  background:transparent;border:1px solid var(--rule);
+  width:34px;height:34px;border-radius:50%;
+  font-size:18px;color:var(--ink-mute);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.modal-body{padding:0;overflow:hidden;flex:1;display:flex;flex-direction:column}
+.ds-tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--rule);
+  background:#FFFEFB;
+  padding:0 24px;
+  overflow-x:auto;
+  flex-shrink:0;
+}
+.ds-tab{
+  padding:14px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--ink-mute);
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .15s;
+}
+.ds-tab:hover{color:var(--ink)}
+.ds-tab.active{color:var(--teal);border-bottom-color:var(--copper);font-weight:600}
+.ds-tab .tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  background:var(--rule);
+  color:var(--ink-mute);
+  padding:2px 5px;
+  border-radius:2px;
+  margin-left:6px;
+  letter-spacing:.05em;
+}
+.ds-panel{
+  padding:22px 24px;
+  overflow-y:auto;
+  flex:1;
+  display:none;
+}
+.ds-panel.active{display:block}
+.ds-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px 24px;
+  margin-bottom:18px;
+  padding-bottom:16px;
+  border-bottom:1px dashed var(--rule);
+}
+.ds-meta .field{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--copper);
+  margin-bottom:4px;
+}
+.ds-meta .val{
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  color:var(--ink);
+  line-height:1.5;
+}
+.ds-meta .val.mono{font-family:'IBM Plex Mono',monospace;font-size:12px}
+.ds-summary{
+  display:flex;gap:18px;flex-wrap:wrap;
+  margin-bottom:16px;
+}
+.ds-summary .chip{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  padding:4px 10px;
+  background:var(--paper-warm);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  color:var(--ink-soft);
+}
+.ds-summary .chip b{color:var(--teal);font-weight:600}
+.ds-summary .chip.warn b{color:var(--copper)}
+.ds-table-wrap{
+  border:1px solid var(--rule);
+  border-radius:2px;
+  overflow:auto;
+  max-height:420px;
+  background:#FFFEFB;
+}
+.ds-table{
+  width:100%;
+  border-collapse:collapse;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+}
+.ds-table thead th{
+  position:sticky;top:0;
+  background:var(--ink);
+  color:var(--paper);
+  padding:9px 12px;
+  text-align:left;
+  font-weight:500;
+  letter-spacing:.04em;
+  white-space:nowrap;
+  border-right:1px solid rgba(255,255,255,0.08);
+}
+.ds-table thead th.target{background:var(--teal)}
+.ds-table tbody td{
+  padding:6px 12px;
+  border-bottom:1px solid var(--rule);
+  border-right:1px solid var(--rule);
+  color:var(--ink-soft);
+  white-space:nowrap;
+}
+.ds-table tbody tr:hover{background:var(--paper-warm)}
+.ds-table tbody td.target{color:var(--teal);font-weight:600}
+.ds-table tbody td.null{color:var(--copper);font-style:italic}
+.ds-table tbody td.num{text-align:right}
+.ds-foot{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;
+  color:var(--ink-mute);
+  margin-top:10px;
+  letter-spacing:.04em;
+}
+.ds-foot .copper{color:var(--copper);font-weight:600}
+@media (max-width:680px){
+  .ds-meta{grid-template-columns:1fr}
+  .modal{max-height:96vh}
+}
+
+/* ============ LAB GUIDE (explainer panel) ============ */
+.lab-guide{
+  background:#FFFEFB;
+  border:1px solid var(--rule);
+  border-left:3px solid var(--copper);
+  border-radius:2px;
+  margin:24px 0 18px 0;
+  overflow:hidden;
+}
+.lab-guide summary{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 22px;
+  cursor:pointer;
+  user-select:none;
+  list-style:none;
+  background:var(--paper-warm);
+  border-bottom:1px solid var(--rule);
+  transition:background .15s;
+}
+.lab-guide summary::-webkit-details-marker{display:none}
+.lab-guide summary:hover{background:#F4EEDB}
+.lab-guide .guide-icon{font-size:16px}
+.lab-guide .guide-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:16px;font-weight:600;
+  color:var(--ink);letter-spacing:-.005em;flex:1;
+}
+.lab-guide .guide-sub{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--ink-mute);
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.lab-guide .guide-toggle{
+  color:var(--copper);font-size:14px;
+  transition:transform .2s;
+}
+.lab-guide[open] .guide-toggle{transform:rotate(180deg)}
+.lab-guide:not([open]){border-left-width:3px}
+.guide-body{padding:0}
+.guide-tabs{
+  display:flex;
+  border-bottom:1px solid var(--rule);
+  background:#FFFCF5;
+  padding:0 22px;
+  overflow-x:auto;
+}
+.guide-tab{
+  padding:12px 18px;
+  font-family:'Inter',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--ink-mute);
+  background:transparent;border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.guide-tab:hover{color:var(--ink)}
+.guide-tab.active{color:var(--teal);border-bottom-color:var(--copper);font-weight:600}
+.guide-panel{display:none;padding:20px 24px 22px}
+.guide-panel.active{display:block}
+
+.guide-panel h5{
+  font-family:'IBM Plex Serif',serif;
+  font-size:14.5px;font-weight:600;
+  color:var(--ink);
+  margin:0 0 6px 0;
+  letter-spacing:-.005em;
+}
+.guide-panel .op-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:14px 22px;
+  margin-bottom:8px;
+}
+.guide-panel .op{
+  padding:11px 14px;
+  background:var(--paper-warm);
+  border:1px solid var(--rule);
+  border-left:2px solid var(--teal);
+  border-radius:2px;
+}
+.guide-panel .op.warn{border-left-color:var(--copper)}
+.guide-panel .op .nm{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;font-weight:600;
+  color:var(--teal);
+  display:block;margin-bottom:4px;
+  letter-spacing:.02em;
+}
+.guide-panel .op.warn .nm{color:var(--copper)}
+.guide-panel .op .dsc{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;color:var(--ink-soft);
+  line-height:1.55;
+}
+.guide-panel .op .dsc b{color:var(--ink);font-weight:600}
+.guide-panel .op .when{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10.5px;color:var(--ink-mute);
+  margin-top:5px;letter-spacing:.02em;
+}
+.guide-panel .op .when b{color:var(--copper);font-weight:600}
+.guide-panel p{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;color:var(--ink-soft);
+  line-height:1.6;margin:0 0 10px 0;
+}
+.guide-panel .recipe{
+  padding:12px 16px;
+  background:linear-gradient(to right, #FFFCF5, #FFFEFB);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  margin-bottom:10px;
+}
+.guide-panel .recipe .ds-name{
+  font-family:'IBM Plex Serif',serif;
+  font-size:14px;font-weight:600;
+  color:var(--ink);
+  display:block;margin-bottom:6px;
+}
+.guide-panel .recipe .pipe{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;color:var(--teal);
+  background:#E8F0EF;
+  padding:6px 10px;border-radius:2px;
+  display:inline-block;margin-bottom:6px;
+}
+.guide-panel .recipe .why{
+  font-family:'Inter',sans-serif;
+  font-size:12.5px;color:var(--ink-soft);
+  line-height:1.55;
+}
+.guide-panel .recipe .bizcase{
+  margin-top:10px;
+  padding:11px 13px;
+  background:#FBF4EA;
+  border:1px solid #EAD9BE;
+  border-left:2px solid var(--copper);
+  border-radius:2px;
+}
+.guide-panel .recipe .bizcase .biz-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--copper);font-weight:600;
+  display:block;margin-bottom:7px;
+}
+.guide-panel .recipe .bizcase .brow{
+  font-family:'Inter',sans-serif;
+  font-size:12px;color:var(--ink-mute);line-height:1.5;
+  margin:0 0 5px 0;
+}
+.guide-panel .recipe .bizcase .brow:last-child{margin-bottom:0}
+.guide-panel .recipe .bizcase .brow b{color:var(--teal-deep);font-weight:600}
+.guide-panel .recipe .bizcase .brow .metric{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+  background:#E8F0EF;color:var(--teal);padding:1px 6px;border-radius:2px;
+  white-space:nowrap;
+}
+.guide-panel .order-line{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  background:var(--ink);color:var(--paper);
+  padding:10px 16px;border-radius:2px;
+  margin:10px 0 14px 0;
+  letter-spacing:.02em;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+.guide-panel .order-line .step{color:var(--copper);font-weight:600}
+.guide-panel .order-line .arr{color:var(--ink-mute);opacity:.6}
+
+/* ============ BUSINESS INTERPRETATION (post-run) ============ */
+.biz-interp{
+  margin-top:24px;
+  background:linear-gradient(to bottom, #FFFEFB, #FAF8F3);
+  border:1px solid var(--rule);
+  border-left:3px solid var(--teal);
+  border-radius:2px;
+  overflow:hidden;
+}
+.biz-interp .biz-head{
+  padding:12px 22px;
+  background:var(--teal);color:var(--paper);
+  display:flex;align-items:center;gap:10px;
+}
+.biz-interp .biz-head .biz-icon{font-size:14px}
+.biz-interp .biz-head .biz-title{
+  font-family:'IBM Plex Serif',serif;
+  font-size:15px;font-weight:600;letter-spacing:-.005em;flex:1;
+}
+.biz-interp .biz-head .biz-meta{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:.15em;opacity:.7;
+}
+.biz-interp .biz-body{padding:18px 22px}
+.biz-row{
+  display:grid;
+  grid-template-columns:130px 1fr;
+  gap:18px;
+  padding:12px 0;
+  border-bottom:1px dashed var(--rule);
+}
+.biz-row:last-child{border-bottom:none}
+.biz-row .biz-key{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.biz-row .biz-key .value{
+  display:block;
+  font-family:'IBM Plex Serif',serif;
+  font-size:18px;font-weight:600;
+  margin-top:3px;
+  letter-spacing:-.01em;
+  text-transform:none;
+}
+.biz-row .biz-key.good .value{color:var(--teal)}
+.biz-row .biz-key.warn .value{color:var(--copper)}
+.biz-row .biz-key.bad  .value{color:#B84A4A}
+.biz-row .biz-key.neutral .value{color:var(--ink)}
+.biz-row .biz-text{
+  font-family:'Inter',sans-serif;
+  font-size:13.5px;color:var(--ink-soft);
+  line-height:1.6;
+}
+.biz-row .biz-text b{color:var(--ink);font-weight:600}
+.biz-row .biz-text .copper{color:var(--copper);font-weight:600}
+.biz-row .biz-text .teal{color:var(--teal);font-weight:600}
+.biz-bottom{
+  margin-top:14px;padding:14px 18px;
+  background:var(--ink);color:var(--paper);
+  border-radius:2px;
+  font-family:'IBM Plex Serif',serif;
+  font-size:13.5px;line-height:1.6;
+  font-style:italic;
+}
+.biz-bottom .lbl{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:.2em;font-style:normal;
+  color:var(--copper);text-transform:uppercase;
+  margin-bottom:6px;
+}
+.biz-bottom b{font-style:normal;color:var(--paper);font-weight:600}
+@media (max-width:680px){
+  .biz-row{grid-template-columns:1fr;gap:6px}
+}
+</style>
+<style>
+/* ---- FX case-study extras (built on the reused design system) ---- */
+/* this case study is one continuous scrolling page (nav scrolls to sections),
+   so override the workshop's hidden-by-default view panels */
+.view{display:block !important}
+.persona{display:flex;gap:12px;align-items:center;background:var(--paper-2);border:1px solid var(--rule);border-radius:10px;padding:12px 15px;min-width:230px}
+.pface{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'IBM Plex Serif',serif;font-size:15px;flex-shrink:0}
+.pname{font-family:'IBM Plex Serif',serif;font-size:15px;color:var(--ink);font-weight:500}
+.prole{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-mute);letter-spacing:.02em;margin-top:2px}
+.persona-line{font-style:italic;color:var(--ink-mute)}
+.fx-lab{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:22px;margin-top:8px}
+.fx-controls{display:grid;grid-template-columns:1fr 1fr;gap:20px 30px;padding-bottom:20px;border-bottom:1px solid var(--rule-soft)}
+@media(max-width:800px){.fx-controls{grid-template-columns:1fr}}
+.fx-field label.blk,.fx-field .flabel{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);font-weight:600;margin-bottom:8px}
+.fx-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:4px;overflow:hidden}
+.fx-toggle label{padding:8px 14px;font-size:13px;cursor:pointer;background:var(--paper);color:var(--ink-mute)}
+.fx-toggle label:first-child{border-right:1px solid var(--rule)}
+.fx-toggle input{display:none}
+.fx-toggle input:checked+span{color:var(--teal);font-weight:600}
+.fx-toggle label:has(input:checked){background:#E8F0EF}
+.fx-field select,.fx-field input[type=range]{font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:7px 9px;width:100%;max-width:280px}
+.fx-field input[type=range]{padding:0}
+#fx-features{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;grid-column:1/-1}
+@media(max-width:800px){#fx-features{grid-template-columns:1fr}}
+.fx-feat-lbl{display:flex;align-items:baseline;gap:7px;font-size:12.5px;color:var(--ink);cursor:pointer;padding:3px 0}
+.fx-feat-name{font-family:'IBM Plex Mono',monospace;font-size:11.5px}
+.fx-feat-hint{font-size:10.5px;color:var(--ink-soft);margin-left:auto;text-align:right}
+.fx-actions{display:flex;gap:10px;align-items:center;margin-top:18px}
+.fx-out{margin-top:20px}
+.fx-charts{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-top:6px}
+@media(max-width:800px){.fx-charts{grid-template-columns:1fr}}
+.fx-chart-box{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:12px;height:300px}
+.fx-log{background:var(--ink);border-radius:4px;padding:12px 14px;margin-top:16px;max-height:180px;overflow:auto}
+.flog-line{font-family:'IBM Plex Mono',monospace;font-size:11.5px;line-height:1.7;color:#C9D3DD}
+.flog-line b{color:#fff}.flog-line.fstep{color:#9FB4C4}.flog-line.fok{color:#8FCF8A}.flog-line.ferr{color:#E89AA0}
+.fx-interp{margin-top:16px;background:var(--paper-2);border:1px solid var(--rule);border-radius:4px;padding:16px 18px}
+.fx-interp-head{font-family:'IBM Plex Serif',serif;font-size:18px;margin-bottom:6px}
+.fx-interp-head.good{color:var(--green)}.fx-interp-head.bad{color:var(--red)}.fx-interp-head.warn{color:var(--copper)}
+.fx-interp p{font-size:14px;color:var(--ink);line-height:1.6;margin:0}
+.fx-history-box{background:var(--surface);border:1px solid var(--rule);border-radius:4px;padding:14px;height:280px;margin-top:20px}
+.ds-table td.target,.ds-table th.target{color:var(--copper)}
+.keytake{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+@media(max-width:760px){.keytake{grid-template-columns:1fr}}
+.keytake .kt{background:var(--paper-2);border:1px solid var(--rule);border-radius:4px;padding:14px 16px}
+.keytake .kt h4{font-family:'IBM Plex Serif',serif;font-size:15px;margin:0 0 6px;color:var(--teal)}
+.keytake .kt p{font-size:13px;color:var(--ink-mute);line-height:1.55;margin:0}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <span class="brand-mark"><span class="course-code">TM2065</span> Application of Machine Learning and Artificial Intelligence in Finance</span>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-target="sec-intro">Overview</button>
+      <button class="nav-tab" data-target="sec-notes">Reading material</button>
+      <button class="nav-tab" data-target="sec-case">Case study</button>
+      <button class="nav-tab" data-target="sec-lab">Interactive lab</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="sec-intro">
+  <h1 class="hero-headline">
+    Predicting the <em>USD/INR</em> exchange rate — a machine-learning case study.
+    <span class="underset">One currency pair, five years of daily data, and the most important lesson in quantitative finance: why a 96% R² can be worthless, and what it really takes to beat a coin-flip forecast.</span>
+  </h1>
+  <div class="hero-meta">
+    <div class="row"><span class="k">Pair</span><span class="v">USD/INR (₹ per $)</span></div>
+    <div class="row"><span class="k">Data</span><span class="v">1,260 trading days · synthetic, realistic</span></div>
+    <div class="row"><span class="k">Task</span><span class="v">Forecast tomorrow — level & return</span></div>
+    <div class="row"><span class="k">Models</span><span class="v">Random walk · Linear · Ridge · KNN · Tree</span></div>
+    <div class="row"><span class="k">Verdict metric</span><span class="v">Skill vs random walk · directional accuracy</span></div>
+    <div class="row"><span class="k">Stack</span><span class="v">Browser-native · export to Excel</span></div>
+  </div>
+  <div class="fx-history-box"><canvas id="fx-history"></canvas></div>
+</section>
+
+<main>
+
+<!-- =================================================================== -->
+<!-- ============================ NOTES ================================ -->
+<!-- =================================================================== -->
+<section class="view" id="sec-notes">
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">I.</span></div>
+      <div>
+        <h2 class="module-title">Why exchange rates are the hardest thing to forecast</h2>
+        <p class="module-lede">Currencies are the deep end of prediction. The reason is not that the maths is hard — it is that the target is almost pure noise, and the first models you try will lie to you about how well they are doing.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">THE CORE IDEA</span>
+        An exchange rate behaves like a <b>random walk</b>: tomorrow ≈ today, plus an unpredictable shock. The shock is most of the move.
+      </aside>
+      <div class="prose">
+        <h3>The random-walk starting point</h3>
+        <p>Meese and Rogoff showed in 1983 that sophisticated economic models could not out-forecast a trivial rule — <em>“tomorrow’s rate equals today’s rate”</em> — at short horizons. Forty years on, that result still stands as the benchmark every FX model is measured against. The reason is the <strong>efficient-market</strong> logic: if a piece of public information reliably predicted the rate, traders would act on it now, and the move would already be in today’s price. What is left over for tomorrow is mostly noise.</p>
+        <p>So the honest framing of the problem is not “predict the exchange rate.” It is: <em>“can I beat the random walk, even slightly, out of sample, after being honest about costs?”</em> Usually the answer is no. Sometimes — with the right variables and modest expectations — it is a thin yes.</p>
+
+        <h3>Level versus return — the distinction everything hinges on</h3>
+        <p>You can frame the forecast two ways, and they behave completely differently:</p>
+        <div class="formula">
+          predict the <span class="var">level</span>: &nbsp; rate<sub>t+1</sub> &nbsp;&nbsp;vs.&nbsp;&nbsp; predict the <span class="var">return</span>: &nbsp; r<sub>t+1</sub> = (rate<sub>t+1</sub> − rate<sub>t</sub>) / rate<sub>t</sub>
+          <span class="cmt">The level is the price itself; the return is the daily change. A model of the level looks brilliant and teaches you nothing. A model of the return looks terrible and is the only honest test.</span>
+        </div>
+        <p>Predicting the <strong>level</strong> is deceptively easy. Because tomorrow’s rate is almost always within a whisker of today’s, <em>any</em> model that stays near the current price scores a huge R² — 0.95 and up. But so does the do-nothing random walk. The R² measures the size of the daily move relative to the whole five-year range; it does not measure skill.</p>
+        <p>Predicting the <strong>return</strong> strips that illusion away. Now the target is just the daily wiggle, which is mostly noise, so R² collapses toward zero — for every model, including good ones. This is uncomfortable but honest, and it is where real FX modelling lives.</p>
+
+        <div class="callout warn">
+          <div class="lbl">The R² trap</div>
+          <p>A 0.96 R² on the <b>level</b> is not a good model — it is the baseline. The random walk gets it for free. Report skill against that baseline, never the raw R², or you will fool yourself and your risk committee.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">II.</span></div>
+      <div>
+        <h2 class="module-title">The features — what could possibly predict a currency</h2>
+        <p class="module-lede">If there is any signal at all, it comes from a handful of macro drivers and from the rate’s own recent behaviour. None is strong; together they may add up to a thin edge.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">A NOTE</span>
+        Every feature is known <b>at the close of day t</b> and used to predict day t+1. Using anything from t+1 is look-ahead leakage — the classic way to build a model that works only in the backtest.
+      </aside>
+      <div class="prose">
+        <h3>The drivers in this dataset</h3>
+        <p>Each row is one trading day. The predictors fall into two families. <strong>Macro drivers</strong> — the interest-rate <em>carry</em> (India’s repo rate minus the US funds rate), the daily move in the <em>dollar index</em>, the move in <em>crude oil</em> (India imports most of its oil, so costlier crude weakens the rupee), and net <em>foreign equity flows</em>. <strong>Price-derived signals</strong> — yesterday’s <em>return</em> (momentum), the gap between the rate and its <em>20-day average</em> (mean reversion), and recent <em>realized volatility</em>.</p>
+        <p>The economics fix the signs. A stronger dollar or costlier oil pushes ₹/$ <em>up</em> (rupee weakens); a wider carry and heavier inflows pull it <em>down</em> (rupee strengthens). A model that learns the wrong sign is overfitting to noise.</p>
+        <div class="callout finance">
+          <div class="lbl">Stationarity — why we difference</div>
+          <p>The <b>level</b> trends and wanders (it is non-stationary), which is exactly why distance- and tree-based models fail on it: they cannot predict a value outside the range they were trained on. <b>Returns</b> are roughly stationary — they hover around zero with stable spread — so almost all serious FX modelling is done on returns, not levels.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <article class="module">
+    <header class="module-head">
+      <div class="module-no">PART<span class="roman">III.</span></div>
+      <div>
+        <h2 class="module-title">How you actually grade an FX forecast</h2>
+        <p class="module-lede">Accuracy and R² are the wrong headline numbers here. Three measures tell the truth: a time-ordered test, skill against the random walk, and directional accuracy.</p>
+      </div>
+    </header>
+    <div class="body-grid">
+      <aside class="side-note">
+        <span class="pin">NEVER SHUFFLE</span>
+        A currency series is ordered in time. Shuffle it into a random train/test split and you train on the future to predict the past — the results look wonderful and mean nothing.
+      </aside>
+      <div class="prose">
+        <h3>1 · Split by time, not at random</h3>
+        <p>Train on the earlier part of the history, test on the later part you have never touched. This mimics reality: you only ever have the past to forecast the future. A random split leaks tomorrow into today’s training set and is the single most common way backtests lie.</p>
+
+        <h3>2 · Skill score — always versus the random walk</h3>
+        <div class="formula">
+          <span class="var">skill</span> = 1 − MSE<sub>model</sub> / MSE<sub>random&nbsp;walk</sub>
+          <span class="cmt">Positive means you beat “tomorrow = today.” Zero means you tied it. Negative — very common — means your clever model is worse than doing nothing. This one number cuts through the R² illusion.</span>
+        </div>
+        <p>Because the random walk is such a strong benchmark on levels, a model can post a 0.96 R² and a <em>negative</em> skill score at the same time. The skill score is what a trading desk actually cares about.</p>
+
+        <h3>3 · Directional accuracy — did we call the move?</h3>
+        <p>For many desks, getting the <em>direction</em> right matters more than the exact number: you hedge or you don’t. Directional accuracy asks what fraction of days the model got the sign of the move right. Fifty percent is a coin flip. Anything reliably above ~53–55% out of sample is a genuine — and rare — edge.</p>
+
+        <div class="callout">
+          <div class="lbl">Putting it together</div>
+          <p>A useful FX model shows <b>positive skill</b> and <b>directional accuracy above 50%</b> on a <b>time-ordered</b> test set — and stays modest about all three. In the lab you will see naive baselines, honest small edges, and models that look great on R² while failing on skill. Learn to read the third number, not the first.</p>
+        </div>
+      </div>
+    </div>
+  </article>
+
+</section>
+<!-- ============ END NOTES ============ -->
+
+<!-- =================================================================== -->
+<!-- ========================= CASE STUDY ============================== -->
+<!-- =================================================================== -->
+<section class="view" id="sec-case">
+  <div class="lab-wrap">
+    <div class="lab-head">
+      <div class="module-no">CASE<span class="roman">★</span></div>
+      <div>
+        <h2 class="lab-title">The treasury desk that needed a number</h2>
+        <p class="lab-sub">Before the maths, the business. Meet the person who has to act on the forecast, the decision it drives, and why she reads the skill score and not the R².</p>
+      </div>
+    </div>
+
+    <div class="module" style="margin-top:8px">
+      <div class="body-grid">
+        <aside class="side-note">
+          <div class="persona"><div class="pface" style="background:var(--teal)">RS</div>
+            <div><div class="pname">Rina Shah</div><div class="prole">Group Treasurer · Kaveri Textiles Ltd</div></div></div>
+          <p class="persona-line" style="margin-top:12px">She owns the company’s currency risk — and the P&amp;L consequences of every hedging call.</p>
+        </aside>
+        <div class="prose">
+          <p><b class="mono">The company.</b> Kaveri Textiles exports home furnishings to the US and imports cotton and dyes priced in dollars. Roughly <b>$4 million</b> flows across its books each month. When the rupee moves a rupee against the dollar, several lakh of margin appears or evaporates — money the mill never earned or lost operationally.</p>
+          <p><b class="mono">The problem.</b> Rina must decide, each week, how much of the next quarter’s dollar exposure to hedge forward. Hedge too much and she pays away forward points and locks out favourable moves; hedge too little and a sudden rupee slide eats the year’s margin. Her CFO keeps asking the impossible question: <em>“where will USD/INR be next month?”</em></p>
+          <p><b class="mono">The temptation.</b> A vendor pitches an ML model that “predicts USD/INR with 96% accuracy.” It sounds like the answer to her problem. It is not — and understanding why is the whole point of this case. That 96% is an R² on the <em>level</em>, and the do-nothing random walk scores the same. The model has no skill; it has a statistic that flatters it.</p>
+          <p><b class="mono">What actually helps her.</b> Not a false promise of the exact rate, but an honest, small edge on <em>direction</em>: a model that, using carry, the dollar index and oil, calls next week’s move correctly a bit more than half the time, with a positive skill score on a time-ordered test. That is enough to tilt her hedge ratio — hedge a little more when the model leans toward a weaker rupee — while sizing the bet to the model’s modest confidence.</p>
+          <div class="callout finance">
+            <div class="lbl">The decision the model feeds</div>
+            <p>Rina never trades on a point forecast of the level. She reads the <b>direction</b> and the <b>skill score</b>, adjusts the quarter’s hedge ratio by a few percentage points, and re-checks weekly whether the edge is still there. A model whose skill has decayed to zero goes back in the drawer — and the random-walk hedge (hedge a steady fraction) takes over again.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="keytake">
+      <div class="kt"><h4>Predict returns, not the level</h4><p>The level forecast flatters every model. Rina’s analysts model the daily <em>return</em>, where the honest difficulty shows.</p></div>
+      <div class="kt"><h4>Beat the random walk or go home</h4><p>The benchmark is “tomorrow = today.” If the model can’t beat it out of sample, it adds nothing to the hedge decision.</p></div>
+      <div class="kt"><h4>Direction &gt; precision</h4><p>She hedges or she doesn’t. Calling the sign right 55% of the time is worth more than a precise-looking level that’s really just today’s price.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- =================================================================== -->
+<!-- ============================ LAB ================================== -->
+<!-- =================================================================== -->
+<section class="view" id="sec-lab">
+  <div class="lab-wrap">
+    <div class="lab-head">
+      <div class="module-no">LAB<span class="roman">▸</span></div>
+      <div>
+        <h2 class="lab-title">Forecast USD/INR — and see the illusion for yourself</h2>
+        <p class="lab-sub">Switch between predicting the <b>level</b> and the <b>return</b>, pick a model and its features, and read the skill score and directional accuracy. Start with the Random walk on the level to see the 96% that means nothing.</p>
+      </div>
+      <div class="lab-controls">
+        <button class="btn ghost" data-fx-preview>📊 Preview data</button>
+        <button class="btn ghost" data-fx-download>⬇ Download (Excel)</button>
+      </div>
+    </div>
+
+    <div class="fx-lab">
+      <div class="fx-controls">
+        <div class="fx-field">
+          <span class="flabel">Target — what to predict</span>
+          <span class="fx-toggle">
+            <label><input type="radio" name="fx-task" value="level" checked><span>Exchange-rate level (₹/$)</span></label>
+            <label><input type="radio" name="fx-task" value="return"><span>Daily return (%)</span></label>
+          </span>
+        </div>
+        <div class="fx-field">
+          <span class="flabel">Model</span>
+          <select id="fx-model">
+            <option value="rw">Random walk — baseline (no features)</option>
+            <option value="lin">Linear regression</option>
+            <option value="ridge">Ridge regression (λ=5)</option>
+            <option value="knn">KNN regressor (k=15)</option>
+            <option value="tree">Decision tree (depth 4)</option>
+          </select>
+        </div>
+        <div class="fx-field" style="grid-column:1/-1">
+          <span class="flabel">Features (known at day t)</span>
+          <div id="fx-features"></div>
+        </div>
+        <div class="fx-field">
+          <span class="flabel">Test set (most recent) — <span id="fx-testfrac-val">25%</span></span>
+          <input type="range" id="fx-testfrac" min="20" max="40" step="5" value="25">
+        </div>
+        <div class="fx-field" style="display:flex;align-items:flex-end">
+          <div class="fx-actions" style="margin-top:0">
+            <button class="btn copper" id="fx-run">▷ Run forecast</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="fx-out">
+        <div class="metrics-grid" id="fx-metrics">
+          <div class="metric"><div class="k">Ready</div><div class="v">—</div><div class="sub">run a forecast to see metrics</div></div>
+        </div>
+        <div class="fx-charts">
+          <div class="fx-chart-box"><canvas id="fx-chart1"></canvas></div>
+          <div class="fx-chart-box"><canvas id="fx-chart2"></canvas></div>
+        </div>
+        <div class="fx-log" id="fx-log"></div>
+        <div class="fx-interp" id="fx-interp"><div class="fx-interp-head warn">Start here</div><p>Run the <b>Random walk</b> on the <b>level</b> first — note the ~0.96 R². Then switch the same baseline to the <b>return</b> and watch R² collapse to zero. That contrast is the entire lesson; every other model is judged against it.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ DATA MODAL ============ -->
+<div class="modal-backdrop" id="fx-modal" role="dialog" aria-modal="true" aria-labelledby="fx-modal-title">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">
+        <span class="mono-sub">USD/INR · daily · raw preview</span>
+        <span id="fx-modal-title">Exchange-rate dataset</span>
+      </div>
+      <div class="modal-head-actions" style="display:flex;gap:12px;align-items:center">
+        <button class="btn ghost" id="fx-modal-dl">⬇ Download (Excel)</button>
+        <button class="modal-close" id="fx-modal-close" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--ink-mute);margin:0 0 12px">Each row is one trading day. Features are known at the close of that day; <span class="copper">rate_next ★</span> and <span class="copper">ret_next ★</span> are what the models predict (the next day’s level and return). Showing the first 24 of 1,260 rows.</p>
+      <div id="fx-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Case study for TM2065 · Application of Machine Learning and Artificial Intelligence in Finance · predicting USD/INR with random-walk, linear, ridge, KNN and tree models — implemented from scratch and run live in your browser on synthetic daily data. The company and persona are fictitious; the synthetic series carries a deliberately learnable edge, and real exchange-rate predictability is far thinner. Open in a modern browser.
+</footer>
+<script>
+/* =====================================================================
+   FX FORECASTING — data generator, models, evaluation (from scratch)
+   Node-testable core. No DOM, no globals beyond these.
+   ===================================================================== */
+
+/* ---------- seeded RNG ---------- */
+function mulberry32(seed){return function(){let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+function gauss(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+/* =====================================================================
+   DATA GENERATOR — USD/INR daily, ~5 trading years (1260 days)
+   The LEVEL is a random walk with drift + volatility regimes (so
+   predicting the level is deceptively "easy"). The RETURN has a small,
+   genuinely predictable component driven by macro variables + mean
+   reversion (so predicting the return is honest and hard). This mirrors
+   real FX: mostly efficient, with a thin exploitable edge.
+   ===================================================================== */
+function generateFX(seed=2024){
+  const rng=mulberry32(seed);
+  const N=1260;                     // ~5 years of trading days
+  const rows=[];
+
+  // latent macro state
+  let rate=74.0;                    // ₹ per $ starting level (≈2019)
+  let oil=65;                       // Brent $/bbl
+  let dxy=97;                       // US dollar index
+  let repoIN=5.15, fedUS=2.25;      // policy rates (%)
+  let vol=0.0035;                   // daily vol (regime-switching)
+  const rateHist=[rate];
+
+  // Coefficients for the NEXT-day return (%). The noise term dominates, so
+  // return R² stays low (markets are mostly efficient). Signs are economically
+  // correct for ₹/$ (UP = rupee weakens): stronger dollar & costlier oil push
+  // the rate up; carry and equity inflows pull it down. A weak "fair-value"
+  // anchor (PPP/policy pull) keeps the level in a realistic band without
+  // removing the near-random-walk day-to-day behaviour.
+  const B={anchor:0.006, carry:-0.003, oilRet:0.060, dxyRet:0.48, flow:-0.0000050, maGap:-0.004, mom:0.030};
+
+  for(let t=0;t<N;t++){
+    // ----- evolve macro drivers (these are the features known at day t) -----
+    // volatility regime: occasional stress spikes that decay
+    if(rng()<0.012) vol=Math.min(0.011, vol+0.004);      // shock
+    vol=0.0035+(vol-0.0035)*0.96;                         // mean-revert vol
+    // oil: mean-reverting around a slow trend
+    const oilRet=(-0.02*(oil-70)/70)+gauss(rng)*0.018;
+    oil=Math.max(25, oil*(1+oilRet));
+    // dollar index: slow random walk
+    const dxyRet=gauss(rng)*0.004;
+    dxy=Math.max(80, dxy*(1+dxyRet));
+    // policy rates drift slowly (quarterly-ish moves)
+    if(rng()<0.02) repoIN=Math.max(4, Math.min(8, repoIN+(rng()<0.5?0.25:-0.25)));
+    if(rng()<0.02) fedUS=Math.max(0.25, Math.min(6, fedUS+(rng()<0.5?0.25:-0.25)));
+    const carry=repoIN-fedUS;                             // interest-rate differential
+    // FII net equity flow ($M), correlated with dxy strength (risk-on/off)
+    const flow=Math.round(gauss(rng)*400 - dxyRet*8000);
+    // momentum: last day's return (%)
+    const mom = t>0 ? 100*(rateHist[t]-rateHist[t-1])/rateHist[t-1] : 0;
+    // 20-day moving average (incl. today) and mean-reversion signal (% above MA)
+    const ma20 = t>=19 ? rateHist.slice(t-19,t+1).reduce((a,b)=>a+b,0)/20
+                       : rateHist.reduce((a,b)=>a+b,0)/rateHist.length;
+    const maGap = 100*(rate-ma20)/ma20;
+    // slowly-rising fair-value anchor (PPP/policy): ₹74 → ₹84 over the sample
+    const fair = 74 + 10*(t/N);
+    const anchor = B.anchor*(fair-rate)/fair*100;
+    // 5-day realized vol (%), a feature
+    let rv=0;
+    if(t>=5){const w=rateHist.slice(t-5,t+1);let s=0;for(let i=1;i<w.length;i++)s+=(100*(w[i]-w[i-1])/w[i-1])**2;rv=Math.sqrt(s/5);}
+
+    // ----- the TRUE next-day return (%) : small signal + dominant noise -----
+    const signal = anchor + B.carry*carry + B.oilRet*(oilRet*100) + B.dxyRet*(dxyRet*100)
+                 + B.flow*flow + B.maGap*maGap + B.mom*mom;
+    const noise = gauss(rng)*(vol*100);                    // dominant, regime-scaled
+    const retNext = signal + noise;                        // % change to t+1
+    const rateNext = rate*(1+retNext/100);
+
+    rows.push({
+      day: t+1,
+      rate: +rate.toFixed(4),                 // current level (feature for LEVEL task)
+      ret_1d: +mom.toFixed(4),                // yesterday's return % (momentum)
+      ma_gap: +maGap.toFixed(4),              // % above 20-day MA (mean reversion)
+      rv_5d: +rv.toFixed(4),                  // 5-day realized vol %
+      carry: +carry.toFixed(3),               // repo(IN) − funds(US), %
+      oil_ret: +(oilRet*100).toFixed(4),      // oil daily return %
+      dxy_ret: +(dxyRet*100).toFixed(4),      // dollar-index daily return %
+      fii_flow: flow,                         // net equity flow $M
+      // targets:
+      rate_next: +rateNext.toFixed(4),        // LEVEL task target
+      ret_next: +retNext.toFixed(4)           // RETURN task target (%)
+    });
+
+    // ----- advance state -----
+    rate=rateNext;
+    rateHist.push(rate);
+  }
+  return rows;
+}
+
+/* =====================================================================
+   LINEAR ALGEBRA
+   ===================================================================== */
+function transpose(A){const r=A.length,c=A[0].length,T=Array.from({length:c},()=>Array(r).fill(0));for(let i=0;i<r;i++)for(let j=0;j<c;j++)T[j][i]=A[i][j];return T;}
+function matmul(A,B){const r=A.length,c=B[0].length,k=B.length,C=Array.from({length:r},()=>Array(c).fill(0));for(let i=0;i<r;i++)for(let j=0;j<c;j++){let s=0;for(let z=0;z<k;z++)s+=A[i][z]*B[z][j];C[i][j]=s;}return C;}
+function matvec(A,v){return A.map(row=>row.reduce((s,a,i)=>s+a*v[i],0));}
+function solveRidge(X,y,lambda){
+  // (XᵀX + λI) β = Xᵀy  ; do not regularize the intercept (col 0)
+  const Xt=transpose(X),XtX=matmul(Xt,X),n=XtX.length;
+  for(let i=0;i<n;i++)XtX[i][i]+= (i===0?0:lambda);
+  const Xty=matvec(Xt,y);
+  // Gauss-Jordan invert of XtX
+  const A=XtX.map((row,i)=>[...row,...Array(n).fill(0).map((_,j)=>i===j?1:0)]);
+  for(let i=0;i<n;i++){
+    let piv=i;for(let k=i+1;k<n;k++)if(Math.abs(A[k][i])>Math.abs(A[piv][i]))piv=k;
+    [A[i],A[piv]]=[A[piv],A[i]];
+    const d=A[i][i]||1e-12;for(let j=0;j<2*n;j++)A[i][j]/=d;
+    for(let k=0;k<n;k++)if(k!==i){const f=A[k][i];for(let j=0;j<2*n;j++)A[k][j]-=f*A[i][j];}
+  }
+  const inv=A.map(r=>r.slice(n));
+  return matvec(inv,Xty);
+}
+
+/* =====================================================================
+   FEATURE MATRIX
+   ===================================================================== */
+function designMatrix(rows,features,standardize){
+  const raw=rows.map(r=>features.map(f=>r[f]));
+  let mean=features.map(()=>0),std=features.map(()=>1);
+  if(standardize){
+    mean=features.map((_,j)=>raw.reduce((s,r)=>s+r[j],0)/raw.length);
+    std=features.map((_,j)=>{const m=mean[j];return Math.sqrt(raw.reduce((s,r)=>s+(r[j]-m)**2,0)/raw.length)||1;});
+  }
+  const X=raw.map(r=>[1,...r.map((v,j)=>(v-mean[j])/std[j])]);
+  return {X,mean,std};
+}
+
+/* =====================================================================
+   MODELS  (each returns {predict: row=>number})
+   ===================================================================== */
+
+// Random-walk baseline: the honest benchmark every model must beat.
+function fitRandomWalk(train,features,target,cfg){
+  // LEVEL task → predict tomorrow = today's rate. RETURN task → predict 0 (no change).
+  const levelTask = cfg.task==='level';
+  return {predict:r=> levelTask ? r.rate : 0, _baseline:true};
+}
+
+function fitLinReg(train,features,target){
+  const {X}=designMatrix(train,features,false);
+  const y=train.map(r=>r[target]);
+  const beta=solveRidge(X,y,0);
+  return {predict:r=>{let s=beta[0];features.forEach((f,i)=>s+=beta[i+1]*r[f]);return s;}, beta};
+}
+
+function fitRidge(train,features,target,lambda=5){
+  const {X,mean,std}=designMatrix(train,features,true);
+  const y=train.map(r=>r[target]);
+  const beta=solveRidge(X,y,lambda);
+  return {predict:r=>{let s=beta[0];features.forEach((f,i)=>s+=beta[i+1]*((r[f]-mean[i])/std[i]));return s;}, beta};
+}
+
+function fitKNN(train,features,target,k=15){
+  const mean=features.map((f)=>train.reduce((s,r)=>s+r[f],0)/train.length);
+  const std=features.map((f,j)=>{const m=mean[j];return Math.sqrt(train.reduce((s,r)=>s+(r[f]-m)**2,0)/train.length)||1;});
+  const z=r=>features.map((f,j)=>(r[f]-mean[j])/std[j]);
+  const pts=train.map(r=>({v:z(r),y:r[target]}));
+  return {predict:r=>{
+    const q=z(r);
+    const d=pts.map(p=>{let s=0;for(let i=0;i<q.length;i++)s+=(q[i]-p.v[i])**2;return {s,y:p.y};});
+    d.sort((a,b)=>a.s-b.s);
+    let sum=0;for(let i=0;i<k&&i<d.length;i++)sum+=d[i].y;
+    return sum/Math.min(k,d.length);
+  }};
+}
+
+function fitTree(train,features,target,depth=4){
+  const MIN_LEAF=12;
+  function build(rows,d){
+    const vals=rows.map(r=>r[target]);
+    const mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+    if(d===0||rows.length<2*MIN_LEAF)return {leaf:true,val:mean};
+    let bestVar=Infinity,bF=null,bT=null,bL=null,bR=null;
+    features.forEach(f=>{
+      const sorted=[...new Set(rows.map(r=>r[f]))].sort((a,b)=>a-b);
+      for(let q=0.1;q<=0.9;q+=0.1){
+        const t=sorted[Math.floor(sorted.length*q)];
+        const L=rows.filter(r=>r[f]<=t),R=rows.filter(r=>r[f]>t);
+        if(L.length<MIN_LEAF||R.length<MIN_LEAF)continue;
+        const v=arr=>{const m=arr.reduce((a,r)=>a+r[target],0)/arr.length;return arr.reduce((a,r)=>a+(r[target]-m)**2,0);};
+        const imp=(v(L)+v(R));
+        if(imp<bestVar){bestVar=imp;bF=f;bT=t;bL=L;bR=R;}
+      }
+    });
+    if(!bF)return {leaf:true,val:mean};
+    return {leaf:false,f:bF,t:bT,L:build(bL,d-1),R:build(bR,d-1)};
+  }
+  const root=build(train,depth);
+  const pred=(n,r)=>n.leaf?n.val:(r[n.f]<=n.t?pred(n.L,r):pred(n.R,r));
+  return {predict:r=>pred(root,r)};
+}
+
+/* =====================================================================
+   EVALUATION
+   Time-ordered split (never shuffle a time series). Metrics on the chosen
+   target, PLUS the two that matter for FX: skill vs random walk, and
+   directional accuracy.
+   ===================================================================== */
+function timeSplit(rows,testFrac=0.25){
+  const n=Math.floor(rows.length*(1-testFrac));
+  return {train:rows.slice(0,n),test:rows.slice(n)};
+}
+
+function evaluate(test,target,preds,cfg){
+  const y=test.map(r=>r[target]);
+  const n=y.length;
+  const err=y.map((v,i)=>v-preds[i]);
+  const mse=err.reduce((a,e)=>a+e*e,0)/n;
+  const mae=err.reduce((a,e)=>a+Math.abs(e),0)/n;
+  const rmse=Math.sqrt(mse);
+  const ymean=y.reduce((a,b)=>a+b,0)/n;
+  const ssTot=y.reduce((a,v)=>a+(v-ymean)**2,0);
+  const r2=1-err.reduce((a,e)=>a+e*e,0)/(ssTot||1);
+
+  // random-walk baseline error on the SAME test rows
+  const base=test.map(r=> cfg.task==='level' ? r.rate : 0);
+  const mseBase=y.reduce((a,v,i)=>a+(v-base[i])**2,0)/n;
+  const skill=1-mse/(mseBase||1e-12);   // >0 ⇒ beats random walk
+
+  // directional accuracy: did we get the SIGN of the move right?
+  // For level task, direction = sign(pred_next − today) vs sign(actual_next − today).
+  let dirCorrect=0, dirN=0;
+  test.forEach((r,i)=>{
+    const actualUp = cfg.task==='level' ? (r.rate_next - r.rate) : r.ret_next;
+    const predUp   = cfg.task==='level' ? (preds[i] - r.rate)     : preds[i];
+    if(Math.abs(actualUp)>1e-9){dirN++; if(Math.sign(actualUp)===Math.sign(predUp))dirCorrect++;}
+  });
+  const dirAcc=dirN?dirCorrect/dirN:0;
+
+  return {mse,mae,rmse,r2,skill,dirAcc,dirCorrect,dirN,preds,actual:y,
+          residuals:err, mseBase, rmseBase:Math.sqrt(mseBase)};
+}
+
+/* =====================================================================
+   XLSX EXPORT — dependency-free .xlsx writer (real Excel files, offline)
+   Builds the OpenXML parts and packs them into a STORE (uncompressed) zip
+   with correct CRC32s. No external library required.
+   ===================================================================== */
+const _CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function _crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=_CRC[(c^b[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function _bytes(s){return new TextEncoder().encode(s);}
+function _xesc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function _xnum(v){return Number.isInteger(v)?v:Math.round(v*1e6)/1e6;}
+function _colRef(n){let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26);}return s;}
+function _sheetName(name,used){let s=String(name).replace(/[\\\/\?\*\[\]:]/g,' ').replace(/\s+/g,' ').trim().slice(0,28)||'Sheet';let base=s,i=2;while(used.has(s.toLowerCase())){s=(base.slice(0,25)+' '+i).slice(0,31);i++;}used.add(s.toLowerCase());return s;}
+function _sheetXML(cols,rows){
+  let x='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  x+='<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+  x+='<row r="1">';
+  cols.forEach((c,ci)=>{x+=`<c r="${_colRef(ci)}1" t="inlineStr" s="1"><is><t xml:space="preserve">${_xesc(c)}</t></is></c>`;});
+  x+='</row>';
+  rows.forEach((r,ri)=>{const rn=ri+2;x+=`<row r="${rn}">`;
+    cols.forEach((c,ci)=>{const ref=_colRef(ci)+rn,v=r[c];
+      if(v===null||v===undefined||(typeof v==='number'&&isNaN(v)))return;
+      if(typeof v==='number')x+=`<c r="${ref}"><v>${_xnum(v)}</v></c>`;
+      else x+=`<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${_xesc(v)}</t></is></c>`;});
+    x+='</row>';});
+  x+='</sheetData></worksheet>';return x;
+}
+function _zipStore(files){
+  const u16=n=>[n&0xFF,(n>>8)&0xFF],u32=n=>[n&0xFF,(n>>8)&0xFF,(n>>16)&0xFF,(n>>>24)&0xFF];
+  const parts=[],central=[];let offset=0;
+  files.forEach(f=>{const nb=_bytes(f.path),data=f.data,crc=_crc32(data);
+    const local=[].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0));
+    parts.push(new Uint8Array(local),nb,data);
+    const cen=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset));
+    central.push(new Uint8Array(cen),nb);offset+=local.length+nb.length+data.length;});
+  const cenSize=central.reduce((a,b)=>a+b.length,0),cenStart=offset;
+  const end=[].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cenSize),u32(cenStart),u16(0));
+  const all=[...parts,...central,new Uint8Array(end)];
+  const total=all.reduce((a,b)=>a+b.length,0),out=new Uint8Array(total);let p=0;
+  all.forEach(c=>{out.set(c,p);p+=c.length;});return out;
+}
+function _makeXlsx(sheets){
+  const files=[],push=(path,str)=>files.push({path,data:_bytes(str)});
+  let ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>';
+  sheets.forEach((s,i)=>{ct+=`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;});
+  ct+='</Types>';push('[Content_Types].xml',ct);
+  push('_rels/.rels','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>');
+  let wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>';
+  sheets.forEach((s,i)=>{wb+=`<sheet name="${_xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`;});
+  wb+='</sheets></workbook>';push('xl/workbook.xml',wb);
+  let wr='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+  sheets.forEach((s,i)=>{wr+=`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`;});
+  wr+='<Relationship Id="rIdS" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>';
+  push('xl/_rels/workbook.xml.rels',wr);
+  push('xl/styles.xml','<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+  sheets.forEach((s,i)=>{push(`xl/worksheets/sheet${i+1}.xml`,_sheetXML(s.cols,s.rows));});
+  return _zipStore(files);
+}
+function _download(bytes,filename){
+  const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},120);
+}
+function downloadFXDataset(){
+  const rows=DATA_FX;
+  const cols=['day','rate','ret_1d','ma_gap','rv_5d','carry','oil_ret','dxy_ret','fii_flow','rate_next','ret_next'];
+  const used=new Set();
+  _download(_makeXlsx([{name:_sheetName('USD-INR daily',used),cols,rows}]),'usd_inr_fx_dataset.xlsx');
+}
+/* =====================================================================
+   FX LAB ENGINE — browser side. Depends on fx_core functions being in
+   scope (generateFX, fit*, timeSplit, evaluate) and Chart.js.
+   ===================================================================== */
+const DATA_FX = generateFX(2024);   // single canonical series for the lab
+
+const FEATURE_META = {
+  rate:    {label:'rate (level today)',        hint:'today’s ₹/$ — only meaningful for the LEVEL task'},
+  ret_1d:  {label:'ret_1d (momentum)',         hint:'yesterday’s % change'},
+  ma_gap:  {label:'ma_gap (mean reversion)',   hint:'% above the 20-day average'},
+  rv_5d:   {label:'rv_5d (volatility)',        hint:'5-day realized volatility %'},
+  carry:   {label:'carry (rate differential)', hint:'repo(IN) − funds(US), %'},
+  oil_ret: {label:'oil_ret (Brent)',           hint:'crude oil daily return %'},
+  dxy_ret: {label:'dxy_ret (dollar index)',    hint:'US dollar index daily return %'},
+  fii_flow:{label:'fii_flow (equity flows)',   hint:'net FII equity flow, $M'}
+};
+const DEFAULT_FEATS = {
+  level:  ['rate','ret_1d','ma_gap','carry','oil_ret','dxy_ret','fii_flow'],
+  return: ['ret_1d','ma_gap','rv_5d','carry','oil_ret','dxy_ret','fii_flow']
+};
+
+let fxCharts={};
+function destroyFXCharts(){Object.values(fxCharts).forEach(c=>{try{c.destroy();}catch(e){}});fxCharts={};}
+
+function flog(msg,cls){const el=document.getElementById('fx-log');if(!el)return;
+  const d=document.createElement('div');d.className='flog-line'+(cls?' '+cls:'');d.innerHTML=msg;el.appendChild(d);el.scrollTop=el.scrollHeight;}
+function fmetric(label,val,sub,tone){
+  return `<div class="metric"><div class="k">${label}</div><div class="v ${tone||''}">${val}</div><div class="sub">${sub||''}</div></div>`;}
+
+function currentTask(){return document.querySelector('input[name="fx-task"]:checked').value;}
+function currentFeatures(){return [...document.querySelectorAll('.fx-feat:checked')].map(c=>c.value);}
+
+function syncFeatureDefaults(){
+  const task=currentTask();
+  const def=new Set(DEFAULT_FEATS[task]);
+  document.querySelectorAll('.fx-feat').forEach(c=>{c.checked=def.has(c.value);});
+  // 'rate' is greyed for the return task hint (still allowed)
+  const rateBox=document.querySelector('.fx-feat[value="rate"]');
+  if(rateBox){const lbl=rateBox.closest('label');if(lbl)lbl.style.opacity = task==='return' ? .55 : 1;}
+}
+
+function buildFeatureChecks(){
+  const wrap=document.getElementById('fx-features');if(!wrap)return;
+  wrap.innerHTML=Object.entries(FEATURE_META).map(([k,m])=>
+    `<label class="fx-feat-lbl"><input type="checkbox" class="fx-feat" value="${k}"> <span class="fx-feat-name">${m.label}</span><span class="fx-feat-hint">${m.hint}</span></label>`).join('');
+}
+
+function runFX(){
+  destroyFXCharts();
+  const logEl=document.getElementById('fx-log');if(logEl)logEl.innerHTML='';
+  const task=currentTask();
+  const target = task==='level' ? 'rate_next' : 'ret_next';
+  const modelKey=document.getElementById('fx-model').value;
+  const testFrac=parseFloat(document.getElementById('fx-testfrac').value)/100;
+  let feats=currentFeatures();
+
+  if(modelKey!=='rw' && feats.length===0){flog('Select at least one feature (or use the Random-walk baseline, which needs none).','ferr');return;}
+
+  flog('① Task: predict the <b>'+(task==='level'?'exchange-rate level':'daily return')+'</b> — target <span class="mono">'+target+'</span>.','fstep');
+  const {train,test}=timeSplit(DATA_FX,testFrac);
+  flog('② Time-ordered split (no shuffling — never leak the future): train='+train.length+' days, test='+test.length+' days.','fstep');
+
+  const cfg={task};
+  let model, mname;
+  try{
+    if(modelKey==='rw'){model=fitRandomWalk(train,feats,target,cfg);mname='Random walk (baseline)';feats=[];}
+    else if(modelKey==='lin'){model=fitLinReg(train,feats,target);mname='Linear regression';}
+    else if(modelKey==='ridge'){model=fitRidge(train,feats,target,5);mname='Ridge regression (λ=5)';}
+    else if(modelKey==='knn'){model=fitKNN(train,feats,target,15);mname='KNN regressor (k=15)';}
+    else if(modelKey==='tree'){model=fitTree(train,feats,target,4);mname='Decision tree (depth 4)';}
+  }catch(e){flog('Model fit failed: '+e.message,'ferr');return;}
+
+  if(modelKey==='rw') flog('③ Baseline logic: '+(task==='level'?'“tomorrow’s rate = today’s rate”':'“tomorrow’s change = 0”')+' — zero features, zero learning. This is the bar to beat.','fstep');
+  else flog('③ Fitting <b>'+mname+'</b> on '+feats.length+' feature(s): <span class="mono">'+feats.join(', ')+'</span>.','fstep');
+
+  const preds=test.map(r=>model.predict(r));
+  const e=evaluate(test,target,preds,cfg);
+
+  // metrics
+  const mg=document.getElementById('fx-metrics');
+  const skillTone = e.skill>0.02?'good':(e.skill<-0.02?'bad':'');
+  const dirTone = e.dirAcc>0.55?'good':(e.dirAcc<0.5?'bad':'');
+  const r2Tone = task==='level' ? (e.r2>0.9?'good':'') : (e.r2>0.05?'good':e.r2<0?'bad':'');
+  mg.innerHTML =
+    fmetric('R² (test)', e.r2.toFixed(3), 'variance explained', r2Tone) +
+    fmetric('RMSE', (task==='level'?e.rmse.toFixed(3)+' ₹':e.rmse.toFixed(3)+' %'), 'root mean sq. error') +
+    fmetric('Skill vs RW', (e.skill>=0?'+':'')+(e.skill*100).toFixed(1)+'%', '1 − MSE÷MSEₛ₀', skillTone) +
+    fmetric('Directional', (e.dirAcc*100).toFixed(1)+'%', e.dirCorrect+'/'+e.dirN+' moves right', dirTone) +
+    fmetric('RW RMSE', (task==='level'?e.rmseBase.toFixed(3)+' ₹':e.rmseBase.toFixed(3)+' %'), 'the baseline’s error');
+
+  // log the headline
+  flog('④ Result — R²='+e.r2.toFixed(3)+', RMSE='+e.rmse.toFixed(3)+', skill vs random walk = '+(e.skill>=0?'+':'')+(e.skill*100).toFixed(1)+'%, directional accuracy '+(e.dirAcc*100).toFixed(1)+'%.','fok');
+
+  renderFXCharts(task,test,e);
+  renderFXInterp(task,modelKey,mname,e);
+}
+
+function renderFXCharts(task,test,e){
+  const days=test.map(r=>r.day);
+  // Chart 1: actual vs predicted over the test window (as LEVELS, always — that's what a treasurer reads)
+  const actualLvl = test.map(r=>r.rate_next);
+  const predLvl   = task==='level' ? e.preds : test.map((r,i)=>r.rate*(1+e.preds[i]/100));
+  const ctx1=document.getElementById('fx-chart1');
+  fxCharts.c1=new Chart(ctx1,{type:'line',
+    data:{labels:days,datasets:[
+      {label:'actual ₹/$',data:actualLvl,borderColor:'#1A2332',borderWidth:1.5,pointRadius:0,tension:0.1},
+      {label:'predicted ₹/$',data:predLvl,borderColor:'#C9711E',borderWidth:1.3,pointRadius:0,borderDash:[4,3],tension:0.1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},title:{display:true,text:'Test window — actual vs predicted level',font:{size:12}}},
+      scales:{x:{title:{display:true,text:'trading day'},ticks:{maxTicksLimit:8}},y:{title:{display:true,text:'₹ per $'}}}}});
+
+  // Chart 2: predicted vs actual scatter on the TARGET, with y=x line
+  const yv=e.actual,pv=e.preds;
+  const mn=Math.min(...yv,...pv),mx=Math.max(...yv,...pv);
+  const ctx2=document.getElementById('fx-chart2');
+  fxCharts.c2=new Chart(ctx2,{type:'scatter',
+    data:{datasets:[
+      {label:'predictions',data:yv.map((a,i)=>({x:a,y:pv[i]})),backgroundColor:'rgba(44,95,93,0.5)',pointRadius:3},
+      {label:'perfect (y=x)',type:'line',data:[{x:mn,y:mn},{x:mx,y:mx}],borderColor:'rgba(201,113,30,0.8)',borderWidth:1.2,borderDash:[4,4],pointRadius:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},title:{display:true,text:'Predicted vs actual '+(task==='level'?'level (₹)':'return (%)'),font:{size:12}}},
+      scales:{x:{title:{display:true,text:'actual'}},y:{title:{display:true,text:'predicted'}}}}});
+}
+
+function renderFXInterp(task,modelKey,mname,e){
+  const el=document.getElementById('fx-interp');if(!el)return;
+  let verdict,tone,body;
+  if(task==='level'){
+    if(modelKey==='rw'){
+      tone='warn';verdict='A 0.96 R² that means nothing';
+      body='The random walk scores R²≈'+e.r2.toFixed(2)+' having learned <b>nothing</b> — it just repeats today’s rate. This is the trap: on a near-random-walk level, a huge R² is the baseline, not an achievement. Every model below must be judged against <i>this</i>, not against zero.';
+    } else if(e.skill>0.02){
+      tone='good';verdict='Beats the naive baseline — modestly';
+      body='R² looks near-identical to the random walk (both ≈'+e.r2.toFixed(2)+'), but the skill score of +'+(e.skill*100).toFixed(1)+'% says this model genuinely improves on “tomorrow = today.” The gain is small — which is the honest reality of exchange-rate levels. Rina reads the skill score, never the raw R².';
+    } else {
+      tone='bad';verdict='High R², negative skill — worse than doing nothing';
+      body='R²='+e.r2.toFixed(2)+' looks respectable, yet the skill score is '+(e.skill*100).toFixed(1)+'%: this model is actually <b>worse</b> than repeating today’s rate. '+(modelKey==='knn'||modelKey==='tree'?'KNN and trees cannot extrapolate a trend — they are boxed in by the range they saw in training, so a drifting level defeats them. This is why FX modelling works in <i>returns</i>, not levels.':'')+' The lesson: never trust R² on a level series.';
+    }
+  } else {
+    if(modelKey==='rw'){
+      tone='warn';verdict='The honest benchmark';
+      body='Predicting “no change” gives R²≈'+e.r2.toFixed(2)+' — essentially zero. That is the truth about daily FX returns: almost all of tomorrow’s move is unforecastable noise. Any model has to beat this near-zero bar to be worth anything.';
+    } else if(e.skill>0.02 && e.dirAcc>0.53){
+      tone='good';verdict='A real, thin edge';
+      body='Skill vs random walk = +'+(e.skill*100).toFixed(1)+'% and directional accuracy '+(e.dirAcc*100).toFixed(1)+'% — the model calls the direction right more than half the time by leaning on carry, the dollar index and oil. In this synthetic series the edge is deliberately learnable; in live markets it would be far thinner and could vanish net of costs. Rina would size positions small and watch the skill score decay.';
+    } else {
+      tone='bad';verdict='No edge worth trading';
+      body='Skill '+(e.skill*100).toFixed(1)+'%, directional '+(e.dirAcc*100).toFixed(1)+'% — this model does not beat “no change” in any way that survives costs. That is the normal outcome for FX returns, and it is not a failure of coding: it is what an efficient market looks like.';
+    }
+  }
+  el.innerHTML='<div class="fx-interp-head '+tone+'">'+verdict+'</div><p>'+body+'</p>';
+}
+
+/* ---------------- dataset preview modal ---------------- */
+function openFXModal(){
+  const modal=document.getElementById('fx-modal');
+  const cols=['day','rate','ret_1d','ma_gap','rv_5d','carry','oil_ret','dxy_ret','fii_flow','rate_next','ret_next'];
+  const previewN=Math.min(24,DATA_FX.length);
+  let t='<table class="ds-table"><thead><tr>'+cols.map(c=>`<th${(c==='rate_next'||c==='ret_next')?' class="target"':''}>${c}${(c==='rate_next'||c==='ret_next')?' ★':''}</th>`).join('')+'</tr></thead><tbody>';
+  for(let i=0;i<previewN;i++){t+='<tr>'+cols.map(c=>{const v=DATA_FX[i][c];const isT=(c==='rate_next'||c==='ret_next');return `<td class="${isT?'target':''}">${v}</td>`;}).join('')+'</tr>';}
+  t+='</tbody></table>';
+  document.getElementById('fx-modal-body').innerHTML=t;
+  modal.classList.add('open');document.body.style.overflow='hidden';
+}
+function closeFXModal(){document.getElementById('fx-modal').classList.remove('open');document.body.style.overflow='';}
+
+/* ---------------- wiring ---------------- */
+document.addEventListener('DOMContentLoaded',()=>{
+  // nav
+  document.querySelectorAll('.nav-tab').forEach(tab=>{tab.addEventListener('click',()=>{
+    const id=tab.dataset.target;document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active',t===tab));
+    const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});});});
+  buildFeatureChecks();
+  syncFeatureDefaults();
+  document.querySelectorAll('input[name="fx-task"]').forEach(r=>r.addEventListener('change',syncFeatureDefaults));
+  const tf=document.getElementById('fx-testfrac'),tfv=document.getElementById('fx-testfrac-val');
+  if(tf)tf.addEventListener('input',()=>{tfv.textContent=tf.value+'%';});
+  const runB=document.getElementById('fx-run');if(runB)runB.addEventListener('click',runFX);
+  const prevB=document.querySelector('[data-fx-preview]');if(prevB)prevB.addEventListener('click',openFXModal);
+  const dlB=document.querySelector('[data-fx-download]');if(dlB)dlB.addEventListener('click',downloadFXDataset);
+  const cl=document.getElementById('fx-modal-close');if(cl)cl.addEventListener('click',closeFXModal);
+  const md=document.getElementById('fx-modal');if(md)md.addEventListener('click',e=>{if(e.target.id==='fx-modal')closeFXModal();});
+  const mdl=document.getElementById('fx-modal-dl');if(mdl)mdl.addEventListener('click',downloadFXDataset);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&md&&md.classList.contains('open'))closeFXModal();});
+  // draw the intro price-history chart
+  drawHistoryChart();
+});
+
+function drawHistoryChart(){
+  const ctx=document.getElementById('fx-history');if(!ctx||typeof Chart==='undefined')return;
+  const step=Math.ceil(DATA_FX.length/300);
+  const pts=DATA_FX.filter((_,i)=>i%step===0);
+  fxCharts.hist=new Chart(ctx,{type:'line',
+    data:{labels:pts.map(r=>r.day),datasets:[{label:'USD/INR',data:pts.map(r=>r.rate),borderColor:'#2C5F5D',borderWidth:1.4,pointRadius:0,tension:0.1,fill:true,backgroundColor:'rgba(44,95,93,0.06)'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},title:{display:true,text:'The series you’ll model — 5 years of daily USD/INR',font:{size:12}}},
+      scales:{x:{title:{display:true,text:'trading day'},ticks:{maxTicksLimit:8}},y:{title:{display:true,text:'₹ per $'}}}}});
+}
+</script>
+</body>
+</html>
